@@ -33,20 +33,7 @@ export function UsersTable({ usersPromise }: UserTableProps) {
   const labels = generateColumnLabels(columns);
 
 
-   enum ServiceType {
-    SYSTEM = "SYSTEM",
-    DISASSEMBLE = "DISASSEMBLE",
-    PORTER = "PORTER",
-    TRUCK = "TRUCK",
-    INSURANCE = "INSURANCE"
-  }
-   const ServiceTypeNames = {
-    [ServiceType.SYSTEM]: "Hệ thống",
-    [ServiceType.DISASSEMBLE]: "Tháo lắp",
-    [ServiceType.PORTER]: "Nhân công",
-    [ServiceType.TRUCK]: "Vận chuyển",
-    [ServiceType.INSURANCE]: "Bảo hiểm",
-  };
+
   
 
   const searchableColumns: DataTableSearchableColumn<IUser>[] = [
@@ -57,22 +44,22 @@ export function UsersTable({ usersPromise }: UserTableProps) {
   ];
 
   const filterableColumns: DataTableFilterableColumn<IUser>[] = [
-    {
-      id: "name",
-      title: "Trạng thái",
-      options: Object.entries(ServiceTypeNames).map(([value, label]) => ({
-        label,
-        value,
-      })),
-    },
-    {
-      id: "id",
-      title: "Tiến Lọc",
-      options: Object.entries(ServiceTypeNames).map(([value, label]) => ({
-        label,
-        value,
-      })),
-    },
+    // {
+    //   id: "name",
+    //   title: "Trạng thái",
+    //   options: Object.entries(ServiceTypeNames).map(([value, label]) => ({
+    //     label,
+    //     value,
+    //   })),
+    // },
+    // {
+    //   id: "id",
+    //   title: "Tiến Lọc",
+    //   options: Object.entries(ServiceTypeNames).map(([value, label]) => ({
+    //     label,
+    //     value,
+    //   })),
+    // },
     // test mode
     // {
     //   id: "status",
