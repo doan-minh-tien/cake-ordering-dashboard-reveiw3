@@ -1,9 +1,38 @@
-import React from 'react'
+import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
+import { Shell } from "@/components/shared/custom-ui/shell";
+import { getUsers } from "@/features/users/actions/users-action";
+import { UsersTable } from "@/features/users/components/user-table/user-table";
+import { SearchParams } from "@/types/table";
+import React from "react";
 
-const UserPage = () => {
-  return (
-    <div>UserPage</div>
-  )
+export interface IndexPageProps {
+  searchParams: SearchParams;
 }
 
-export default UserPage
+const UserPage = ({ searchParams }: IndexPageProps) => {
+  // call
+  const usersPromise = getUsers(searchParams);
+
+  return (
+    <div className="min-w-full">
+      <Shell>
+        <React.Suspense
+          fallback={
+            <DataTableSkeleton
+              columnCount={5}
+              searchableColumnCount={1}
+              filterableColumnCount={2}
+              cellWidths={["10rem", "40rem", "12rem", "12rem", "8rem"]}
+              shrinkZero
+            />
+          }
+        >
+          {/* //component */}
+          <UsersTable usersPromise={usersPromise} />
+        </React.Suspense>
+      </Shell>
+    </div>
+  );
+};
+
+export default UserPage;
