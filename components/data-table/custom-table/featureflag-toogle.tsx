@@ -41,7 +41,7 @@ export function FeatureFlagsToggle() {
                 )}
                 asChild
               >
-                <TooltipTrigger>
+                <TooltipTrigger className="border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground">
                   <flag.icon className="size-3.5 shrink-0" aria-hidden="true" />
                   {flag.label}
                 </TooltipTrigger>

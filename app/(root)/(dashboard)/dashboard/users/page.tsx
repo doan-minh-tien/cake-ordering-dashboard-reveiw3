@@ -15,9 +15,8 @@ const UserPage = ({ searchParams }: IndexPageProps) => {
   const usersPromise = getUsers(searchParams);
 
   return (
-    <div className="min-w-full">
+    <div className="min-w-full ">
       <Shell>
-        <FeatureFlagsToggle />
         <React.Suspense
           fallback={
             <DataTableSkeleton
@@ -29,6 +28,7 @@ const UserPage = ({ searchParams }: IndexPageProps) => {
             />
           }
         >
+          <FeatureFlagsToggle />
           <UsersTable usersPromise={usersPromise} />
         </React.Suspense>
       </Shell>

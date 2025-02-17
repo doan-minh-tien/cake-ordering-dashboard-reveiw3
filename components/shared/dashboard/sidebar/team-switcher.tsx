@@ -35,9 +35,9 @@ export function TeamSwitcher() {
   const { isMobile } = useSidebar();
   const teams: Teams[] = [
     {
-      name: "Acme Inc",
+      name: "Logo",
       logo: GalleryVerticalEnd,
-      plan: "Enterprise",
+      plan: "Logo",
     },
     {
       name: "Acme Corp.",
@@ -81,7 +81,7 @@ export function TeamSwitcher() {
             sideOffset={4}
           >
             <DropdownMenuLabel className="text-xs text-muted-foreground">
-              Teams
+              Multit store
             </DropdownMenuLabel>
             {teams.map((team, index) => (
               <DropdownMenuItem
@@ -101,7 +101,7 @@ export function TeamSwitcher() {
               <div className="flex size-6 items-center justify-center rounded-md border bg-background">
                 <Plus className="size-4" />
               </div>
-              <div className="font-medium text-muted-foreground">Add team</div>
+              <div className="font-medium text-muted-foreground">Add store</div>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
