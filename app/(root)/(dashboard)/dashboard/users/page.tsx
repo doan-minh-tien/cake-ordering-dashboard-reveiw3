@@ -1,4 +1,5 @@
 import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
+import { FeatureFlagsToggle } from "@/components/data-table/custom-table/featureflag-toogle";
 import { Shell } from "@/components/shared/custom-ui/shell";
 import { getUsers } from "@/features/users/actions/users-action";
 import { UsersTable } from "@/features/users/components/user-table/user-table";
@@ -16,6 +17,7 @@ const UserPage = ({ searchParams }: IndexPageProps) => {
   return (
     <div className="min-w-full">
       <Shell>
+        <FeatureFlagsToggle />
         <React.Suspense
           fallback={
             <DataTableSkeleton
@@ -27,7 +29,6 @@ const UserPage = ({ searchParams }: IndexPageProps) => {
             />
           }
         >
-          {/* //component */}
           <UsersTable usersPromise={usersPromise} />
         </React.Suspense>
       </Shell>

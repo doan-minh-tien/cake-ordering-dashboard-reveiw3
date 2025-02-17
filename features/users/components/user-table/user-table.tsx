@@ -18,12 +18,19 @@ import { generateColumnLabels } from "@/components/data-table/column-label-mappi
 import { getUsers } from "../../actions/users-action";
 import { IUser } from "../../types/user-type";
 import { fetchUsesrsTableColumnDefs } from "./user-table-column-def";
+import { useFeatureFlagsStore } from "@/hooks/use-feature-flag";
+import { TasksTableFloatingBar } from "@/components/data-table/custom-table/data-table-floating-bar";
 
 interface UserTableProps {
     usersPromise: ReturnType<typeof getUsers>;
 }
 
 export function UsersTable({ usersPromise }: UserTableProps) {
+
+  const featureFlags = useFeatureFlagsStore((state) => state.featureFlags);
+
+  const enableFloatingBar = featureFlags.includes("floatingBar");
+
   const { data, pageCount } = React.use(usersPromise);
 
   const columns = React.useMemo<ColumnDef<IUser, unknown>[]>(
@@ -33,7 +40,7 @@ export function UsersTable({ usersPromise }: UserTableProps) {
   const labels = generateColumnLabels(columns);
 
 
-
+console.log(enableFloatingBar)
   
 
   const searchableColumns: DataTableSearchableColumn<IUser>[] = [
@@ -94,6 +101,9 @@ export function UsersTable({ usersPromise }: UserTableProps) {
     <div className="h-full flex flex-col">
       <DataTable
         dataTable={dataTable}
+        floatingBarContent={
+          enableFloatingBar ? <TasksTableFloatingBar table={dataTable} /> : null
+        }
         columns={columns}
         searchableColumns={searchableColumns}
         filterableColumns={filterableColumns}

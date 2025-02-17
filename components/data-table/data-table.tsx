@@ -112,13 +112,12 @@ export function DataTable<TData, TValue>({
           </Table>
         </div>
       </div>
-      <div className="space-y-2.5">
+      <div className="flex flex-col gap-2.5">
         <DataTablePagination table={dataTable} />
-        {floatingBarContent ? (
-          <DataTableFloatingBar table={dataTable}>
-            {floatingBarContent}
-          </DataTableFloatingBar>
-        ) : null}
+
+    
+          {dataTable.getFilteredSelectedRowModel().rows.length > 0 &&
+            floatingBarContent}
       </div>
     </div>
   );
