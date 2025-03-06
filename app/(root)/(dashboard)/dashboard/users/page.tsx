@@ -11,7 +11,7 @@ export interface IndexPageProps {
 }
 
 const UserPage = ({ searchParams }: IndexPageProps) => {
-  // call
+  // Call
   const usersPromise = getUsers(searchParams);
 
   return (
