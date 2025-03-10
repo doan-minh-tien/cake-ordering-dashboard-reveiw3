@@ -5,7 +5,7 @@ import { Row, type Column } from "@tanstack/react-table";
 export const bakeyNameColumn = {
   accessorKey: "bakeryName",
   header: ({ column }: { column: Column<any, unknown> }) => (
-    <DataTableColumnHeader column={column} title="Ten cua hang" />
+    <DataTableColumnHeader column={column} title="Tên cửa hàng" />
   ),
   cell: ({ row }: { row: Row<IBarkery> }) => {
     return (
@@ -18,15 +18,9 @@ export const bakeyNameColumn = {
   },
   enableSorting: false,
   enableHiding: false,
-  filterFn: (
-    row: Row<IBarkery>,
-    columnId: string,
-    filterValue: IBarkery[]
-  ) => {
+  filterFn: (row: Row<IBarkery>, columnId: string, filterValue: IBarkery[]) => {
     return filterValue.includes(row.getValue(columnId));
   },
-
-
 } as const;
 
 export default bakeyNameColumn;

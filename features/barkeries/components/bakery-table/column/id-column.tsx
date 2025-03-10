@@ -5,7 +5,7 @@ import { Row, type Column } from "@tanstack/react-table";
 export const idColumn = {
   accessorKey: "id",
   header: ({ column }: { column: Column<any, unknown> }) => (
-    <DataTableColumnHeader column={column} title="Id cua hang" />
+    <DataTableColumnHeader column={column} title="Id" />
   ),
   cell: ({ row }: { row: Row<IBarkery> }) => (
     <div className="w-[80px]">{row.getValue("id")}</div>
