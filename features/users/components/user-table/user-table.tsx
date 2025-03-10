@@ -20,6 +20,10 @@ import { IUser } from "../../types/user-type";
 import { fetchUsesrsTableColumnDefs } from "./user-table-column-def";
 import { useFeatureFlagsStore } from "@/hooks/use-feature-flag";
 import { TasksTableFloatingBar } from "@/components/data-table/custom-table/data-table-floating-bar";
+import { Button } from "@/components/ui/button";
+import CreateNewUserModal from "../modals/create-new-user-modal";
+import { useModal } from "@/hooks/use-modal";
+
 
 interface UserTableProps {
     usersPromise: ReturnType<typeof getUsers>;
@@ -29,6 +33,7 @@ export function UsersTable({ usersPromise }: UserTableProps) {
 
   const featureFlags = useFeatureFlagsStore((state) => state.featureFlags);
 
+  const {onOpen} = useModal()
   const enableFloatingBar = featureFlags.includes("floatingBar");
 
   const { data, pageCount } = React.use(usersPromise);
@@ -99,6 +104,7 @@ console.log(enableFloatingBar)
 
   return (
     <div className="h-full flex flex-col">
+      <Button variant="destructive" onClick={() => onOpen("createNewUserModal",{})} >Update</Button>
       <DataTable
         dataTable={dataTable}
         floatingBarContent={

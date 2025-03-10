@@ -35,7 +35,9 @@ console.log(users)
 
 
   // logic
-
+  const handleClose = () => {
+    onClose()
+}
  
   // ui modal
   return (
