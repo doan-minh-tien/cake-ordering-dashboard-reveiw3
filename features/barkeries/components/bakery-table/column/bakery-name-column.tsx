@@ -3,7 +3,7 @@ import { IBarkery } from "@/features/barkeries/types/barkeries-type";
 import { Row, type Column } from "@tanstack/react-table";
 
 export const bakeyNameColumn = {
-  accessorKey: "bakeryName",
+  accessorKey: "bakery_name",
   header: ({ column }: { column: Column<any, unknown> }) => (
     <DataTableColumnHeader column={column} title="Tên cửa hàng" />
   ),
@@ -11,7 +11,7 @@ export const bakeyNameColumn = {
     return (
       <div className="flex space-x-2">
         <span className="max-w-[500px] truncate font-medium">
-          {row.getValue("bakeryName")}
+          {row.getValue("bakery_name")}
         </span>
       </div>
     );

@@ -4,7 +4,7 @@ import { Row, type Column } from "@tanstack/react-table";
 import { access } from "fs";
 
 export const phoneNumColumn = {
-  accessorKey: "phoneNum",
+  accessorKey: "phone",
   header: ({ column }: { column: Column<any, unknown> }) => (
     <DataTableColumnHeader column={column} title="Số điện thoại" />
   ),

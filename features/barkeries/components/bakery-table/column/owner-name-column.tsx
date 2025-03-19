@@ -3,7 +3,7 @@ import { IBarkery } from "@/features/barkeries/types/barkeries-type";
 import { Row, type Column } from "@tanstack/react-table";
 
 export const ownerNameColumn = {
-  accessorKey: "ownerName",
+  accessorKey: "owner_name",
   header: ({ column }: { column: Column<any, unknown> }) => (
     <DataTableColumnHeader column={column} title="Chủ cửa hàng" />
   ),
@@ -11,7 +11,7 @@ export const ownerNameColumn = {
     return (
       <div className="flex space-x-2">
         <span className="max-w-[500px] truncate font-medium">
-          {row.getValue("ownerName")}
+          {row.getValue("owner_name")}
         </span>
       </div>
     );

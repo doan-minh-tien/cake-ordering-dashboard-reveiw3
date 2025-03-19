@@ -4,7 +4,8 @@ import { create } from "zustand";
 export type ModalType =
   | "updateBookingServicesModalSheet"
   | "createNewServicesBookingModal"
-  | "createNewUserModal";
+  | "createNewUserModal"
+  | "createNewBakeryModal";
 
 export interface ModalData {
   // user   -- example
