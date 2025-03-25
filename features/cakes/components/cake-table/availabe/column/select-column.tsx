@@ -1,11 +1,11 @@
 import { Row, Table } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { IUser } from "@/features/users/types/user-type";
+import { ICake } from "@/features/cakes/types/cake";
 
 
 export const selectColumn = {
   id: "select",
-  header: ({ table }: { table: Table<IUser> }) => (
+    header: ({ table }: { table: Table<ICake> }) => (
     <Checkbox
       checked={table.getIsAllPageRowsSelected()}
       onCheckedChange={(value) => {
@@ -15,7 +15,7 @@ export const selectColumn = {
       className="translate-y-[2px] dark:text-white"
     />
   ),
-  cell: ({ row }: { row: Row<IUser> }) => (
+  cell: ({ row }: { row: Row<ICake> }) => (
     <Checkbox
       checked={row.getIsSelected()}
       onCheckedChange={(value) => {

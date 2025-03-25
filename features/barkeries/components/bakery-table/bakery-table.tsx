@@ -18,7 +18,7 @@ import { generateColumnLabels } from "@/components/data-table/column-label-mappi
 
 import { fetchBakeryTableColumnDefs} from "./bakery-table-column-def";
 import { useFeatureFlagsStore } from "@/hooks/use-feature-flag";
-import { TasksTableFloatingBar } from "@/components/data-table/custom-table/data-table-floating-bar";
+// import { TasksTableFloatingBar } from "@/components/data-table/custom-table/data-table-floating-bar";
 import { getBakeries } from "../../actions/barkeries-action";
 import { IBarkery } from "../../types/barkeries-type";
 
@@ -105,7 +105,7 @@ console.log(enableFloatingBar)
         // floatingBarContent={
         //   enableFloatingBar ? <TasksTableFloatingBar table={dataTable} /> : null
         // }
-        newRowLink="/dashboard/bakeries/create-cake"
+        newRowLink="/dashboard/bakeries/create-bakery"
         columns={columns}
         searchableColumns={searchableColumns}
         filterableColumns={filterableColumns}

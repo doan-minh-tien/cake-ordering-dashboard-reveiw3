@@ -1,32 +1,26 @@
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
-import { IUser } from "@/features/users/types/user-type";
+import { ICake } from "@/features/cakes/types/cake";
 import { Row, type Column } from "@tanstack/react-table";
 
-export const nameColumn = {
-  accessorKey: "name",
+export const availableCakeNameColumn = {
+  accessorKey: "available_cake_name",
   header: ({ column }: { column: Column<any, unknown> }) => (
-    <DataTableColumnHeader column={column} title="Phí dịch vụ" />
+    <DataTableColumnHeader column={column} title="Tên bánh" />
   ),
-  cell: ({ row }: { row: Row<IUser> }) => {
+  cell: ({ row }: { row: Row<ICake> }) => {
     return (
       <div className="flex space-x-2">
         <span className="max-w-[500px] truncate font-medium">
-          {row.getValue("name")}
+          {row.getValue("available_cake_name")}
         </span>
       </div>
     );
   },
   enableSorting: false,
   enableHiding: false,
-  filterFn: (
-    row: Row<IUser>,
-    columnId: string,
-    filterValue: IUser[]
-  ) => {
+  filterFn: (row: Row<ICake>, columnId: string, filterValue: ICake[]) => {
     return filterValue.includes(row.getValue(columnId));
   },
-
-
 } as const;
 
-export default nameColumn;
+export default availableCakeNameColumn;

@@ -115,9 +115,8 @@ export function DataTable<TData, TValue>({
       <div className="flex flex-col gap-2.5">
         <DataTablePagination table={dataTable} />
 
-    
-          {dataTable.getFilteredSelectedRowModel().rows.length > 0 &&
-            floatingBarContent}
+        {dataTable.getFilteredSelectedRowModel().rows.length > 0 &&
+          floatingBarContent}
       </div>
     </div>
   );

@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { Contact, Edit, Trash2, Eye } from "lucide-react";
-import { IUser } from "@/features/users/types/user-type";
+// import { IUser } from "@/features/users/types/user-type";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { useModal } from "@/hooks/use-modal";
 import { useSession } from "next-auth/react";

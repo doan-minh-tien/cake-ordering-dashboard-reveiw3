@@ -1,5 +1,4 @@
 "use client";
-import CreateNewUserModal from "@/features/users/components/modals/create-new-user-modal";
 import { useEffect, useState } from "react";
 
 export const ModalProvider = () => {
@@ -12,9 +11,6 @@ export const ModalProvider = () => {
   if (!isMounted) return null;
 
   return ( <>
-  <CreateNewUserModal/>
-  <CreateNewUserModal/>
-  <CreateNewUserModal/>
   </>
   )
 };

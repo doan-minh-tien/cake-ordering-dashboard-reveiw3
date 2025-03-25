@@ -76,21 +76,21 @@ export const routes: Route[] = [
   //   ],
   // },
   {
-    label: "Quản lý dịch vụ",
+    label: "Quản lý bánh",
     icon: MdMiscellaneousServices,
     activeIcon: MdMiscellaneousServices,
     isParent: true,
     allowsRoles: [UserRole.MANAGER],
     children: [
       {
-        label: "Danh sách dịch vụ",
-        href: "/dashboard/services",
+        label: "Danh sách bánh",
+        href: "/dashboard/cakes",
         icon: FaRegListAlt,
         activeIcon: FaListAlt,
       },
       {
-        label: "Tạo mới dịch vụ",
-        href: "/dashboard/services/create_service",
+        label: "Danh sách nguyên liệu",
+        href: "/dashboard/ingredients",
         icon: BadgePlus,
         activeIcon: BadgePlus,
       },

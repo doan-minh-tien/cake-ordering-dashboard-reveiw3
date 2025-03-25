@@ -1,19 +1,21 @@
+
+
 "use server";
 import { unstable_noStore as noStore, revalidatePath } from "next/cache";
 
 import { ApiListResponse, fetchListData } from "@/lib/api/api-handler/generic";
 import { SearchParams } from "@/types/table";
-import { IUser } from "../types/user-type";
+import { ICake } from "../types/cake";
 
-export const getUsers = async (
+export const getCakes = async (
   searchParams: SearchParams
-): Promise<ApiListResponse<IUser>> => {
+): Promise<ApiListResponse<ICake>> => {
   noStore();
 
-  const result = await fetchListData<IUser>("/", searchParams);
+  const result = await fetchListData<ICake>("/available_cakes", searchParams);
 
   if (!result.success) {
-    console.error("Failed to fetch list IFee:", result.error);
+    console.error("Failed to fetch list ICake:", result.error);
     return { data: [], pageCount: 0, error: result.error };
   }
 

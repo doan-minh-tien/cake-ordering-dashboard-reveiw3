@@ -15,47 +15,38 @@ import { toast } from "sonner";
 
 import { generateColumnLabels } from "@/components/data-table/column-label-mapping";
 
-import { getUsers } from "../../actions/users-action";
-import { IUser } from "../../types/user-type";
-import { fetchUsesrsTableColumnDefs } from "./user-table-column-def";
+import { fetchCakeTableColumnDefs } from "./cake-table-column-def";
 import { useFeatureFlagsStore } from "@/hooks/use-feature-flag";
-import { TasksTableFloatingBar } from "@/components/data-table/custom-table/data-table-floating-bar";
-import { Button } from "@/components/ui/button";
-import CreateNewUserModal from "../modals/create-new-user-modal";
-import { useModal } from "@/hooks/use-modal";
-
-
-interface UserTableProps {
-    usersPromise: ReturnType<typeof getUsers>;
+// import { TasksTableFloatingBar } from "@/components/data-table/custom-table/data-table-floating-bar";
+import { getCakes } from "../../../actions/cake-action";
+import { ICake } from "../../../types/cake";
+import { ApiListResponse } from "@/lib/api/api-handler/generic";
+interface CakeTableProps {
+  data: ApiListResponse<ICake>;
 }
 
-export function UsersTable({ usersPromise }: UserTableProps) {
-
+export function CakeTable({ data }: CakeTableProps) {
   const featureFlags = useFeatureFlagsStore((state) => state.featureFlags);
 
-  const {onOpen} = useModal()
   const enableFloatingBar = featureFlags.includes("floatingBar");
+  const { data: cakeData, pageCount } = data;
 
-  const { data, pageCount } = React.use(usersPromise);
-
-  const columns = React.useMemo<ColumnDef<IUser, unknown>[]>(
-    () => fetchUsesrsTableColumnDefs(),
+  const columns = React.useMemo<ColumnDef<ICake, unknown>[]>(
+    () => fetchCakeTableColumnDefs(),
     []
   );
   const labels = generateColumnLabels(columns);
 
+  console.log(enableFloatingBar);
 
-console.log(enableFloatingBar)
-  
-
-  const searchableColumns: DataTableSearchableColumn<IUser>[] = [
+  const searchableColumns: DataTableSearchableColumn<ICake>[] = [
     {
-      id: "id",
-      title: "dịch vụ",
+      id: "name",
+      title: "Tên bánh",
     },
   ];
 
-  const filterableColumns: DataTableFilterableColumn<IUser>[] = [
+  const filterableColumns: DataTableFilterableColumn<ICake>[] = [
     // {
     //   id: "name",
     //   title: "Trạng thái",
@@ -95,7 +86,7 @@ console.log(enableFloatingBar)
   ];
 
   const { dataTable } = useDataTable({
-    data,
+    data: cakeData,
     columns,
     pageCount,
     searchableColumns,
@@ -104,12 +95,12 @@ console.log(enableFloatingBar)
 
   return (
     <div className="h-full flex flex-col">
-      <Button variant="destructive" onClick={() => onOpen("createNewUserModal",{})} >Update</Button>
       <DataTable
         dataTable={dataTable}
-        floatingBarContent={
-          enableFloatingBar ? <TasksTableFloatingBar table={dataTable} /> : null
-        }
+        // floatingBarContent={
+        //   enableFloatingBar ? <TasksTableFloatingBar table={dataTable} /> : null
+        // }
+        newRowLink="/dashboard/cakes/create-cake"
         columns={columns}
         searchableColumns={searchableColumns}
         filterableColumns={filterableColumns}
