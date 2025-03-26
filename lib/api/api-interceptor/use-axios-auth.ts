@@ -14,7 +14,7 @@ const useAxiosAuth = () => {
         if (!config.headers["Authorization"]) {
           config.headers[
             "Authorization"
-          ] = `Bearer ${session?.user.accessToken}`;
+          ] = `Bearer ${session?.user.access_token}`;
         }
         return config;
       },
@@ -32,12 +32,12 @@ const useAxiosAuth = () => {
             ...session?.user,
             user: {
               ...session?.user,
-              accessToken: session?.user.accessToken,
+              access_token: session?.user.access_token,
             },
           });
           prevRequest.headers[
             "Authorization"
-          ] = `Bearer ${session?.user.accessToken}`;
+          ] = `Bearer ${session?.user.access_token}`;
           return axiosAuth(prevRequest);
         }
         return Promise.reject(error);

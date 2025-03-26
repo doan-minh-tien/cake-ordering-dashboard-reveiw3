@@ -8,10 +8,10 @@ export const useRefreshToken = () => {
 
   const refreshToken = async () => {
     const res = await api.post("/auth/refreshToken", {
-      refreshToken: session?.user.refreshToken,
+      refresh_token: session?.user.refresh_token,
     });
 
-    if (session) session.user.accessToken = res.data.tokens.accessToken;
+    if (session) session.user.access_token = res.data.metadata.access_token;
     else signIn();
   };
   return refreshToken;

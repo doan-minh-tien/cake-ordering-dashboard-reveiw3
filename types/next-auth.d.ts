@@ -15,8 +15,8 @@ declare module "next-auth" {
       gender:string;
       avatarUrl: string;
       roleId: number;
-      accessToken: string;
-      refreshToken: string;
+      access_token: string;
+      refresh_token: string;
       emailVerified?: Date | null;
     };
   }

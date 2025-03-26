@@ -49,10 +49,10 @@ export function NavMain() {
                   <SidebarMenuButton
                     tooltip={item.label}
                     className={cn(
-                      "w-full transition-all duration-200 hover:bg-[#FF9E40] hover:text-white hover:shadow",
+                      "w-full transition-all duration-200 hover:bg-gradient-to-r hover:from-green-500 hover:to-green-700 hover:text-white hover:shadow",
                       isActive
-                        ? "bg-[#FF5722] text-white shadow"
-                        : "text-neutral-600 dark:text-neutral-400 hover:bg-[#FF9E40] dark:hover:bg-[#D97706]"
+                        ? "bg-gradient-to-r from-green-500 to-green-700 text-white shadow"
+                        : "text-neutral-600 dark:text-neutral-400 hover:bg-gradient-to-r hover:from-green-500 hover:to-green-700 dark:hover:from-green-600 dark:hover:to-green-800"
                     )}
                   >
                     <Icon className="w-6 h-6" />
@@ -79,10 +79,10 @@ export function NavMain() {
                   <SidebarMenuButton
                     tooltip={item.label}
                     className={cn(
-                      "transition-all duration-200 hover:bg-[#FF9E40] hover:text-white hover:shadow",
+                      "transition-all duration-200 hover:bg-gradient-to-r hover:from-green-500 hover:to-green-700 hover:text-white hover:shadow",
                       isActive
-                        ? "bg-[#FF5722] text-white shadow"
-                        : "text-neutral-600 dark:text-neutral-400 hover:bg-[#FF9E40] dark:hover:bg-[#D97706]"
+                        ? "bg-gradient-to-r from-green-500 to-green-700 text-white shadow"
+                        : "text-neutral-600 dark:text-neutral-400 hover:bg-gradient-to-r hover:from-green-500 hover:to-green-700 dark:hover:from-green-600 dark:hover:to-green-800"
                     )}
                   >
                     <Icon className="w-6 h-6" />
@@ -99,9 +99,9 @@ export function NavMain() {
                         <SidebarMenuSubButton
                           asChild
                           className={cn(
-                            "transition-all font-medium hover:bg-[#FF9E40] hover:text-white",
+                            "transition-all font-medium hover:bg-gradient-to-r hover:from-green-400 hover:to-green-600 hover:text-white",
                             pathname === subItem.href
-                              ? "bg-[#FF5722] text-white shadow"
+                              ? "bg-gradient-to-r from-green-400 to-green-600 text-white shadow"
                               : "text-neutral-600 dark:text-neutral-400"
                           )}
                         >

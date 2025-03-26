@@ -14,8 +14,8 @@ interface UserJWT extends JWT {
   gender: string;
   avatarUrl: string;
   roleId: number;
-  accessToken: string;
-  refreshToken: string;
+  access_token: string;
+  refresh_token: string;
   emailVerified: Date | null;
 }
 
@@ -43,16 +43,16 @@ export const authOptions: NextAuthConfig = {
         }
 
         try {
-          const result = await apiRequest<{ payload: any }>(() =>
-            axios.post(`${API_URL}/authentications/login`, {
+          const result = await apiRequest<{ payload: any, meta_data: any }>(() =>
+            axios.post(`${API_URL}/auths`, {
               email: credentials.email,
               password: credentials.password,
             })
           );
 
           if (result.success) {
-            const { payload } = result.data;
-            return { ...payload, ...payload.tokens };
+            const { payload, meta_data } = result.data;
+            return { ...payload, ...meta_data };
           }
         } catch (error) {
           return null;
@@ -79,8 +79,8 @@ export const authOptions: NextAuthConfig = {
           gender,
           avatarUrl,
           roleId,
-          accessToken,
-          refreshToken,
+          access_token  ,
+          refresh_token,
         } = token;
         Object.assign(session.user, {
           id,
@@ -91,8 +91,8 @@ export const authOptions: NextAuthConfig = {
           gender,
           avatarUrl,
           roleId,
-          accessToken,
-          refreshToken,
+          access_token,
+          refresh_token,
         });
       }
       return session;

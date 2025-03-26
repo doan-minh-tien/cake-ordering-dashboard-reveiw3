@@ -1,7 +1,7 @@
 "use client";
 
 import { ApiListResponse } from "@/lib/api/api-handler/generic";
-import { Cake, PlusCircle } from "lucide-react";
+import { Cake, PlusCircle, Sparkles } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { Suspense, useEffect, useRef, useState } from "react";
@@ -12,6 +12,8 @@ import { ICake } from "../../types/cake";
 import { CakeTable } from "./availabe/cake-table";
 import { ICustomCake } from "../../types/custome-cake";
 import { CustomCakeTable } from "./custom/custom-cake-table";
+import { motion, AnimatePresence } from "framer-motion";
+
 interface CakeClientWrapperProps {
   cakeData: ApiListResponse<ICake>;
   customCakeData: ApiListResponse<ICustomCake>;
@@ -26,24 +28,30 @@ const TABS: readonly {
   value: TABS_VALUE;
   label: string;
   icon: typeof Cake;
-  lightBg: string;
-  darkBg: string;
+  gradient: {
+    light: string;
+    dark: string;
+  };
   description: string;
 }[] = [
   {
     value: TABS_VALUE.AVAILABLE,
     label: "Bánh Có Sẵn",
     icon: Cake,
-    lightBg: "bg-amber-50 text-amber-600",
-    darkBg: "bg-amber-900/20 text-amber-300",
+    gradient: {
+      light: "from-amber-100 via-amber-50 to-white",
+      dark: "from-amber-900/30 via-amber-900/20 to-background/90",
+    },
     description: "Danh sách bánh đã được chuẩn bị sẵn",
   },
   {
     value: TABS_VALUE.CUSTOM,
     label: "Bánh Đặt Riêng",
     icon: PlusCircle,
-    lightBg: "bg-pink-50 text-pink-600",
-    darkBg: "bg-pink-900/20 text-pink-300",
+    gradient: {
+      light: "from-pink-100 via-pink-50 to-white",
+      dark: "from-pink-900/30 via-pink-900/20 to-background/90",
+    },
     description: "Bánh được thiết kế theo yêu cầu riêng",
   },
 ] as const;
@@ -91,10 +99,9 @@ export function CakeClientWrapper({ cakeData, customCakeData }: CakeClientWrappe
             onValueChange={handleTabChange}
             className="w-full"
           >
-            <div className="border-b px-4 sticky top-0 bg-background z-10 rounded-md">
-            <TabsList className="bg-transparent">
-
-                {TABS.map((tab: any) => {
+            <div className="border-b px-4 sticky top-0 bg-white/80 dark:bg-background/80 backdrop-blur-md z-10 rounded-md">
+              <TabsList className="bg-transparent">
+                {TABS.map((tab) => {
                   const Icon = tab.icon;
                   const isActive = activeTab === tab.value;
 
@@ -108,28 +115,36 @@ export function CakeClientWrapper({ cakeData, customCakeData }: CakeClientWrappe
                         transition-all 
                         duration-300 
                         py-3 
+                        relative 
+                        overflow-hidden
                         ${
                           isActive
-                            ? `${tab.lightBg} dark:${tab.darkBg}`
+                            ? `bg-gradient-to-br ${tab.gradient.light} dark:${tab.gradient.dark}`
                             : "bg-transparent hover:bg-secondary/10"
                         }
                         data-[state=active]:scale-[1.03]
                         group
-                        relative
-                        overflow-hidden
                       `}
                     >
+                      <div className="absolute inset-0 opacity-20 group-hover:opacity-10 transition-opacity"></div>
                       <div className="flex items-center space-x-2 relative z-10">
-                        <Icon
-                          className={`
-                            h-5 
-                            w-5 
-                            transition-transform 
-                            group-data-[state=active]:scale-110
-                            group-data-[state=active]:rotate-6
-                            ${isActive ? "text-primary" : "text-secondary"}
-                          `}
-                        />
+                        <motion.div
+                          initial={{ scale: 1, rotate: 0 }}
+                          animate={{
+                            scale: isActive ? 1.1 : 1,
+                            rotate: isActive ? 6 : 0,
+                          }}
+                          transition={{ type: "spring", stiffness: 300 }}
+                        >
+                          <Icon
+                            className={`
+                              h-5 
+                              w-5 
+                              transition-colors
+                              ${isActive ? "text-primary" : "text-secondary"}
+                            `}
+                          />
+                        </motion.div>
                         <span className="font-semibold">{tab.label}</span>
                       </div>
                     </TabsTrigger>
@@ -139,71 +154,93 @@ export function CakeClientWrapper({ cakeData, customCakeData }: CakeClientWrappe
             </div>
 
             <div className="relative">
-              <TabsContent
-                value={TABS_VALUE.AVAILABLE}
-                className="m-0 min-h-[500px]"
-              >
-                <div className="p-4">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-bold text-amber-700 dark:text-amber-300 flex items-center gap-2">
-                      <Cake className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-                      Danh Sách Bánh Có Sẵn
-                    </h2>
-                  </div>
-                  <Suspense
-                    fallback={
-                      <DataTableSkeleton
-                        columnCount={5}
-                        searchableColumnCount={1}
-                        filterableColumnCount={2}
-                        cellWidths={[
-                          "10rem",
-                          "40rem",
-                          "12rem",
-                          "12rem",
-                          "8rem",
-                        ]}
-                        shrinkZero
-                      />
-                    }
+              <AnimatePresence mode="wait">
+                <TabsContent
+                  key={activeTab}
+                  value={TABS_VALUE.AVAILABLE}
+                  className="m-0 min-h-[500px]"
+                  asChild
+                >
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    <CakeTable data={cakeData} />
-                  </Suspense>
-                </div>
-              </TabsContent>
+                    <div className="p-4">
+                      <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-2xl font-bold text-amber-700 dark:text-amber-300 flex items-center gap-2">
+                          <Cake className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                          Danh Sách Bánh Có Sẵn
+                          <Sparkles className="w-5 h-5 text-amber-500 animate-pulse" />
+                        </h2>
+                      </div>
+                      <Suspense
+                        fallback={
+                          <DataTableSkeleton
+                            columnCount={5}
+                            searchableColumnCount={1}
+                            filterableColumnCount={2}
+                            cellWidths={[
+                              "10rem",
+                              "40rem",
+                              "12rem",
+                              "12rem",
+                              "8rem",
+                            ]}
+                            shrinkZero
+                          />
+                        }
+                      >
+                        <CakeTable data={cakeData} />
+                      </Suspense>
+                    </div>
+                  </motion.div>
+                </TabsContent>
 
-              <TabsContent
-                value={TABS_VALUE.CUSTOM}
-                className="m-0 min-h-[500px]"
-              >
-                <div className="p-4">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-bold text-pink-700 dark:text-pink-300 flex items-center gap-2">
-                      <PlusCircle className="w-6 h-6 text-pink-600 dark:text-pink-400" />
-                      Danh Sách Đã Từng Được Custom
-                    </h2>
-                  </div>
-                  <Suspense
-                    fallback={
-                      <DataTableSkeleton
-                        columnCount={5}
-                        searchableColumnCount={1}
-                        filterableColumnCount={2}
-                        cellWidths={[
-                          "10rem",
-                          "40rem",
-                          "12rem",
-                          "12rem",
-                          "8rem",
-                        ]}
-                        shrinkZero
-                      />
-                    }
+                <TabsContent
+                  key={`${activeTab}-custom`}
+                  value={TABS_VALUE.CUSTOM}
+                  className="m-0 min-h-[500px]"
+                  asChild
+                >
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    <CustomCakeTable data={customCakeData} />
-                  </Suspense>
-                </div>
-              </TabsContent>
+                    <div className="p-4">
+                      <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-2xl font-bold text-pink-700 dark:text-pink-300 flex items-center gap-2">
+                          <PlusCircle className="w-6 h-6 text-pink-600 dark:text-pink-400" />
+                          Danh Sách Đã Từng Được Custom
+                          <Sparkles className="w-5 h-5 text-pink-500 animate-pulse" />
+                        </h2>
+                      </div>
+                      <Suspense
+                        fallback={
+                          <DataTableSkeleton
+                            columnCount={5}
+                            searchableColumnCount={1}
+                            filterableColumnCount={2}
+                            cellWidths={[
+                              "10rem",
+                              "40rem",
+                              "12rem",
+                              "12rem",
+                              "8rem",
+                            ]}
+                            shrinkZero
+                          />
+                        }
+                      >
+                        <CustomCakeTable data={customCakeData} />
+                      </Suspense>
+                    </div>
+                  </motion.div>
+                </TabsContent>
+              </AnimatePresence>
             </div>
           </Tabs>
         </CardContent>

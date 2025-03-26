@@ -10,7 +10,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
       {items.map((item, index) => (
         <div key={index} className="flex items-center">
           {!item.isLast ? (
-            <Link href={item.href} className="text-orange-500 hover:underline hidden md:block">
+            <Link href={item.href} className="text-primary hover:underline hidden md:block">
               {item.label}
             </Link>
           ) : (

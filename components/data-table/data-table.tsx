@@ -55,16 +55,21 @@ export function DataTable<TData, TValue>({
         columnLabels={columnLabels}
         newRowLink={newRowLink}
       />
-      <div className="rounded-md border border-black dark:border-gray-600">
+   <div className="rounded-lg border border-green-200 dark:border-green-800 shadow-md overflow-hidden">
         <div className="overflow-auto">
-          <Table>
-            <TableHeader className="bg-gray-100 dark:bg-gray-800 sticky top-0 z-4">
+          <Table className="w-full">
+          <TableHeader className="bg-green-50 dark:bg-green-900/30 sticky top-0 z-4">
               {dataTable.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
+                <TableRow
+                  key={headerGroup.id}
+                  className="border-b border-gray-200 dark:border-gray-700"
+                >
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
                       className="text-gray-900 dark:text-gray-100 font-bold"
+                      style={{
+                      }}
                     >
                       {header.isPlaceholder
                         ? null
@@ -79,16 +84,22 @@ export function DataTable<TData, TValue>({
             </TableHeader>
             <TableBody>
               {dataTable.getRowModel().rows?.length ? (
-                dataTable.getRowModel().rows.map((row) => (
+                dataTable.getRowModel().rows.map((row, index) => (
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
-                    className="hover:bg-gray-100 dark:hover:bg-gray-700"
+                   className="hover:bg-green-100 dark:hover:bg-green-800/50"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell
                         key={cell.id}
                         className="text-gray-800 dark:text-gray-200 font-semibold"
+                        style={{
+                          minWidth:
+                            cell.column.id === "name" ? "50px" : "20px",
+                          maxWidth:
+                            cell.column.id === "name" ? "250px" : "150px",
+                        }}
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
@@ -102,7 +113,7 @@ export function DataTable<TData, TValue>({
                 <TableRow>
                   <TableCell
                     colSpan={columns.length}
-                    className="h-24 text-center text-gray-600 dark:text-gray-300"
+                    className="h-24 text-center text-gray-500 dark:text-gray-400 italic"
                   >
                     Không có dữ liệu
                   </TableCell>
@@ -114,7 +125,6 @@ export function DataTable<TData, TValue>({
       </div>
       <div className="flex flex-col gap-2.5">
         <DataTablePagination table={dataTable} />
-
         {dataTable.getFilteredSelectedRowModel().rows.length > 0 &&
           floatingBarContent}
       </div>

@@ -5,7 +5,7 @@ const refreshToken = async (session: Session | null) => {
   try {
     // Gửi yêu cầu refresh token đến máy chủ
     const refreshTokenResponse = await axiosAuth.post("/auth/refreshToken", {
-      refreshToken: session?.user.refreshToken,
+      refresh_token: session?.user.refresh_token,
     });
 
     //  const updateRefreshToken = await update({
@@ -16,7 +16,7 @@ const refreshToken = async (session: Session | null) => {
 
     //   const sessionUpdate =   updateRefreshToken?.user.access_token
 
-    const newAccessToken = refreshTokenResponse.data.tokens.accessToken;
+    const newAccessToken = refreshTokenResponse.data.metadata.access_token;
     // console.log(newAccessToken);
 
     return newAccessToken;

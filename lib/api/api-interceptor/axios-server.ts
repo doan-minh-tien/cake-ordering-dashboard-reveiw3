@@ -9,7 +9,7 @@ const setupAxiosAuth = async (session: Session | null) => {
       if (!config.headers["Authorization"]) {
         config.headers[
           "Authorization"
-        ] = `Bearer ${session?.user?.accessToken}`;
+        ] = `Bearer ${session?.user?.access_token}`;
       }
       return config;
     },
@@ -27,13 +27,13 @@ const setupAxiosAuth = async (session: Session | null) => {
 
         const sessionChange = await update({
           user: {
-            accessToken: updatedSession,
+            access_token: updatedSession,
           },
         });
 
         prevRequest.headers[
           "Authorization"
-        ] = `Bearer ${sessionChange?.user?.accessToken}`;
+        ] = `Bearer ${sessionChange?.user?.access_token}`;
         return axiosAuth(prevRequest);
       }
       return Promise.reject(error);
