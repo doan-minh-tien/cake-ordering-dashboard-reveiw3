@@ -1,6 +1,7 @@
 import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
 import { Shell } from "@/components/shared/custom-ui/shell";
 import { getCakes } from "@/features/cakes/actions/cake-action";
+import { getCustomCakes } from "@/features/cakes/actions/custome-cake-action";
 import { CakeClientWrapper } from "@/features/cakes/components/cake-table/cake-client-wrapper";
 import { SearchParams } from "@/types/table";
 import React, { Suspense } from "react";
@@ -10,7 +11,10 @@ export interface IndexPageProps {
 }
 
 const CakesPage = async ({ searchParams }: IndexPageProps) => {
-  const [cakeData] = await Promise.all([getCakes(searchParams)]);
+  const [cakeData, customCakeData] = await Promise.all([
+    getCakes(searchParams),
+    getCustomCakes(searchParams),
+  ]);
   return (
     <Shell>
       <Suspense
@@ -24,7 +28,7 @@ const CakesPage = async ({ searchParams }: IndexPageProps) => {
           />
         }
       >
-        <CakeClientWrapper cakeData={cakeData} />
+        <CakeClientWrapper cakeData={cakeData} customCakeData={customCakeData} />
       </Suspense>
     </Shell>
   );

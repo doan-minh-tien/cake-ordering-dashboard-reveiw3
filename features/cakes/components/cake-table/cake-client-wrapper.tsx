@@ -10,9 +10,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
 import { ICake } from "../../types/cake";
 import { CakeTable } from "./availabe/cake-table";
-
+import { ICustomCake } from "../../types/custome-cake";
+import { CustomCakeTable } from "./custom/custom-cake-table";
 interface CakeClientWrapperProps {
   cakeData: ApiListResponse<ICake>;
+  customCakeData: ApiListResponse<ICustomCake>;
 }
 
 export enum TABS_VALUE {
@@ -46,7 +48,7 @@ const TABS: readonly {
   },
 ] as const;
 
-export function CakeClientWrapper({ cakeData }: CakeClientWrapperProps) {
+export function CakeClientWrapper({ cakeData, customCakeData }: CakeClientWrapperProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const scrollPositionRef = useRef<number>(0);
@@ -92,7 +94,7 @@ export function CakeClientWrapper({ cakeData }: CakeClientWrapperProps) {
             <div className="border-b px-4 sticky top-0 bg-background z-10 rounded-md">
             <TabsList className="bg-transparent">
 
-                {TABS.map((tab) => {
+                {TABS.map((tab: any) => {
                   const Icon = tab.icon;
                   const isActive = activeTab === tab.value;
 
@@ -178,7 +180,7 @@ export function CakeClientWrapper({ cakeData }: CakeClientWrapperProps) {
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-bold text-pink-700 dark:text-pink-300 flex items-center gap-2">
                       <PlusCircle className="w-6 h-6 text-pink-600 dark:text-pink-400" />
-                      Danh Sách Bánh Đặt Riêng
+                      Danh Sách Đã Từng Được Custom
                     </h2>
                   </div>
                   <Suspense
@@ -198,7 +200,7 @@ export function CakeClientWrapper({ cakeData }: CakeClientWrapperProps) {
                       />
                     }
                   >
-                    <CakeTable data={cakeData} />
+                    <CustomCakeTable data={customCakeData} />
                   </Suspense>
                 </div>
               </TabsContent>
