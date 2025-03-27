@@ -1,4 +1,8 @@
 "use client";
+import CakeDecorationModal from "@/features/ingredients/components/ingredient-modal/cake-decoration-modal";
+import CakeExtraModal from "@/features/ingredients/components/ingredient-modal/cake-extra-modal";
+import CakeMessageOptionModal from "@/features/ingredients/components/ingredient-modal/cake-message-option";
+import CakePartModal from "@/features/ingredients/components/ingredient-modal/cake-part-modal";
 import { useEffect, useState } from "react";
 
 export const ModalProvider = () => {
@@ -10,7 +14,12 @@ export const ModalProvider = () => {
 
   if (!isMounted) return null;
 
-  return ( <>
-  </>
-  )
+  return (
+    <>
+      <CakeDecorationModal />
+      <CakeExtraModal />
+      <CakeMessageOptionModal />
+      <CakePartModal />
+    </>
+  );
 };

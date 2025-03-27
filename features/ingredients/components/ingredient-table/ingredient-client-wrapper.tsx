@@ -13,8 +13,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ICakeMessageOptionType } from "../../types/cake-message-option-type";
 import { ICakeExtraOptionType } from "../../types/cake-extra-option-type";
 import { ICakePartType } from "../../types/cake-part-type";
-import { CakeDecorationTable } from "./cake-decoration-table/cake-decoration-table";
-
+import { CakeDecorationTable } from "./cake-decoration-table";
+import CakeExtraOptionTable from "./cake-extra-option-table";
+import CakeMessageOptionTable from "./cake-message-option-table";
+import CakePartTable from "./cake-part-table";
 interface IngredientsClientWrapperProps {
   cakeDecorations: ApiListResponse<ICakeDecorationType>;
   cakeMessageOptions: ApiListResponse<ICakeMessageOptionType>;
@@ -246,7 +248,7 @@ export function IngredientsClientWrapper({
                   asChild
                 >
                   {renderTabContent(
-                    "Danh Sách Đã Từng Được Custom",
+                    "Tùy chọn tin nhắn",
                     PlusCircle,
                     "text-pink-700 dark:text-pink-300",
                     <CakeMessageOptionTable data={cakeMessageOptions} />
@@ -263,7 +265,7 @@ export function IngredientsClientWrapper({
                     "Các Tùy Chọn Thêm",
                     StarIcon,
                     "text-green-700 dark:text-green-300",
-                    <CakeExtraOptionsTable data={cakeExtraOptions} />
+                    <CakeExtraOptionTable data={cakeExtraOptions} />
                   )}
                 </TabsContent>
 
@@ -277,7 +279,7 @@ export function IngredientsClientWrapper({
                     "Các Phần Của Bánh",
                     BoxIcon,
                     "text-blue-700 dark:text-blue-300",
-                    <CakePartsTable data={cakeParts} />
+                    <CakePartTable data={cakeParts} />
                   )}
                 </TabsContent>
               </AnimatePresence>
@@ -289,24 +291,5 @@ export function IngredientsClientWrapper({
   );
 }
 
-function CakeMessageOptionTable({
-  data,
-}: {
-  data: ApiListResponse<ICakeMessageOptionType>;
-}) {
-  return <div>Bảng Tùy Chọn Thông Điệp</div>;
-}
-
-function CakeExtraOptionsTable({
-  data,
-}: {
-  data: ApiListResponse<ICakeExtraOptionType>;
-}) {
-  return <div>Bảng Tùy Chọn Phụ</div>;
-}
-
-function CakePartsTable({ data }: { data: ApiListResponse<ICakePartType> }) {
-  return <div>Bảng Các Phần Bánh</div>;
-}
 
 export default IngredientsClientWrapper;

@@ -1,3 +1,7 @@
+import { ICakeDecorationItem } from "@/features/ingredients/types/cake-decoration-type";
+import { ICakeExtraOptionItem } from "@/features/ingredients/types/cake-extra-option-type";
+import { ICakeMessageOptionItem } from "@/features/ingredients/types/cake-message-option-type";
+import { ICakePartItem } from "@/features/ingredients/types/cake-part-type";
 import { create } from "zustand";
 
 // example -- 2 modal
@@ -5,11 +9,19 @@ export type ModalType =
   | "updateBookingServicesModalSheet"
   | "createNewServicesBookingModal"
   | "createNewUserModal"
-  | "createNewBakeryModal";
+  | "createNewBakeryModal"
+  | "cakeDecorationModal"
+  | "cakeExtraModal"
+  | "cakeMessageModal"
+  | "cakePartModal";
 
 export interface ModalData {
   // user   -- example
   // user?: IUser;
+  cakeDecoration?: ICakeDecorationItem;
+  cakeExtra?: ICakeExtraOptionItem;
+  cakeMessage?: ICakeMessageOptionItem;
+  cakePart?: ICakePartItem;
 }
 
 interface ModalStore {

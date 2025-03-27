@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useDataTable } from "@/hooks/use-data-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { generateColumnLabels } from "@/components/data-table/column-label-mapping";
-import { ICakeDecorationType } from "../../../types/cake-decoration-type";
+import { ICakeDecorationType } from "../../types/cake-decoration-type";
 import { ApiListResponse } from "@/lib/api/api-handler/generic";
 import {
   Table,
@@ -41,7 +41,7 @@ import {
 } from "lucide-react";
 import { ExpandDataTable } from "@/components/data-table/expand-data-table";
 import { Badge } from "@/components/ui/badge";
-
+import { ICakePartType } from "../../types/cake-part-type";
 
 // Utility function to format VND
 const formatVND = (price: number) => {
@@ -72,17 +72,17 @@ const getItemIcon = (type: string) => {
   return iconMap[type as keyof typeof iconMap] || iconMap["default"];
 };
 
-interface CakeDecorationTableProps {
-  data: ApiListResponse<ICakeDecorationType>;
+interface CakePartTableProps {
+  data: ApiListResponse<ICakePartType>;
   onViewItem?: (item: any) => void;
   onEditItem?: (item: any) => void;
 }
 
-export function CakeDecorationTable({
+export function CakePartTable({
   data,
   onViewItem,
   onEditItem,
-}: CakeDecorationTableProps) {
+}: CakePartTableProps) {
   const [expandedRows, setExpandedRows] = React.useState<
     Record<string, boolean>
   >({});
@@ -96,11 +96,11 @@ export function CakeDecorationTable({
     }));
   };
 
-  const columns = React.useMemo<ColumnDef<ICakeDecorationType, unknown>[]>(
+  const columns = React.useMemo<ColumnDef<ICakePartType, unknown>[]>(
     () => [
       {
         accessorKey: "type",
-        header: "Loại Trang Trí",
+        header: "Phần bánh",
         cell: ({ row }) => (
           <motion.div 
             className="flex items-center space-x-3"
@@ -320,4 +320,4 @@ export function CakeDecorationTable({
   );
 }
 
-export default CakeDecorationTable;
+export default CakePartTable;
