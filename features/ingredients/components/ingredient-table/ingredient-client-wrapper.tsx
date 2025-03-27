@@ -232,7 +232,7 @@ export function IngredientsClientWrapper({
                   asChild
                 >
                   {renderTabContent(
-                    "Danh Sách Bánh Có Sẵn",
+                    "Danh Mục Trang Trí Bánh",
                     Cake,
                     "text-amber-700 dark:text-amber-300",
                     <CakeDecorationTable data={cakeDecorations} />
@@ -288,8 +288,6 @@ export function IngredientsClientWrapper({
     </div>
   );
 }
-
-
 
 function CakeMessageOptionTable({
   data,
