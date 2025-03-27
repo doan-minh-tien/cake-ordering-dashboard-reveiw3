@@ -43,7 +43,7 @@ export const updateCakeExtraOption = async (
     return { success: false, error: result.error };
   }
 
-  revalidatePath("/ingredients");
+  revalidatePath(`/dashboard/ingredients/${id}`);
 
   return { success: true, data: result.data };
 };

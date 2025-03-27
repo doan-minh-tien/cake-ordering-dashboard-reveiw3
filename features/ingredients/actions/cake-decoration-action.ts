@@ -43,7 +43,7 @@ export const updateCakeDecoration = async (
     return { success: false, error: result.error };
   }
 
-  revalidatePath("/ingredients");
+  revalidatePath("/dashboard/ingredients");
 
   return { success: true, data: result.data };
 };

@@ -1,4 +1,6 @@
-
+/**
+ * This file contains the actions related to cake parts.
+ */
 
 "use server";
 import { unstable_noStore as noStore, revalidatePath } from "next/cache";
@@ -11,6 +13,7 @@ export const getCakeParts = async (
   searchParams: SearchParams
 ): Promise<ApiListResponse<ICakePartType>> => {
   noStore();
+  revalidatePath("/dashboard/ingredients");
 
   const result = await fetchListData<ICakePartType>("/part_options", searchParams);
 

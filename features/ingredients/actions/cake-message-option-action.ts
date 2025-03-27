@@ -1,4 +1,7 @@
-
+/**
+ * @file cake-message-option-action.ts
+ * @description This file contains the actions related to cake message options.
+ */
 
 "use server";
 import { unstable_noStore as noStore, revalidatePath } from "next/cache";
@@ -41,7 +44,7 @@ export const updateCakeMessage = async (
     return { success: false, error: result.error };
   }
 
-  revalidatePath("/ingredients");
+  revalidatePath("/dashboard/ingredients");
 
   return { success: true, data: result.data };
 };
