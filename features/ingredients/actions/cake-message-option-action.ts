@@ -3,9 +3,10 @@
 "use server";
 import { unstable_noStore as noStore, revalidatePath } from "next/cache";
 
-import { ApiListResponse, fetchListData } from "@/lib/api/api-handler/generic";
+import { ApiListResponse, fetchListData, Result, apiRequest } from "@/lib/api/api-handler/generic";
 import { SearchParams } from "@/types/table";
 import { ICakeMessageOptionType } from "../types/cake-message-option-type";
+import { axiosAuth } from "@/lib/api/api-interceptor/api";
 
 export const getCakeMessageOptions = async (
   searchParams: SearchParams
@@ -20,4 +21,27 @@ export const getCakeMessageOptions = async (
   }
 
   return result.data;
+};
+
+
+export const updateCakeMessage = async (
+  data: any,
+  id: string
+): Promise<Result<void>> => {
+  noStore();
+  const result = await apiRequest(() =>
+    axiosAuth.put(`/message_options/${id}`, data,{
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  );
+
+  if (!result.success) {
+    return { success: false, error: result.error };
+  }
+
+  revalidatePath("/ingredients");
+
+  return { success: true, data: result.data };
 };

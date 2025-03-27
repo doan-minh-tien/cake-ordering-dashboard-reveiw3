@@ -42,6 +42,7 @@ import {
 import { ExpandDataTable } from "@/components/data-table/expand-data-table";
 import { Badge } from "@/components/ui/badge";
 import { ICakeExtraOptionType } from "../../types/cake-extra-option-type";
+import { useModal } from "@/hooks/use-modal";
 
 // Utility function to format VND
 const formatVND = (price: number) => {
@@ -88,6 +89,7 @@ export function CakeExtraOptionTable({
   >({});
 
   const { data: cakeData, pageCount } = data;
+  const { onOpen} = useModal();
 
   const toggleRowExpansion = (type: string) => {
     setExpandedRows((prev) => ({
@@ -274,6 +276,7 @@ export function CakeExtraOptionTable({
                                   variant="outline"
                                   size="icon"
                                   className="hover:bg-indigo-50 group"
+                                  onClick={() => onOpen("cakeExtraModal", {cakeExtra: item})}
                                 >
                                   <Edit2Icon className="h-4 w-4 text-indigo-600 group-hover:rotate-12 transition-transform" />
                                 </Button>

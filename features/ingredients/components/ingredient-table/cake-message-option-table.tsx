@@ -42,7 +42,7 @@ import {
 import { ExpandDataTable } from "@/components/data-table/expand-data-table";
 import { Badge } from "@/components/ui/badge";
 import { ICakeMessageOptionType } from "../../types/cake-message-option-type";
-
+import { useModal } from "@/hooks/use-modal";
 // Utility function to format VND
 const formatVND = (price: number) => {
   return new Intl.NumberFormat("vi-VN", {
@@ -88,6 +88,7 @@ export function CakeMessageOptionTable({
   >({});
 
   const { data: cakeData, pageCount } = data;
+  const { onOpen } = useModal();
 
   const toggleRowExpansion = (type: string) => {
     setExpandedRows((prev) => ({
@@ -102,7 +103,7 @@ export function CakeMessageOptionTable({
         accessorKey: "type",
         header: "Tùy chọn tin nhắn",
         cell: ({ row }) => (
-          <motion.div 
+          <motion.div
             className="flex items-center space-x-3"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -149,14 +150,16 @@ export function CakeMessageOptionTable({
         accessorKey: "items",
         header: "Số Lượng Danh Mục",
         cell: ({ row }) => (
-          <motion.div 
+          <motion.div
             className="flex items-center space-x-2 text-gray-600"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
             <BoxIcon className="h-4 w-4 text-indigo-500 animate-pulse" />
-            <span className="font-medium">{row.original.items.length} danh mục</span>
+            <span className="font-medium">
+              {row.original.items.length} danh mục
+            </span>
           </motion.div>
         ),
       },
@@ -182,7 +185,7 @@ export function CakeMessageOptionTable({
         <TableCell colSpan={columns.length} className="p-0">
           <motion.div
             initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
+            animate={{ opacity: 1, height: "auto" }}
             transition={{ duration: 0.3 }}
           >
             <Card className="m-2 border-indigo-100 dark:border-indigo-800/50 rounded-lg overflow-hidden shadow-md">
@@ -199,19 +202,14 @@ export function CakeMessageOptionTable({
                       <TableHead className="text-indigo-700 dark:text-indigo-300">
                         Tên
                       </TableHead>
-                      <TableHead className="text-indigo-700 dark:text-indigo-300">
-                        Giá
-                      </TableHead>
+
                       <TableHead className="text-indigo-700 dark:text-indigo-300">
                         Màu Sắc
                       </TableHead>
-                      <TableHead className="text-indigo-700 dark:text-indigo-300">
-                        Mô Tả
-                      </TableHead>
+
                       <TableHead className="text-indigo-700 dark:text-indigo-300">
                         Mặc Định
                       </TableHead>
-              
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -223,9 +221,9 @@ export function CakeMessageOptionTable({
                             key={item.id}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ 
+                            transition={{
                               delay: index * 0.1,
-                              duration: 0.3 
+                              duration: 0.3,
                             }}
                             className="hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors duration-200"
                           >
@@ -235,14 +233,7 @@ export function CakeMessageOptionTable({
                                 {item.name}
                               </span>
                             </TableCell>
-                            <TableCell>
-                              <Badge
-                                variant="outline"
-                                className="bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-200 hover:bg-indigo-200 transition-colors"
-                              >
-                                {formatVND(item.price)}
-                              </Badge>
-                            </TableCell>
+
                             <TableCell>
                               <motion.div
                                 className="w-4 h-4 rounded-full inline-block mr-2 shadow-sm"
@@ -253,12 +244,12 @@ export function CakeMessageOptionTable({
                                 {item.color}
                               </span>
                             </TableCell>
-                            <TableCell className="text-gray-600 dark:text-gray-400">
-                              {item.description}
-                            </TableCell>
+
                             <TableCell>
                               <Badge
-                                variant={item.is_default ? "default" : "outline"}
+                                variant={
+                                  item.is_default ? "default" : "outline"
+                                }
                                 className={
                                   item.is_default
                                     ? "bg-indigo-500 text-white dark:bg-indigo-600 animate-pulse"
@@ -274,6 +265,11 @@ export function CakeMessageOptionTable({
                                   variant="outline"
                                   size="icon"
                                   className="hover:bg-indigo-50 group"
+                                  onClick={() =>
+                                    onOpen("cakeMessageModal", {
+                                      cakeMessage: item,
+                                    })
+                                  }
                                 >
                                   <Edit2Icon className="h-4 w-4 text-indigo-600 group-hover:rotate-12 transition-transform" />
                                 </Button>
