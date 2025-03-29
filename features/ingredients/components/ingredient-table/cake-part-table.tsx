@@ -29,6 +29,7 @@ import {
 import { ExpandDataTable } from "@/components/data-table/expand-data-table";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useModal } from "@/hooks/use-modal";
 
 // Currency formatter
 const formatVND = (price: number) => {
@@ -46,6 +47,7 @@ export function CakePartTable({ data }: CakePartTableProps) {
   const [expandedRows, setExpandedRows] = React.useState<Record<string, boolean>>({});
 
   const { data: cakeData, pageCount } = data;
+  const {onOpen} = useModal()
 
   const toggleRowExpansion = (type: string) => {
     setExpandedRows((prev) => ({
@@ -190,6 +192,11 @@ export function CakePartTable({ data }: CakePartTableProps) {
                               variant="outline"
                               size="icon"
                               className="hover:bg-indigo-50 group"
+                              onClick={() => {
+                                onOpen("cakePartModal",{
+                                  cakePart: item,
+                                });
+                              }}
                             >
                               <Edit2Icon className="h-4 w-4 text-indigo-600 group-hover:rotate-12 transition-transform" />
                             </Button>

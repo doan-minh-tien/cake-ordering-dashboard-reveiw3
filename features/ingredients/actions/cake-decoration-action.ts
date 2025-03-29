@@ -10,14 +10,16 @@ import {
 import { SearchParams } from "@/types/table";
 import { ICakeDecorationType } from "../types/cake-decoration-type";
 import { axiosAuth } from "@/lib/api/api-interceptor/api";
+import { auth } from "@/lib/next-auth/auth";
 
 export const getCakeDecorations = async (
   searchParams: SearchParams
 ): Promise<ApiListResponse<ICakeDecorationType>> => {
   noStore();
+  const session = await auth();
 
   const result = await fetchListData<ICakeDecorationType>(
-    "/decoration_options",
+    `/decoration_options?bakeryId=${session?.user.entity.id}`,
     searchParams
   );
 

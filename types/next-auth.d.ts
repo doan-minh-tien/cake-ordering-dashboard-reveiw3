@@ -13,6 +13,9 @@ declare module "next-auth" {
       name: string;
       phone:string;
       gender:string;
+      entity: {
+        id: string;
+      }
       avatarUrl: string;
       roleId: number;
       access_token: string;

@@ -10,14 +10,15 @@ import {
 import { SearchParams } from "@/types/table";
 import { ICakeExtraOptionType } from "../types/cake-extra-option-type";
 import { axiosAuth } from "@/lib/api/api-interceptor/api";
-
+import { auth } from "@/lib/next-auth/auth";  
 export const getCakeExtraOptions = async (
   searchParams: SearchParams
 ): Promise<ApiListResponse<ICakeExtraOptionType>> => {
   noStore();
+  const session = await auth();
 
   const result = await fetchListData<ICakeExtraOptionType>(
-    "/extra_options",
+    `/extra_options?bakeryId=${session?.user.entity.id}`,
     searchParams
   );
 

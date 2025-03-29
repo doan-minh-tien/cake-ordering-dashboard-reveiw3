@@ -10,13 +10,13 @@ import { ApiListResponse, fetchListData, Result, apiRequest } from "@/lib/api/ap
 import { SearchParams } from "@/types/table";
 import { ICakeMessageOptionType } from "../types/cake-message-option-type";
 import { axiosAuth } from "@/lib/api/api-interceptor/api";
-
+import { auth } from "@/lib/next-auth/auth";
 export const getCakeMessageOptions = async (
   searchParams: SearchParams
 ): Promise<ApiListResponse<ICakeMessageOptionType>> => {
   noStore();
-
-  const result = await fetchListData<ICakeMessageOptionType>("/message_options", searchParams);
+  const session = await auth();
+  const result = await fetchListData<ICakeMessageOptionType>(`/message_options?bakeryId=${session?.user.entity.id}`, searchParams);
 
   if (!result.success) {
     console.error("Failed to fetch list ICakeMessageOptionType:", result.error);
