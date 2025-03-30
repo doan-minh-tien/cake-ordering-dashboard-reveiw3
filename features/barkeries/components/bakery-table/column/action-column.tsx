@@ -19,13 +19,13 @@ import { ColumnDef, Row } from "@tanstack/react-table";
 import { useModal } from "@/hooks/use-modal";
 import { useSession } from "next-auth/react";
 import { IBarkery } from "@/features/barkeries/types/barkeries-type";
-
+import { useRouter } from "nextjs-toploader/app";
 interface ActionMenuProps {
   row: Row<IBarkery>;
 }
 
 const ActionMenu = ({ row }: ActionMenuProps) => {
-  const { onOpen } = useModal();
+  const router = useRouter();
 
   return (
     <DropdownMenu>
@@ -44,7 +44,7 @@ const ActionMenu = ({ row }: ActionMenuProps) => {
         className="w-[180px] border shadow-md rounded-md"
       >
         <DropdownMenuItem
-          onClick={() => {}}
+          onClick={() => router.push(`/dashboard/bakeries/${row.original.id}`)}
           className="cursor-pointer hover:bg-accent/50 focus:bg-accent/50"
         >
           <Contact className="mr-2 h-4 w-4 text-green-500" />
