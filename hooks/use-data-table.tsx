@@ -42,14 +42,15 @@ export function useDataTable<TData, TValue>({
   const searchParams = useSearchParams();
 
   // search params
-  const page = searchParams?.get("page") ?? "1";
-  const pageAsNumber = Number(page);
-  const fallbackPage =
-    isNaN(pageAsNumber) || pageAsNumber < 1 ? 1 : pageAsNumber;
+  const pageIndex = searchParams?.get("pageIndex") ?? "1";
+  const pageIndexAsNumber = Number(pageIndex);
+  const fallbackPageIndex =
+    isNaN(pageIndexAsNumber) || pageIndexAsNumber < 1 ? 1 : pageIndexAsNumber;
 
-  const per_page = searchParams?.get("per_page") ?? "10";
-  const perPageAsNumber = Number(per_page);
-  const fallbackPerPage = isNaN(perPageAsNumber) ? 10 : perPageAsNumber;
+  const pageSize = searchParams?.get("pageSize") ?? "10";
+  const pageSizeAsNumber = Number(pageSize);
+  const fallbackPageSize =
+    isNaN(pageSizeAsNumber) || pageSizeAsNumber < 1 ? 1 : pageSizeAsNumber;
 
   const sortColumn = searchParams?.get("sortcolumn") ?? "";
   const sortDir = searchParams?.get("sortdir") ?? "0";
@@ -61,20 +62,20 @@ export function useDataTable<TData, TValue>({
       const newSearchParams = new URLSearchParams(searchParams?.toString());
 
       // Remove existing page and per_page if they are default values
-      if (newSearchParams.get("page") === "1") {
-        newSearchParams.delete("page");
+      if (newSearchParams.get("pageIndex") === "1") {
+        newSearchParams.delete("pageIndex");
       }
-      if (newSearchParams.get("per_page") === "10") {
-        newSearchParams.delete("per_page");
+      if (newSearchParams.get("pageSize") === "10") {
+        newSearchParams.delete("pageSize");
       }
 
       for (const [key, value] of Object.entries(params)) {
         // Only add page and per_page to URL if they're not default values
-        if (key === "page" && value === 1) {
+        if (key === "pageIndex" && value === 1) {
           newSearchParams.delete(key);
           continue;
         }
-        if (key === "per_page" && value === 10) {
+        if (key === "pageSize" && value === 10) {
           newSearchParams.delete(key);
           continue;
         }
@@ -125,25 +126,25 @@ export function useDataTable<TData, TValue>({
     useState<ColumnFiltersState>(initialColumnFilters);
 
   // handle server-side pagination
-  const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
-    pageIndex: fallbackPage - 1,
-    pageSize: fallbackPerPage,
+  const [{ pageIndex: currentPageIndex, pageSize: currentPageSize }, setPagination] = useState<PaginationState>({
+    pageIndex: fallbackPageIndex - 1,
+    pageSize: fallbackPageSize,
   });
 
   const pagination = useMemo(
-    () => ({ pageIndex, pageSize }),
-    [pageIndex, pageSize]
+    () => ({ pageIndex: currentPageIndex, pageSize: currentPageSize }),
+    [currentPageIndex, currentPageSize]
   );
 
   useEffect(() => {
-    setPagination({ pageIndex: fallbackPage - 1, pageSize: fallbackPerPage });
-  }, [fallbackPage, fallbackPerPage]);
+    setPagination({ pageIndex: fallbackPageIndex - 1, pageSize: fallbackPageSize });
+  }, [fallbackPageIndex, fallbackPageSize]);
 
   useEffect(() => {
-    const newPage = pageIndex + 1;
+    const newPage = currentPageIndex + 1;
     const queryString = createQueryString({
-      page: newPage,
-      per_page: pageSize,
+      pageIndex: newPage,
+      pageSize: currentPageSize,
     });
 
     router.push(`${pathname}${queryString ? `?${queryString}` : ""}`, {
@@ -151,7 +152,7 @@ export function useDataTable<TData, TValue>({
     });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageIndex, pageSize]);
+  }, [currentPageIndex, currentPageSize]);
 
   const [sorting, setSorting] = useState<SortingState>([
     { id: sortColumn, desc: sortDir === "1" },
@@ -159,7 +160,8 @@ export function useDataTable<TData, TValue>({
 
   useEffect(() => {
     const queryString = createQueryString({
-      page,
+      pageIndex: currentPageIndex,
+      pageSize: currentPageSize,
       sortcolumn: sorting[0]?.id,
       sortdir: sorting[0]?.desc ? "1" : "0",
     });
@@ -190,8 +192,8 @@ export function useDataTable<TData, TValue>({
   useEffect(() => {
     // Initialize new params
     const newParamsObject: Record<string, string | number | null> = {
-      page: 1,
-      per_page: 10,
+      pageIndex: 1,
+      pageSize: 10,
     };
 
     // Handle debounced searchable column filters
