@@ -49,3 +49,19 @@ export const updateCakeDecoration = async (
 
   return { success: true, data: result.data };
 };
+
+
+export const createCakeDecoration = async (data: any): Promise<Result<void>> => {
+  noStore();
+
+  const result = await apiRequest(() =>
+    axiosAuth.post("/decoration_options", data)
+  );
+
+  if (!result.success) {
+    return { success: false, error: result.error };
+  }
+
+  revalidatePath("/dashboard/ingredients");
+  return { success: true, data: result.data };
+};

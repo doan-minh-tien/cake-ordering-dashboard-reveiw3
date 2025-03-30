@@ -13,11 +13,17 @@ export type ModalType =
   | "cakeDecorationModal"
   | "cakeExtraModal"
   | "cakeMessageModal"
-  | "cakePartModal";
+  | "cakePartModal"
+  | "collectionCakeDecorationModal"
+  | "collectionCakeExtraOptionModal"
+  | "collectionCakeMessageModal"
+  | "collectionCakePartModal"
+  ;
 
 export interface ModalData {
   // user   -- example
   // user?: IUser;
+  ingredientType?: string;
   cakeDecoration?: ICakeDecorationItem;
   cakeExtra?: ICakeExtraOptionItem;
   cakeMessage?: ICakeMessageOptionItem;

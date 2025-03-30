@@ -30,7 +30,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useState, useTransition } from "react";
-import { updateCake } from "../../actions/cake-action";
+import { updateCake, createCake } from "../../actions/cake-action";
 import { toast } from "sonner";
 
 interface CakeDetailFormProps {
@@ -92,15 +92,15 @@ const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
           }
         });
       } else {
-        // startTransition(async () => {
-        //   const result = await createCake(data);
+        startTransition(async () => {
+          const result = await createCake(data);
 
-        //   if (!result.success) {
-        //     toast.error(result.error);
-        //   } else {
-        //     toast.success(toastMessage);
-        //   }
-        // });
+          if (!result.success) {
+            toast.error(result.error);
+          } else {
+            toast.success(toastMessage);
+          }
+        });
         form.reset();
       }
     } catch (error: any) {

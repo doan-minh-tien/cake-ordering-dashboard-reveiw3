@@ -62,3 +62,22 @@ export async function updateCake(
 
   return { success: true, data: undefined };
 }
+
+
+export async function createCake(
+  data: any
+): Promise<Result<void>> {
+  noStore();
+
+
+  const result = await apiRequest(() =>
+    axiosAuth.post("/available_cakes", data)
+  );
+  if (!result.success) {
+    return { success: false, error: result.error };
+  }
+
+  revalidatePath("/dashboard/cakes");
+
+  return { success: true, data: undefined };
+} 

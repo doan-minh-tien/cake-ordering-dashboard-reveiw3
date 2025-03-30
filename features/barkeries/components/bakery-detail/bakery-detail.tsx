@@ -424,7 +424,7 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
                 <h3 className="text-sm font-medium">Yêu cầu xác minh:</h3>
                 <VerificationItem 
                   title="Thông tin cơ bản" 
-                  description="Tên, địa chỉ, SĐT..." 
+                  description={`Tên:  ${bakery.owner_name}`} 
                   completed={true} 
                 />
                 <VerificationItem 
