@@ -9,7 +9,7 @@ import codeColumn from "./column/code";
 import discountPercentageColumn from "./column/discount-column";
 import expirationDateColumn from "./column/expiration_date";
 import quantityColumn from "./column/quantity-column";
-
+import typeColumn from "./column/type-column";
 export function fetchPromotionTableColumnDefs(): ColumnDef<IPromotion, unknown>[] {
   return [
     selectColumn,
@@ -18,6 +18,7 @@ export function fetchPromotionTableColumnDefs(): ColumnDef<IPromotion, unknown>[
     discountPercentageColumn,
     expirationDateColumn,
     quantityColumn,
+    typeColumn,
     // bakeyNameColumn,
     // ownerNameColumn,
     // phoneNumColumn,

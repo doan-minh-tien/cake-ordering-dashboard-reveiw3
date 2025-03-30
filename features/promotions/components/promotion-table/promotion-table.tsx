@@ -105,7 +105,7 @@ console.log(enableFloatingBar)
         // floatingBarContent={
         //   enableFloatingBar ? <TasksTableFloatingBar table={dataTable} /> : null
         // }
-        newRowLink="/dashboard/bakeries/create-bakery"
+        newRowLink="/dashboard/promotions/create-promotion"
         columns={columns}
         searchableColumns={searchableColumns}
         filterableColumns={filterableColumns}

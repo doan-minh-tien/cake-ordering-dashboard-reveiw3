@@ -65,3 +65,20 @@ export async function updatePromotion(
 
   return { success: true, data: undefined };
 }
+
+
+
+export async function createPromotion(data: any): Promise<Result<void>> {
+  noStore();
+
+  const result = await apiRequest(() =>
+    axiosAuth.post("/vouchers", data)
+  );
+  if (!result.success) {
+    return { success: false, error: result.error };
+  }
+
+  revalidatePath("/dashboard/promotions");
+
+  return { success: true, data: undefined };
+}   
