@@ -112,16 +112,16 @@ export const routes: Route[] = [
     children: [
       {
         label: "Đơn đặt bánh",
-        href: "/dashboard/bookings",
+        href: "/dashboard/orders",
         icon: FaRegListAlt,
         activeIcon: FaListAlt,
       },
-      {
-        label: "Đơn khách custom",
-        href: "/dashboard/bookings_exception",
-        icon: ShieldAlert,
-        activeIcon: ShieldAlert,
-      },
+      // {
+      //   label: "Đơn khách custom",
+      //   href: "/dashboard/bookings_exception",
+      //   icon: ShieldAlert,
+      //   activeIcon: ShieldAlert,
+      // },
     ],
     // allowsRoles: [UserRole.MANAGER, UserRole.REVIEWER],
   },

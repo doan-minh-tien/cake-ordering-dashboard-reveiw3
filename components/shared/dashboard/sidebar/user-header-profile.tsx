@@ -21,7 +21,7 @@ const UserProfileDropdown = () => {
 
   const handleLogout = useCallback(async () => {
     try {
-      await signOut({ redirect: false });
+      await signOut();
       router.push("/");
     } catch (error) {
       console.error("Logout failed:", error);

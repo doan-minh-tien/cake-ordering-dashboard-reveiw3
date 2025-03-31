@@ -27,9 +27,17 @@ import {
 } from "@/components/ui/sidebar";
 import { ModeToggle } from "../../custom-ui/mode-toggle";
 import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "nextjs-toploader/app";
+
 export function NavUser() {
   const { isMobile } = useSidebar();
   const { data: session } = useSession();
+
+  const router = useRouter();
+  const handleLogout = async () => {
+    await signOut();
+    router.push("/");
+  };
 
   return (
     <SidebarMenu>
@@ -96,7 +104,7 @@ export function NavUser() {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950" onClick={() => signOut()}>
+            <DropdownMenuItem className="gap-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950" onClick={handleLogout}>
               <LogOut className="h-4 w-4" />
               Đăng xuất
             </DropdownMenuItem>
