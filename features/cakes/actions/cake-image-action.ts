@@ -21,9 +21,9 @@ export async function getCakeImageById(
     return { 
       success: true, 
       data: {
-        id: response.data.id,
-        file_name: response.data.file_name,
-        file_url: response.data.file_url,
+        id: response.data.payload.id,
+        file_name: response.data.payload.file_name,
+        file_url: response.data.payload.file_url,
       } 
     };
   } catch (error: any) {

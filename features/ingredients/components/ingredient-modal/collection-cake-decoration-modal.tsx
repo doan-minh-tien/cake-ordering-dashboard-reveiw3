@@ -155,11 +155,13 @@ const CollectionCakeDecorationModal = () => {
   useEffect(() => {
     const currentItem = decorationItems[currentItemIndex];
     if (currentItem) {
+      // Reset các state hình ảnh
       setUploadedFileUrl(null);
       setImagePreview(null);
 
-      // If the item has an image_id, fetch the image
+      // Nếu item có image_id, fetch hình ảnh
       if (currentItem.image_id) {
+        console.log("Fetching image for id:", currentItem.image_id);
         fetchImage(currentItem.image_id);
       }
     }
@@ -172,8 +174,12 @@ const CollectionCakeDecorationModal = () => {
     try {
       setFetchingImage(true);
       const result = await getCakeImageById(imageId);
+      console.log("Fetch image result:", result);
+      
       if (result.success && result.data) {
+        // Trực tiếp lấy file_url từ kết quả API
         setUploadedFileUrl(result.data.file_url);
+        console.log("Fetched image URL:", result.data.file_url);
       }
     } catch (error) {
       console.error("Failed to fetch image:", error);
@@ -190,21 +196,26 @@ const CollectionCakeDecorationModal = () => {
     try {
       setImageLoading(true);
 
+      // Tạo preview tạm thời
       const previewUrl = URL.createObjectURL(file);
       setImagePreview(previewUrl);
 
       const base64 = await convertFileToBase64(file);
 
+      // Gọi API upload hình ảnh
       const result = await uploadCakeImage(base64, file.name, file.type);
+      console.log("Upload result:", result);
 
       if (!result.success) {
         toast.error(result.error || "Failed to upload image");
         return;
       }
 
+      // Lưu URL từ kết quả API
       setUploadedFileUrl(result.data.file_url);
-
-      // Update the current item's image_id
+      console.log("Uploaded image URL:", result.data.file_url);
+      
+      // Cập nhật image_id cho item hiện tại
       updateCurrentItem("image_id", result.data.id);
 
       toast.success("Image uploaded successfully");
@@ -569,7 +580,7 @@ const CollectionCakeDecorationModal = () => {
               )}
             </div>
 
-            <div className="flex justify-between">
+            <div className="flex justify-between space-x-2">
               {/* Price Field */}
               <div className="space-y-1.5">
                 <FormLabel className="flex items-center gap-2 text-sm">
@@ -618,7 +629,7 @@ const CollectionCakeDecorationModal = () => {
                       variant="outline"
                       role="combobox"
                       className={cn(
-                        "w-full justify-between rounded-xl h-10 border-gray-300 hover:bg-transparent",
+                        "w-full justify-between rounded-xl h-10  hover:bg-transparent",
                         isFieldTouched("color") &&
                           !validation.colorValid &&
                           "border-red-500"
