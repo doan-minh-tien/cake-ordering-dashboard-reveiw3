@@ -1,4 +1,4 @@
-
+import { IImage } from "./cake-decoration-type";
 
 export type ICakeExtraOptionType = {
   type: string;
@@ -13,8 +13,9 @@ export type ICakeExtraOptionItem = {
   is_default: boolean;
   description: string;
   image_id: string | null;
-  image: string | null;
+  image: IImage | null;
   type: string;
   bakery_id: string;
 
 };
+
