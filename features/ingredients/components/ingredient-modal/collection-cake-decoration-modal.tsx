@@ -16,8 +16,11 @@ import {
   ChevronLeft,
   ChevronRight,
   ListFilter,
+  Loader,
+  ImagePlus,
 } from "lucide-react";
 import { toast } from "sonner";
+import Image from "next/image";
 
 import {
   Dialog,
@@ -64,6 +67,11 @@ import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { createCakeDecoration } from "../../actions/cake-decoration-action";
+import {
+  getCakeImageById,
+  uploadCakeImage,
+} from "../../../cakes/actions/cake-image-action";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const cakeDecorationItemSchema = z.object({
   name: z.string().min(2, { message: "Tối thiểu 2 ký tự" }),
@@ -75,6 +83,8 @@ const cakeDecorationItemSchema = z.object({
   }),
   description: z.string().optional(),
   type: z.string().min(1, { message: "Chọn loại trang trí" }),
+  is_default: z.boolean().default(false),
+  image_id: z.string().optional(),
 });
 
 const collectionSchema = z.object({
@@ -98,8 +108,16 @@ const CollectionCakeDecorationModal = () => {
   const [currentStep, setCurrentStep] = useState("form"); // "form", "summary"
   const [currentItemIndex, setCurrentItemIndex] = useState(0);
   const [currentItemValidated, setCurrentItemValidated] = useState(false);
-  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
+  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>(
+    {}
+  );
   const [allItemsValid, setAllItemsValid] = useState(false);
+
+  // Image handling states
+  const [imageLoading, setImageLoading] = useState(false);
+  const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [fetchingImage, setFetchingImage] = useState(false);
 
   const form = useForm<z.infer<typeof collectionSchema>>({
     resolver: zodResolver(collectionSchema),
@@ -119,6 +137,8 @@ const CollectionCakeDecorationModal = () => {
       color: getColorValue("White"),
       description: "",
       type: itemType,
+      is_default: false,
+      image_id: "",
     };
   };
 
@@ -130,6 +150,80 @@ const CollectionCakeDecorationModal = () => {
       form.setValue("decorations", [newItem]);
     }
   }, [isOpenModal]);
+
+  // Reset image states when changing items
+  useEffect(() => {
+    const currentItem = decorationItems[currentItemIndex];
+    if (currentItem) {
+      setUploadedFileUrl(null);
+      setImagePreview(null);
+
+      // If the item has an image_id, fetch the image
+      if (currentItem.image_id) {
+        fetchImage(currentItem.image_id);
+      }
+    }
+  }, [currentItemIndex, decorationItems]);
+
+  // Fetch image function
+  const fetchImage = async (imageId: string) => {
+    if (!imageId) return;
+
+    try {
+      setFetchingImage(true);
+      const result = await getCakeImageById(imageId);
+      if (result.success && result.data) {
+        setUploadedFileUrl(result.data.file_url);
+      }
+    } catch (error) {
+      console.error("Failed to fetch image:", error);
+    } finally {
+      setFetchingImage(false);
+    }
+  };
+
+  // Image upload handling
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setImageLoading(true);
+
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+
+      const base64 = await convertFileToBase64(file);
+
+      const result = await uploadCakeImage(base64, file.name, file.type);
+
+      if (!result.success) {
+        toast.error(result.error || "Failed to upload image");
+        return;
+      }
+
+      setUploadedFileUrl(result.data.file_url);
+
+      // Update the current item's image_id
+      updateCurrentItem("image_id", result.data.id);
+
+      toast.success("Image uploaded successfully");
+    } catch (error: any) {
+      toast.error("Failed to upload image");
+      console.error("Image upload error:", error);
+    } finally {
+      setImageLoading(false);
+    }
+  };
+
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  };
 
   // Validate the current item
   const validateCurrentItem = () => {
@@ -143,7 +237,8 @@ const CollectionCakeDecorationModal = () => {
 
     // Validate all required fields with detailed checks
     const nameValid = currentItem.name && currentItem.name.length >= 2;
-    const priceValid = typeof currentItem.price === "number" && currentItem.price >= 0;
+    const priceValid =
+      typeof currentItem.price === "number" && currentItem.price >= 0;
     const colorValid = !!currentItem.color && !!currentItem.color.name;
     const typeValid = !!currentItem.type && currentItem.type.length >= 1;
 
@@ -153,7 +248,7 @@ const CollectionCakeDecorationModal = () => {
       priceValid,
       colorValid,
       typeValid,
-      allValid: nameValid && priceValid && colorValid && typeValid
+      allValid: nameValid && priceValid && colorValid && typeValid,
     };
 
     setCurrentItemValidated(!!validationResults.allValid);
@@ -167,12 +262,12 @@ const CollectionCakeDecorationModal = () => {
       return false;
     }
 
-    const allValid = decorationItems.every(item => {
+    const allValid = decorationItems.every((item) => {
       const nameValid = item.name && item.name.length >= 2;
       const priceValid = typeof item.price === "number" && item.price >= 0;
       const colorValid = !!item.color && !!item.color.name;
       const typeValid = !!item.type && item.type.length >= 1;
-      
+
       return nameValid && priceValid && colorValid && typeValid;
     });
 
@@ -219,11 +314,11 @@ const CollectionCakeDecorationModal = () => {
       };
       setDecorationItems(updatedItems);
       form.setValue("decorations", updatedItems);
-      
+
       // Đánh dấu trường đã được tương tác
-      setTouchedFields(prev => ({
+      setTouchedFields((prev) => ({
         ...prev,
-        [field]: true
+        [field]: true,
       }));
     }
   };
@@ -303,6 +398,13 @@ const CollectionCakeDecorationModal = () => {
     setCurrentItemIndex(0);
     setCurrentStep("form");
     setCurrentItemValidated(false);
+    setUploadedFileUrl(null);
+    setImagePreview(null);
+  };
+
+  // Get selected color object based on name
+  const getSelectedColor = (colorName: string) => {
+    return COLOR_OPTIONS.find((color) => color.name === colorName) || null;
   };
 
   const renderItemForm = () => {
@@ -325,13 +427,14 @@ const CollectionCakeDecorationModal = () => {
     }
 
     const itemType = data?.ingredientType || "Default";
-    
+
     // Run validation for field-specific error messages
     const validation = {
       nameValid: currentItem.name && currentItem.name.length >= 2,
-      priceValid: typeof currentItem.price === "number" && currentItem.price >= 0,
+      priceValid:
+        typeof currentItem.price === "number" && currentItem.price >= 0,
       colorValid: !!currentItem.color && !!currentItem.color.name,
-      typeValid: !!currentItem.type && currentItem.type.length >= 1
+      typeValid: !!currentItem.type && currentItem.type.length >= 1,
     };
 
     return (
@@ -376,162 +479,263 @@ const CollectionCakeDecorationModal = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          {/* Name Field */}
-          <div className="space-y-1.5">
+        <div className="flex space-x-2">
+          {/* Image Upload Field */}
+          <div className="col-span-2">
             <FormLabel className="flex items-center gap-2 text-sm">
-              <CakeSlice className="w-4 h-4 text-primary" />
-              Tên trang trí <span className="text-red-500">*</span>
+              Hình Ảnh Trang Trí
             </FormLabel>
-            <Input
-              placeholder="Nhập tên"
-              value={currentItem.name || ""}
-              onChange={(e) => updateCurrentItem("name", e.target.value)}
-              onBlur={() => setTouchedFields(prev => ({ ...prev, name: true }))}
-              className={cn(
-                "rounded-md h-9", 
-                isFieldTouched("name") && !validation.nameValid && "border-red-500"
-              )}
-            />
-            {isFieldTouched("name") && !validation.nameValid && (
-              <p className="text-xs text-red-500">Tối thiểu 2 ký tự</p>
-            )}
+            <div className="flex flex-col gap-3">
+              <div className="relative w-full h-40 border rounded-md border-dashed flex items-center justify-center bg-gray-50/50 group">
+                {imageLoading || fetchingImage ? (
+                  <div className="flex items-center justify-center">
+                    <Loader className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                ) : uploadedFileUrl ? (
+                  <Image
+                    src={uploadedFileUrl}
+                    alt="Decoration preview"
+                    fill
+                    className="object-contain p-2"
+                  />
+                ) : imagePreview ? (
+                  <Image
+                    src={imagePreview}
+                    alt="Decoration preview"
+                    fill
+                    className="object-contain p-2"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center text-gray-400 text-center px-2">
+                    <ImagePlus className="h-8 w-8 mb-1" />
+                    <p className="text-xs">Upload decoration image</p>
+                  </div>
+                )}
+
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() =>
+                      document
+                        .getElementById(
+                          `decoration-image-upload-${currentItemIndex}`
+                        )
+                        ?.click()
+                    }
+                    disabled={imageLoading || fetchingImage}
+                    className="text-xs"
+                  >
+                    {imageLoading ? "Uploading..." : "Change Image"}
+                  </Button>
+                </div>
+              </div>
+
+              <Input
+                type="file"
+                accept="image/*"
+                id={`decoration-image-upload-${currentItemIndex}`}
+                className="hidden"
+                onChange={handleImageUpload}
+                disabled={imageLoading}
+              />
+            </div>
           </div>
 
-          {/* Price Field */}
-          <div className="space-y-1.5">
-            <FormLabel className="flex items-center gap-2 text-sm">
-              <DollarSign className="w-4 h-4 text-primary" />
-              Giá <span className="text-red-500">*</span>
-            </FormLabel>
-            <Input
-              type="number"
-              placeholder="Nhập giá"
-              value={currentItem.price}
-              onChange={(e) => updateCurrentItem("price", parseFloat(e.target.value) || 0)}
-              onBlur={() => setTouchedFields(prev => ({ ...prev, price: true }))}
-              className={cn(
-                "rounded-md h-9", 
-                isFieldTouched("price") && !validation.priceValid && "border-red-500"
-              )}
-            />
-            {isFieldTouched("price") && !validation.priceValid && (
-              <p className="text-xs text-red-500">Giá không hợp lệ</p>
-            )}
-          </div>
-
-          {/* Color Field */}
-          <div className="space-y-1.5">
-            <FormLabel className="flex items-center gap-2 text-sm text-gray-700">
-              <Palette className="w-4 h-4 text-purple-500" />
-              Màu sắc <span className="text-red-500">*</span>
-            </FormLabel>
-            <Popover
-              open={currentColorPopover}
-              onOpenChange={(open) => {
-                setCurrentColorPopover(open);
-                if (!open) {
-                  setTouchedFields(prev => ({ ...prev, color: true }));
+          <div className="grid grid-cols-2 gap-4">
+            {/* Name Field */}
+            <div className="space-y-1.5">
+              <FormLabel className="flex items-center gap-2 text-sm">
+                <CakeSlice className="w-4 h-4 text-primary" />
+                Tên trang trí <span className="text-red-500">*</span>
+              </FormLabel>
+              <Input
+                placeholder="Nhập tên"
+                value={currentItem.name || ""}
+                onChange={(e) => updateCurrentItem("name", e.target.value)}
+                onBlur={() =>
+                  setTouchedFields((prev) => ({ ...prev, name: true }))
                 }
-              }}
-            >
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
+                className={cn(
+                  "rounded-md h-9",
+                  isFieldTouched("name") &&
+                    !validation.nameValid &&
+                    "border-red-500"
+                )}
+              />
+              {isFieldTouched("name") && !validation.nameValid && (
+                <p className="text-xs text-red-500">Tối thiểu 2 ký tự</p>
+              )}
+            </div>
+
+            <div className="flex justify-between">
+              {/* Price Field */}
+              <div className="space-y-1.5">
+                <FormLabel className="flex items-center gap-2 text-sm">
+                  <DollarSign className="w-4 h-4 text-primary" />
+                  Giá <span className="text-red-500">*</span>
+                </FormLabel>
+                <Input
+                  type="number"
+                  placeholder="Nhập giá"
+                  value={currentItem.price}
+                  onChange={(e) =>
+                    updateCurrentItem("price", parseFloat(e.target.value) || 0)
+                  }
+                  onBlur={() =>
+                    setTouchedFields((prev) => ({ ...prev, price: true }))
+                  }
                   className={cn(
-                    "w-full justify-between rounded-xl h-10 border-gray-300 hover:bg-transparent",
-                    isFieldTouched("color") && !validation.colorValid && "border-red-500"
+                    "rounded-md h-9",
+                    isFieldTouched("price") &&
+                      !validation.priceValid &&
+                      "border-red-500"
+                  )}
+                />
+                {isFieldTouched("price") && !validation.priceValid && (
+                  <p className="text-xs text-red-500">Giá không hợp lệ</p>
+                )}
+              </div>
+
+              {/* Color Field */}
+              <div className="space-y-1.5">
+                <FormLabel className="flex items-center gap-2 text-sm text-gray-700">
+                  <Palette className="w-4 h-4 text-purple-500" />
+                  Màu sắc <span className="text-red-500">*</span>
+                </FormLabel>
+                <Popover
+                  open={currentColorPopover}
+                  onOpenChange={(open) => {
+                    setCurrentColorPopover(open);
+                    if (!open) {
+                      setTouchedFields((prev) => ({ ...prev, color: true }));
+                    }
+                  }}
+                >
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className={cn(
+                        "w-full justify-between rounded-xl h-10 border-gray-300 hover:bg-transparent",
+                        isFieldTouched("color") &&
+                          !validation.colorValid &&
+                          "border-red-500"
+                      )}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-4 h-4 rounded-full"
+                          style={{
+                            backgroundColor:
+                              currentItem.color?.hex || "#FFFFFF",
+                          }}
+                        />
+                        {currentItem.color?.name || "White"} (
+                        {currentItem.color?.hex || "#FFFFFF"})
+                      </div>
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="p-0 w-[300px]">
+                    <Command>
+                      <CommandInput placeholder="Tìm màu..." className="h-9" />
+                      <CommandList>
+                        <CommandEmpty>Không tìm thấy màu.</CommandEmpty>
+                        <CommandGroup>
+                          {COLOR_OPTIONS.map((color) => (
+                            <CommandItem
+                              key={color.hex}
+                              value={color.name}
+                              onSelect={() => {
+                                updateCurrentItem("color", color);
+                                setCurrentColorPopover(false);
+                              }}
+                            >
+                              <div className="flex items-center gap-3 w-full">
+                                <div
+                                  className="w-5 h-5 rounded-full border border-gray-200"
+                                  style={{ backgroundColor: color.hex }}
+                                />
+                                <span className="text-sm">
+                                  {color.name} ({color.hex})
+                                </span>
+                              </div>
+                              <Check
+                                className={cn(
+                                  "ml-auto h-4 w-4",
+                                  color.hex === currentItem.color?.hex
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                {isFieldTouched("color") && !validation.colorValid && (
+                  <p className="text-xs text-red-500">Vui lòng chọn màu sắc</p>
+                )}
+              </div>
+            </div>
+
+            {/* Type Field */}
+            <div className="space-y-1.5">
+              <FormLabel className="flex items-center gap-2 text-sm">
+                <CakeSlice className="w-4 h-4 text-primary" />
+                Loại trang trí <span className="text-red-500">*</span>
+              </FormLabel>
+              <Select
+                value={itemType}
+                onValueChange={(value) => {
+                  updateCurrentItem("type", value);
+                  setTouchedFields((prev) => ({ ...prev, type: true }));
+                }}
+                onOpenChange={(open) => {
+                  if (!open) {
+                    setTouchedFields((prev) => ({ ...prev, type: true }));
+                  }
+                }}
+              >
+                <SelectTrigger
+                  className={cn(
+                    "rounded-md h-9",
+                    isFieldTouched("type") &&
+                      !validation.typeValid &&
+                      "border-red-500"
                   )}
                 >
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-4 h-4 rounded-full"
-                      style={{
-                        backgroundColor: currentItem.color?.hex || "#FFFFFF",
-                      }}
-                    />
-                    {currentItem.color?.name || "White"} (
-                    {currentItem.color?.hex || "#FFFFFF"})
-                  </div>
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="p-0 w-[300px]">
-                <Command>
-                  <CommandInput placeholder="Tìm màu..." className="h-9" />
-                  <CommandList>
-                    <CommandEmpty>Không tìm thấy màu.</CommandEmpty>
-                    <CommandGroup>
-                      {COLOR_OPTIONS.map((color) => (
-                        <CommandItem
-                          key={color.hex}
-                          value={color.name}
-                          onSelect={() => {
-                            updateCurrentItem("color", color);
-                            setCurrentColorPopover(false);
-                          }}
-                        >
-                          <div className="flex items-center gap-3 w-full">
-                            <div
-                              className="w-5 h-5 rounded-full border border-gray-200"
-                              style={{ backgroundColor: color.hex }}
-                            />
-                            <span className="text-sm">
-                              {color.name} ({color.hex})
-                            </span>
-                          </div>
-                          <Check
-                            className={cn(
-                              "ml-auto h-4 w-4",
-                              color.hex === currentItem.color?.hex
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-            {isFieldTouched("color") && !validation.colorValid && (
-              <p className="text-xs text-red-500">Vui lòng chọn màu sắc</p>
-            )}
-          </div>
+                  <SelectValue placeholder="Chọn loại" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={itemType}>{itemType}</SelectItem>
+                </SelectContent>
+              </Select>
+              {isFieldTouched("type") && !validation.typeValid && (
+                <p className="text-xs text-red-500">
+                  Vui lòng chọn loại trang trí
+                </p>
+              )}
+            </div>
 
-          {/* Type Field */}
-          <div className="space-y-1.5">
-            <FormLabel className="flex items-center gap-2 text-sm">
-              <CakeSlice className="w-4 h-4 text-primary" />
-              Loại trang trí <span className="text-red-500">*</span>
-            </FormLabel>
-            <Select
-              value={itemType}
-              onValueChange={(value) => {
-                updateCurrentItem("type", value);
-                setTouchedFields(prev => ({ ...prev, type: true }));
-              }}
-              onOpenChange={(open) => {
-                if (!open) {
-                  setTouchedFields(prev => ({ ...prev, type: true }));
-                }
-              }}
-            >
-              <SelectTrigger className={cn(
-                "rounded-md h-9", 
-                isFieldTouched("type") && !validation.typeValid && "border-red-500"
-              )}>
-                <SelectValue placeholder="Chọn loại" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={itemType}>{itemType}</SelectItem>
-              </SelectContent>
-            </Select>
-            {isFieldTouched("type") && !validation.typeValid && (
-              <p className="text-xs text-red-500">Vui lòng chọn loại trang trí</p>
-            )}
+            {/* Is Default Checkbox */}
+            <div className="col-span-2">
+              <div className="flex flex-row items-start space-x-3 space-y-0 p-2">
+                <Checkbox
+                  checked={currentItem.is_default || false}
+                  onCheckedChange={(checked) =>
+                    updateCurrentItem("is_default", !!checked)
+                  }
+                />
+                <div className="space-y-1 leading-none">
+                  <FormLabel className="text-sm">Đặt làm mặc định</FormLabel>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -568,14 +772,14 @@ const CollectionCakeDecorationModal = () => {
         <ScrollArea className="h-[300px] pr-4">
           <div className="space-y-2">
             {decorationItems.map((item, index) => {
-              const isItemValid = 
-                item.name && 
-                item.name.length >= 2 && 
-                typeof item.price === "number" && 
-                item.price >= 0 && 
-                !!item.color && 
-                !!item.color.name && 
-                !!item.type && 
+              const isItemValid =
+                item.name &&
+                item.name.length >= 2 &&
+                typeof item.price === "number" &&
+                item.price >= 0 &&
+                !!item.color &&
+                !!item.color.name &&
+                !!item.type &&
                 item.type.length >= 1;
 
               return (
@@ -593,10 +797,13 @@ const CollectionCakeDecorationModal = () => {
                       style={{ backgroundColor: item.color?.hex || "#FFFFFF" }}
                     />
                     <div>
-                      <div className="font-medium">{item.name || "Chưa có tên"}</div>
+                      <div className="font-medium">
+                        {item.name || "Chưa có tên"}
+                      </div>
                       <div className="text-xs text-gray-500">
                         {item.type} -{" "}
                         {new Intl.NumberFormat("vi-VN").format(item.price)}đ
+                        {item.is_default && " - Mặc định"}
                       </div>
                     </div>
                   </div>
@@ -661,7 +868,9 @@ const CollectionCakeDecorationModal = () => {
                 <Button
                   type="submit"
                   className="w-full rounded-md h-10"
-                  disabled={isPending || decorationItems.length === 0 || !allItemsValid}
+                  disabled={
+                    isPending || decorationItems.length === 0 || !allItemsValid
+                  }
                 >
                   {isPending
                     ? "Đang xử lý..."
