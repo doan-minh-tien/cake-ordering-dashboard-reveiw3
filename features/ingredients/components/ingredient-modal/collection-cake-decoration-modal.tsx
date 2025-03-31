@@ -98,6 +98,8 @@ const CollectionCakeDecorationModal = () => {
   const [currentStep, setCurrentStep] = useState("form"); // "form", "summary"
   const [currentItemIndex, setCurrentItemIndex] = useState(0);
   const [currentItemValidated, setCurrentItemValidated] = useState(false);
+  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
+  const [allItemsValid, setAllItemsValid] = useState(false);
 
   const form = useForm<z.infer<typeof collectionSchema>>({
     resolver: zodResolver(collectionSchema),
@@ -139,21 +141,48 @@ const CollectionCakeDecorationModal = () => {
       return false;
     }
 
-    // Check if all required properties exist and are valid
-    const isValid =
-      currentItem.name &&
-      currentItem.name.length >= 2 &&
-      typeof currentItem.price === "number" &&
-      currentItem.price >= 0 &&
-      currentItem.type &&
-      currentItem.type.length >= 1;
+    // Validate all required fields with detailed checks
+    const nameValid = currentItem.name && currentItem.name.length >= 2;
+    const priceValid = typeof currentItem.price === "number" && currentItem.price >= 0;
+    const colorValid = !!currentItem.color && !!currentItem.color.name;
+    const typeValid = !!currentItem.type && currentItem.type.length >= 1;
 
-    setCurrentItemValidated(!!isValid);
-    return isValid;
+    // Get validation results
+    const validationResults = {
+      nameValid,
+      priceValid,
+      colorValid,
+      typeValid,
+      allValid: nameValid && priceValid && colorValid && typeValid
+    };
+
+    setCurrentItemValidated(!!validationResults.allValid);
+    return !!validationResults.allValid;
+  };
+
+  // Validate all items
+  const validateAllItems = () => {
+    if (decorationItems.length === 0) {
+      setAllItemsValid(false);
+      return false;
+    }
+
+    const allValid = decorationItems.every(item => {
+      const nameValid = item.name && item.name.length >= 2;
+      const priceValid = typeof item.price === "number" && item.price >= 0;
+      const colorValid = !!item.color && !!item.color.name;
+      const typeValid = !!item.type && item.type.length >= 1;
+      
+      return nameValid && priceValid && colorValid && typeValid;
+    });
+
+    setAllItemsValid(allValid);
+    return allValid;
   };
 
   useEffect(() => {
     validateCurrentItem();
+    validateAllItems();
   }, [decorationItems, currentItemIndex]);
 
   // Add a new item to the list and navigate to it
@@ -163,6 +192,7 @@ const CollectionCakeDecorationModal = () => {
     setDecorationItems(newItems);
     form.setValue("decorations", newItems);
     setCurrentItemIndex(newItems.length - 1);
+    resetTouchedFields();
   };
 
   // Remove the current item
@@ -189,24 +219,47 @@ const CollectionCakeDecorationModal = () => {
       };
       setDecorationItems(updatedItems);
       form.setValue("decorations", updatedItems);
+      
+      // Đánh dấu trường đã được tương tác
+      setTouchedFields(prev => ({
+        ...prev,
+        [field]: true
+      }));
     }
+  };
+
+  // Hàm kiểm tra xem field đã được tương tác chưa
+  const isFieldTouched = (field: string) => {
+    return touchedFields[field] === true;
+  };
+
+  // Reset touched fields khi thêm item mới hoặc chuyển item
+  const resetTouchedFields = () => {
+    setTouchedFields({});
   };
 
   const goToPrevItem = () => {
     if (currentItemIndex > 0) {
       setCurrentItemIndex(currentItemIndex - 1);
+      resetTouchedFields();
     }
   };
 
   const goToNextItem = () => {
     if (currentItemIndex < decorationItems.length - 1) {
       setCurrentItemIndex(currentItemIndex + 1);
+      resetTouchedFields();
     }
   };
 
   const goToSummary = () => {
     if (decorationItems.length > 0) {
-      setCurrentStep("summary");
+      // Validate all items before proceeding to summary
+      if (validateAllItems()) {
+        setCurrentStep("summary");
+      } else {
+        toast.error("Vui lòng điền đầy đủ thông tin cho tất cả trang trí");
+      }
     }
   };
 
@@ -272,6 +325,14 @@ const CollectionCakeDecorationModal = () => {
     }
 
     const itemType = data?.ingredientType || "Default";
+    
+    // Run validation for field-specific error messages
+    const validation = {
+      nameValid: currentItem.name && currentItem.name.length >= 2,
+      priceValid: typeof currentItem.price === "number" && currentItem.price >= 0,
+      colorValid: !!currentItem.color && !!currentItem.color.name,
+      typeValid: !!currentItem.type && currentItem.type.length >= 1
+    };
 
     return (
       <div className="space-y-6">
@@ -320,54 +381,68 @@ const CollectionCakeDecorationModal = () => {
           <div className="space-y-1.5">
             <FormLabel className="flex items-center gap-2 text-sm">
               <CakeSlice className="w-4 h-4 text-primary" />
-              Tên trang trí
+              Tên trang trí <span className="text-red-500">*</span>
             </FormLabel>
             <Input
               placeholder="Nhập tên"
               value={currentItem.name || ""}
               onChange={(e) => updateCurrentItem("name", e.target.value)}
-              className="rounded-md h-9"
+              onBlur={() => setTouchedFields(prev => ({ ...prev, name: true }))}
+              className={cn(
+                "rounded-md h-9", 
+                isFieldTouched("name") && !validation.nameValid && "border-red-500"
+              )}
             />
-            {!currentItem.name || currentItem.name.length < 2 ? (
+            {isFieldTouched("name") && !validation.nameValid && (
               <p className="text-xs text-red-500">Tối thiểu 2 ký tự</p>
-            ) : null}
+            )}
           </div>
 
           {/* Price Field */}
           <div className="space-y-1.5">
             <FormLabel className="flex items-center gap-2 text-sm">
               <DollarSign className="w-4 h-4 text-primary" />
-              Giá
+              Giá <span className="text-red-500">*</span>
             </FormLabel>
             <Input
               type="number"
               placeholder="Nhập giá"
               value={currentItem.price}
-              onChange={(e) =>
-                updateCurrentItem("price", parseFloat(e.target.value) || 0)
-              }
-              className="rounded-md h-9"
+              onChange={(e) => updateCurrentItem("price", parseFloat(e.target.value) || 0)}
+              onBlur={() => setTouchedFields(prev => ({ ...prev, price: true }))}
+              className={cn(
+                "rounded-md h-9", 
+                isFieldTouched("price") && !validation.priceValid && "border-red-500"
+              )}
             />
-            {currentItem.price < 0 ? (
+            {isFieldTouched("price") && !validation.priceValid && (
               <p className="text-xs text-red-500">Giá không hợp lệ</p>
-            ) : null}
+            )}
           </div>
 
           {/* Color Field */}
           <div className="space-y-1.5">
             <FormLabel className="flex items-center gap-2 text-sm text-gray-700">
               <Palette className="w-4 h-4 text-purple-500" />
-              Màu sắc
+              Màu sắc <span className="text-red-500">*</span>
             </FormLabel>
             <Popover
               open={currentColorPopover}
-              onOpenChange={setCurrentColorPopover}
+              onOpenChange={(open) => {
+                setCurrentColorPopover(open);
+                if (!open) {
+                  setTouchedFields(prev => ({ ...prev, color: true }));
+                }
+              }}
             >
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   role="combobox"
-                  className="w-full justify-between rounded-xl h-10 border-gray-300 hover:bg-transparent"
+                  className={cn(
+                    "w-full justify-between rounded-xl h-10 border-gray-300 hover:bg-transparent",
+                    isFieldTouched("color") && !validation.colorValid && "border-red-500"
+                  )}
                 >
                   <div className="flex items-center gap-2">
                     <div
@@ -421,25 +496,42 @@ const CollectionCakeDecorationModal = () => {
                 </Command>
               </PopoverContent>
             </Popover>
+            {isFieldTouched("color") && !validation.colorValid && (
+              <p className="text-xs text-red-500">Vui lòng chọn màu sắc</p>
+            )}
           </div>
 
           {/* Type Field */}
           <div className="space-y-1.5">
             <FormLabel className="flex items-center gap-2 text-sm">
               <CakeSlice className="w-4 h-4 text-primary" />
-              Loại trang trí
+              Loại trang trí <span className="text-red-500">*</span>
             </FormLabel>
             <Select
               value={itemType}
-              onValueChange={(value) => updateCurrentItem("type", value)}
+              onValueChange={(value) => {
+                updateCurrentItem("type", value);
+                setTouchedFields(prev => ({ ...prev, type: true }));
+              }}
+              onOpenChange={(open) => {
+                if (!open) {
+                  setTouchedFields(prev => ({ ...prev, type: true }));
+                }
+              }}
             >
-              <SelectTrigger className="rounded-md h-9">
+              <SelectTrigger className={cn(
+                "rounded-md h-9", 
+                isFieldTouched("type") && !validation.typeValid && "border-red-500"
+              )}>
                 <SelectValue placeholder="Chọn loại" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={itemType}>{itemType}</SelectItem>
               </SelectContent>
             </Select>
+            {isFieldTouched("type") && !validation.typeValid && (
+              <p className="text-xs text-red-500">Vui lòng chọn loại trang trí</p>
+            )}
           </div>
         </div>
 
@@ -475,28 +567,48 @@ const CollectionCakeDecorationModal = () => {
 
         <ScrollArea className="h-[300px] pr-4">
           <div className="space-y-2">
-            {decorationItems.map((item, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
-                onClick={() => backToForm(index)}
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-4 h-4 rounded-full border"
-                    style={{ backgroundColor: item.color?.hex || "#FFFFFF" }}
-                  />
-                  <div>
-                    <div className="font-medium">{item.name}</div>
-                    <div className="text-xs text-gray-500">
-                      {item.type} -{" "}
-                      {new Intl.NumberFormat("vi-VN").format(item.price)}đ
+            {decorationItems.map((item, index) => {
+              const isItemValid = 
+                item.name && 
+                item.name.length >= 2 && 
+                typeof item.price === "number" && 
+                item.price >= 0 && 
+                !!item.color && 
+                !!item.color.name && 
+                !!item.type && 
+                item.type.length >= 1;
+
+              return (
+                <div
+                  key={index}
+                  className={cn(
+                    "flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer",
+                    !isItemValid && "border-red-500 bg-red-50"
+                  )}
+                  onClick={() => backToForm(index)}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-4 h-4 rounded-full border"
+                      style={{ backgroundColor: item.color?.hex || "#FFFFFF" }}
+                    />
+                    <div>
+                      <div className="font-medium">{item.name || "Chưa có tên"}</div>
+                      <div className="text-xs text-gray-500">
+                        {item.type} -{" "}
+                        {new Intl.NumberFormat("vi-VN").format(item.price)}đ
+                      </div>
                     </div>
                   </div>
+                  {!isItemValid && (
+                    <Badge variant="destructive" className="mr-2">
+                      Thiếu thông tin
+                    </Badge>
+                  )}
+                  <ChevronRight className="h-4 w-4 text-gray-400" />
                 </div>
-                <ChevronRight className="h-4 w-4 text-gray-400" />
-              </div>
-            ))}
+              );
+            })}
           </div>
         </ScrollArea>
       </div>
@@ -549,10 +661,12 @@ const CollectionCakeDecorationModal = () => {
                 <Button
                   type="submit"
                   className="w-full rounded-md h-10"
-                  disabled={isPending || decorationItems.length === 0}
+                  disabled={isPending || decorationItems.length === 0 || !allItemsValid}
                 >
                   {isPending
                     ? "Đang xử lý..."
+                    : !allItemsValid
+                    ? "Một số trang trí chưa hoàn thành"
                     : `Xác nhận thêm ${decorationItems.length} trang trí`}
                 </Button>
               )}
