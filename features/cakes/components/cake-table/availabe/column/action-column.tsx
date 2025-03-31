@@ -31,10 +31,6 @@ const ActionMenu = ({ row }: ActionMenuProps) => {
     router.push(`/dashboard/cakes/${cakeId}`);
   };
 
-  const handleEdit = () => {
-    // Navigate to edit page
-    router.push(`/dashboard/cakes/edit/${cakeId}`);
-  };
 
   const handleDelete = () => {
     // Implement delete logic
@@ -67,14 +63,6 @@ const ActionMenu = ({ row }: ActionMenuProps) => {
         >
           <Eye className="mr-2 h-4 w-4 text-blue-500" />
           <span>Xem chi tiết</span>
-        </DropdownMenuItem>
-
-        <DropdownMenuItem
-          onClick={handleEdit}
-          className="cursor-pointer hover:bg-accent/50 focus:bg-accent/50"
-        >
-          <Edit className="mr-2 h-4 w-4 text-green-500" />
-          <span>Chỉnh sửa</span>
         </DropdownMenuItem>
 
         <DropdownMenuItem
