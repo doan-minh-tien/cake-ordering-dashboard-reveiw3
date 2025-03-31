@@ -48,3 +48,18 @@ export const updateCakeExtraOption = async (
 
   return { success: true, data: result.data };
 };
+
+export const createCakeExtraOption = async (data: any): Promise<Result<void>> => {
+  noStore();
+
+  const result = await apiRequest(() =>
+    axiosAuth.post("/extra_options", data)
+  );
+
+  if (!result.success) {
+    return { success: false, error: result.error };
+  }
+
+  revalidatePath("/dashboard/ingredients");
+  return { success: true, data: result.data };
+};

@@ -4,6 +4,7 @@ import CakeExtraModal from "@/features/ingredients/components/ingredient-modal/c
 import CakeMessageOptionModal from "@/features/ingredients/components/ingredient-modal/cake-message-option";
 import CakePartModal from "@/features/ingredients/components/ingredient-modal/cake-part-modal";
 import CollectionCakeDecorationModal from "@/features/ingredients/components/ingredient-modal/collection-cake-decoration-modal";
+import CollectionCakeExtraModal from "@/features/ingredients/components/ingredient-modal/collection-cake-extra-modal";
 import { useEffect, useState } from "react";
 
 export const ModalProvider = () => {
@@ -22,6 +23,7 @@ export const ModalProvider = () => {
       <CakeMessageOptionModal />
       <CakePartModal />
       <CollectionCakeDecorationModal />
+      <CollectionCakeExtraModal/>
     </>
   );
 };
