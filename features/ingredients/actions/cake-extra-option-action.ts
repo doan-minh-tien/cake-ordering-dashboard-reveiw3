@@ -63,3 +63,19 @@ export const createCakeExtraOption = async (data: any): Promise<Result<void>> =>
   revalidatePath("/dashboard/ingredients");
   return { success: true, data: result.data };
 };
+
+
+export const deleteCakeExtraOption = async (id: string): Promise<Result<void>> => {
+  noStore();
+
+  const result = await apiRequest(() =>
+    axiosAuth.delete(`/extra_options/${id}`)
+  );
+
+  if (!result.success) {
+    return { success: false, error: result.error };
+  }
+
+  revalidatePath("/dashboard/ingredients");
+  return { success: true, data: result.data };
+};    
