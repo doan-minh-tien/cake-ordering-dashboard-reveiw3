@@ -81,3 +81,20 @@ export async function createCake(
 
   return { success: true, data: undefined };
 } 
+
+
+export async function deleteCake(params: string): Promise<Result<void>> {
+  noStore();
+
+  const result = await apiRequest(() =>
+    axiosAuth.delete(`/available_cakes/${params}`)
+  );
+
+  if (!result.success) {
+    return { success: false, error: result.error };
+  }
+
+  revalidatePath("/dashboard/cakes");
+
+  return { success: true, data: undefined };
+} 

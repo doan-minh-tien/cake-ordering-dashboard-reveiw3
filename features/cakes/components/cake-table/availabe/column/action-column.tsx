@@ -17,6 +17,8 @@ import { ICake } from "@/features/cakes/types/cake";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+import { deleteCake } from "@/features/cakes/actions/cake-action";
 interface ActionMenuProps {
   row: Row<ICake>;
 }
@@ -25,15 +27,23 @@ const ActionMenu = ({ row }: ActionMenuProps) => {
   const { onOpen } = useModal();
   const cakeId = row.original.id;
 
+  const [isPending, startTransition] = useTransition();
+
   const router = useRouter();
 
   const handleView = () => {
     router.push(`/dashboard/cakes/${cakeId}`);
   };
 
-
-  const handleDelete = () => {
-    // Implement delete logic
+  const handleDelete = async () => {
+    startTransition(async () => {
+      const result = await deleteCake(cakeId);
+      if (result.success) {
+        toast.success("Đã xóa bánh thành công");
+      } else {
+        toast.error("Đã xảy ra lỗi khi xóa bánh");
+      }
+    });
   };
 
   const handleDuplicate = () => {
