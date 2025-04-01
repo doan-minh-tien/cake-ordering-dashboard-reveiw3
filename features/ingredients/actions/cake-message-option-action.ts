@@ -48,3 +48,18 @@ export const updateCakeMessage = async (
 
   return { success: true, data: result.data };
 };
+
+export const createCakeMessage = async (data: any): Promise<Result<void>> => {
+  noStore();
+  console.log("data", data);
+  const result = await apiRequest(() =>
+    axiosAuth.post("/message_options", data)
+  );
+
+  if (!result.success) {
+    return { success: false, error: result.error };
+  }
+
+  revalidatePath("/dashboard/ingredients");
+  return { success: true, data: result.data };
+};  
