@@ -38,6 +38,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import AlertModal from "@/components/modals/alert-modal";
+import { deleteCakePart } from "@/features/ingredients/actions/cake-part-action";
+import { toast } from "sonner";
 
 // Utility function to format VND
 const formatVND = (price: number) =>
@@ -66,6 +69,9 @@ export function CakePartTable({ data }: CakePartTableProps) {
     Record<string, boolean>
   >({});
   const { onOpen } = useModal();
+  const [openDeleteModal, setOpenDeleteModal] = React.useState(false);
+  const [isPending, startTransition] = React.useTransition();
+  const [openDeleteId, setOpenDeleteId] = React.useState<string | undefined>(undefined);
 
   const { data: cakeData, pageCount } = data;
 
@@ -74,6 +80,18 @@ export function CakePartTable({ data }: CakePartTableProps) {
       ...prev,
       [type]: !prev[type],
     }));
+  };
+
+  const handleDelete = async (id?: string) => {
+    startTransition(async () => {
+      const result = await deleteCakePart(id!);
+      if (result.success) {
+        setOpenDeleteModal(false);
+        toast.success("Đã xóa thành công");
+      } else {
+        toast.error("Đã xảy ra lỗi");
+      }
+    });
   };
 
   const columns = React.useMemo<ColumnDef<ICakePartType, unknown>[]>(
@@ -284,7 +302,10 @@ export function CakePartTable({ data }: CakePartTableProps) {
                                     variant="outline"
                                     size="icon"
                                     className="hover:bg-red-50 group"
-                                    onClick={() => {}}
+                                    onClick={() => {
+                                      setOpenDeleteId(item.id);
+                                      setOpenDeleteModal(true);
+                                    }}
                                   >
                                     <TrashIcon className="h-4 w-4 text-red-500 group-hover:scale-90 transition-transform" />
                                   </Button>
@@ -333,36 +354,45 @@ export function CakePartTable({ data }: CakePartTableProps) {
   };
 
   return (
-    <div className="space-y-4">
-      <Card className="shadow-sm border-indigo-100">
-        <div className="p-4 border-b border-indigo-100 flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-indigo-800">
-            Quản lý phần bánh
-          </h2>
-          <Button
-            variant="default"
-            size="sm"
-            className="bg-indigo-600 hover:bg-indigo-700 text-white"
-            onClick={() => onOpen("collectionCakePartModal", {})}
-          >
-            <PlusCircle className="h-4 w-4 mr-1" />
-            Thêm loại phần bánh mới
-          </Button>
-        </div>
-        <CardContent>
-          <ExpandDataTable
-            dataTable={dataTable}
-            columns={columns}
-            searchableColumns={[]}
-            filterableColumns={[]}
-            columnLabels={labels}
-            renderAdditionalRows={(row) =>
-              renderExpandedContent(row.original.type, row.original.items)
-            }
-          />
-        </CardContent>
-      </Card>
-    </div>
+    <>
+      <AlertModal
+        isOpen={openDeleteModal}
+        onClose={() => setOpenDeleteModal(false)}
+        onConfirm={() => handleDelete(openDeleteId)}
+        title="Xóa"
+        description="Bạn có chắc chắn với hành động này không?"
+      />
+      <div className="space-y-4">
+        <Card className="shadow-sm border-indigo-100">
+          <div className="p-4 border-b border-indigo-100 flex justify-between items-center">
+            <h2 className="text-xl font-semibold text-indigo-800">
+              Quản lý phần bánh
+            </h2>
+            <Button
+              variant="default"
+              size="sm"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white"
+              onClick={() => onOpen("collectionCakePartModal", {})}
+            >
+              <PlusCircle className="h-4 w-4 mr-1" />
+              Thêm loại phần bánh mới
+            </Button>
+          </div>
+          <CardContent>
+            <ExpandDataTable
+              dataTable={dataTable}
+              columns={columns}
+              searchableColumns={[]}
+              filterableColumns={[]}
+              columnLabels={labels}
+              renderAdditionalRows={(row) =>
+                renderExpandedContent(row.original.type, row.original.items)
+              }
+            />
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 }
 
