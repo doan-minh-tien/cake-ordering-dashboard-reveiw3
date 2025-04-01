@@ -22,17 +22,19 @@ import {
 } from "@/components/ui/sidebar";
 
 import { Route, routes } from "@/constants/sidebar-link";
+import { useRole } from "@/hooks/use-auth-session-client";
 
 export function NavMain() {
   const pathname = usePathname();
+  const { userRole, hasRole, hasAnyRole } = useRole();
 
   const isRouteVisible = (route: Route) => {
-    // Uncomment when role checking is implemented
-    // if (route.allowsRoles && !hasAnyRole(route.allowsRoles)) {
-    //   return false;
-    // }
+    if (route.allowsRoles && !hasAnyRole(route.allowsRoles)) {
+      return false;
+    }
     return true;
   };
+
 
   return (
     <SidebarGroup>

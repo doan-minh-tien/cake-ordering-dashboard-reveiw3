@@ -8,7 +8,7 @@ import { apiRequest } from "../api/api-handler/generic";
 interface UserJWT extends JWT {
   id: string;
   email: string;
-  roleName: string;
+  role: string;
   name: string;
   phone: string;
   gender: string;
@@ -76,7 +76,7 @@ export const authOptions: NextAuthConfig = {
         const {
           id,
           email,
-          roleName,
+          role,
           name,
           phone,
           gender,
@@ -88,7 +88,7 @@ export const authOptions: NextAuthConfig = {
         Object.assign(session.user, {
           id,
           email,
-          roleName,
+          role,
           name,
           phone,
           gender,

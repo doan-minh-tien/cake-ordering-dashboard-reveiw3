@@ -10,7 +10,6 @@ export async function middleware(request: NextRequest) {
     req: request, 
     secret: process.env.NEXTAUTH_SECRET
   });
-
   // Define public routes that don't require authentication
   const publicRoutes = ['/', '/api'];
   const isPublicPath = publicRoutes.some(route => 

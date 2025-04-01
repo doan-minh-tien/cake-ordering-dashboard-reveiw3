@@ -45,14 +45,14 @@ export const routes: Route[] = [
     icon: GoHome,
     activeIcon: GoHomeFill,
     href: "/dashboard",
-    allowsRoles: [UserRole.MANAGER, UserRole.REVIEWER, UserRole.ADMIN],
+    allowsRoles: [UserRole.BAKERY, UserRole.ADMIN],
   },
   {
     label: "Quản lý cửa hàng",
     icon: Store,
     activeIcon: Store,
     href: "/dashboard/bakeries",
-    allowsRoles: [UserRole.MANAGER],
+    allowsRoles: [ UserRole.ADMIN],
   },
   // {
   //   label: "Quản lý nhân sự",
@@ -87,7 +87,7 @@ export const routes: Route[] = [
     icon: MdMiscellaneousServices,
     activeIcon: MdMiscellaneousServices,
     isParent: true,
-    allowsRoles: [UserRole.MANAGER],
+    allowsRoles: [UserRole.BAKERY],
     children: [
       {
         label: "Danh sách bánh",
@@ -108,7 +108,7 @@ export const routes: Route[] = [
     icon: TbBrandBooking,
     activeIcon: TbBrandBooking,
     isParent: true,
-    allowsRoles: [UserRole.MANAGER, UserRole.REVIEWER],
+    allowsRoles: [UserRole.BAKERY],
     children: [
       {
         label: "Đơn đặt bánh",
@@ -145,21 +145,21 @@ export const routes: Route[] = [
     icon: GrTransaction,
     activeIcon: GrTransaction,
     href: "/dashboard/transactions",
-    allowsRoles: [UserRole.MANAGER],
+    allowsRoles: [UserRole.BAKERY, UserRole.ADMIN],
   },
     {
     label: "Danh sách khuyến mãi",
     icon: FaGifts,
     activeIcon: FaGifts,
     href: "/dashboard/promotions",
-    allowsRoles: [UserRole.MANAGER],
+    allowsRoles: [UserRole.BAKERY, UserRole.ADMIN],
   },
   {
     label: "Hỗ trợ khách hàng",
     icon: FaRegMoneyBillAlt,
     activeIcon: FaMoneyBillAlt,
     href: "/dashboard/refund",
-    allowsRoles: [UserRole.MANAGER],
+    allowsRoles: [UserRole.BAKERY, UserRole.ADMIN],
   },
   // {
   //   label: "Phản hồi",
@@ -172,5 +172,6 @@ export const routes: Route[] = [
     icon: Settings,
     activeIcon: Settings,
     href: "/dashboard/settings",
+    allowsRoles: [UserRole.BAKERY, UserRole.ADMIN],
   },
 ];
