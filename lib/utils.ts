@@ -12,3 +12,11 @@ export const formatCurrency = (amount: number): string => {
   }).format(amount);
 };
 
+export const formatPercentage = (value: number): string => {
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'percent',
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(value / 100);
+};
+
