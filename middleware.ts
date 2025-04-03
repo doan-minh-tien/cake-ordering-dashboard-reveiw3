@@ -5,34 +5,31 @@ import { getToken } from 'next-auth/jwt';
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
-  // Get token from user session
-  const token = await getToken({ 
-    req: request, 
-    secret: process.env.NEXTAUTH_SECRET
-  });
-  // Define public routes that don't require authentication
-  const publicRoutes = ['/', '/api'];
-  const isPublicPath = publicRoutes.some(route => 
-    pathname === route || pathname.startsWith('/api/')
-  );
+  // Bỏ qua các API routes và _next routes
+  if (pathname.startsWith('/api') || pathname.startsWith('/_next')) {
+    return NextResponse.next();
+  }
+  
+
   
   // Dashboard routes require authentication
   const isDashboardPath = pathname.startsWith('/dashboard');
+  const isRootPath = pathname === '/';
   
-  // If path is dashboard and user is not authenticated, redirect to login
-  if (isDashboardPath && !token) {
+  // Nếu đang ở trang dashboard nhưng chưa đăng nhập -> chuyển về trang chủ
+  if (isDashboardPath) {
     return NextResponse.redirect(new URL('/', request.url));
   }
   
-  // If user is logged in and trying to access login page, redirect to dashboard
-  if (isPublicPath && token && pathname === '/') {
+  // Nếu đã đăng nhập và đang ở trang chủ -> chuyển đến dashboard
+  if (isRootPath) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
   
+  // Cho phép truy cập tất cả các routes khác
   return NextResponse.next();
 }
 
-// Configure which routes to run middleware on
 export const config = {
-  matcher: ['/', '/dashboard/:path*']
-}; 
+  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
+};
