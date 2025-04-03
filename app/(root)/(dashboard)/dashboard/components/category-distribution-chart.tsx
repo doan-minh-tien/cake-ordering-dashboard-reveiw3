@@ -4,6 +4,7 @@ import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts'
 import { useTheme } from "next-themes"
+import { ChartPieIcon } from 'lucide-react'
 
 interface CategoryDataItem {
   name: string;
@@ -32,6 +33,7 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
       className="pie-chart-label"
       stroke="#000000"
       strokeWidth={0.3}
+      strokeOpacity={0.4}
     >
       {`${(percent * 100).toFixed(0)}%`}
     </text>
@@ -61,12 +63,16 @@ const CategoryDistributionChart = ({ data }: CategoryDistributionChartProps) => 
 
   // Get current theme to determine colors
   const { resolvedTheme } = useTheme();
-  const COLORS = resolvedTheme === 'dark' ? DARK_COLORS : LIGHT_COLORS;
+  const isDark = resolvedTheme === 'dark';
+  const COLORS = isDark ? DARK_COLORS : LIGHT_COLORS;
 
   return (
     <Card className="col-span-1 overflow-hidden border border-border/50 shadow-md hover:shadow-lg transition-shadow duration-300">
       <CardHeader className="bg-card/50 pb-2">
-        <CardTitle className="text-lg font-semibold text-foreground">Phân Bổ Theo Danh Mục</CardTitle>
+        <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
+          <ChartPieIcon className="h-5 w-5 text-amber-500 dark:text-amber-400" />
+          Phân Bổ Theo Danh Mục
+        </CardTitle>
         <CardDescription className="text-muted-foreground text-sm">
           Phân bổ đơn hàng theo các danh mục bánh
         </CardDescription>
@@ -78,7 +84,7 @@ const CategoryDistributionChart = ({ data }: CategoryDistributionChartProps) => 
               <defs>
                 {COLORS.map((color, index) => (
                   <filter key={`shadow-${index}`} id={`shadow-${index}`} x="-20%" y="-20%" width="140%" height="140%">
-                    <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor={color} floodOpacity="0.5" />
+                    <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor={color} floodOpacity={isDark ? 0.6 : 0.5} />
                   </filter>
                 ))}
               </defs>
@@ -95,7 +101,7 @@ const CategoryDistributionChart = ({ data }: CategoryDistributionChartProps) => 
                 nameKey="name"
                 paddingAngle={3}
                 strokeWidth={1}
-                stroke={resolvedTheme === 'dark' ? '#1f2937' : '#ffffff'}
+                stroke={isDark ? '#1f2937' : '#ffffff'}
               >
                 {data.map((entry, index) => (
                   <Cell 
@@ -103,7 +109,7 @@ const CategoryDistributionChart = ({ data }: CategoryDistributionChartProps) => 
                     fill={COLORS[index % COLORS.length]} 
                     style={{ 
                       filter: `url(#shadow-${index % COLORS.length})`,
-                      opacity: 0.9
+                      opacity: isDark ? 0.95 : 0.9
                     }}
                   />
                 ))}
@@ -114,12 +120,15 @@ const CategoryDistributionChart = ({ data }: CategoryDistributionChartProps) => 
                   color: 'var(--card-foreground)',
                   border: '1px solid var(--border)',
                   borderRadius: '8px',
-                  boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
+                  boxShadow: isDark ? '0 2px 10px rgba(0,0,0,0.5)' : '0 2px 10px rgba(0,0,0,0.2)'
                 }}
                 labelStyle={{ color: 'var(--foreground)', fontWeight: 'bold', marginBottom: '5px' }}
                 formatter={(value: number, name, props) => {
                   const percent = ((value / total) * 100).toFixed(1);
-                  return [`${value.toLocaleString('vi-VN')} (${percent}%)`, props.payload.name];
+                  return [
+                    <span key="value" className="text-foreground">{`${value.toLocaleString('vi-VN')} (${percent}%)`}</span>,
+                    <span key="name" className="text-foreground font-medium">{props.payload.name}</span>
+                  ];
                 }}
               />
               <Legend 
@@ -129,7 +138,7 @@ const CategoryDistributionChart = ({ data }: CategoryDistributionChartProps) => 
                 wrapperStyle={{ paddingTop: 20 }}
                 formatter={(value, entry, index) => (
                   <span style={{ 
-                    color: 'var(--foreground)', 
+                    color: isDark ? 'rgba(255,255,255,0.9)' : 'var(--foreground)', 
                     fontSize: '12px',
                     fontWeight: 'medium'
                   }}>

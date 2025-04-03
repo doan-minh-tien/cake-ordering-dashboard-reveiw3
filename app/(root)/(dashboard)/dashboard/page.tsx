@@ -18,13 +18,43 @@ const Shimmer = ({ className }: { className: string }) => (
 );
 
 const Dashboard = async () => {
+  const currentYear = new Date().getFullYear();
+  
   // Fetch data from API
-  const [overview, categoryDistribution, productPerformance, saleOverview] = await Promise.all([
+  const [overview, categoryDistribution, productPerformance, saleOverviewRevenue, saleOverviewOrders, saleOverviewCustomers] = await Promise.all([
     getOverview(),
     getCategoryDistribution(),
     getProductPerformance(),
-    getSaleOverview({type: "REVENUE", year: 2025}),
+    getSaleOverview({type: "REVENUE", year: currentYear}),
+    getSaleOverview({type: "ORDERS", year: currentYear}),
+    getSaleOverview({type: "CUSTOMERS", year: currentYear}),
   ]);
+
+  // Chuyển đổi mảng số sang định dạng phù hợp với biểu đồ
+  const months = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 
+                 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
+                 
+  const convertArrayToChartData = (dataArray: number[], shouldRound = false) => {
+    if (!Array.isArray(dataArray)) return [];
+    
+    return dataArray.map((value, index) => {
+      const processedValue = shouldRound ? Math.round(value || 0) : (value || 0);
+      const target = shouldRound ? Math.round((value || 0) * 1.2) : (value || 0) * 1.2;
+      
+      return {
+        month: months[index],
+        value: processedValue,
+        target: target
+      };
+    });
+  };
+
+  // Combine all sales data types
+  const combinedSalesData = {
+    REVENUE: convertArrayToChartData(saleOverviewRevenue?.data || [], false),
+    ORDERS: convertArrayToChartData(saleOverviewOrders?.data || [], true),
+    CUSTOMERS: convertArrayToChartData(saleOverviewCustomers?.data || [], true)
+  };
 
   // Format the data for charts with robust null checks
   const productData = productPerformance?.data?.cake_names && Array.isArray(productPerformance.data.cake_names) ? 
@@ -65,12 +95,12 @@ const Dashboard = async () => {
   };
 
   return (
-    <div className="min-h-screen space-y-8 p-6 pt-4 bg-gradient-to-br from-background via-background to-background/90">
-      <div className="mx-auto max-w-7xl">
+    <div className="min-h-screen p-6 pt-4 bg-gradient-to-br from-background via-background to-background/95 dark:from-background dark:to-background/90">
+      <div className="mx-auto max-w-7xl space-y-8">
         <DashboardHeader />
 
         {/* Stats Overview */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mt-8">
+        <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mt-8" aria-label="Statistics overview">
           <Suspense fallback={<Shimmer className="h-32" />}>
             <StatCard
               title="Tổng Doanh Thu"
@@ -107,24 +137,24 @@ const Dashboard = async () => {
               icon={<CakeIcon className={`h-5 w-5 ${iconColors.average}`} />}
             />
           </Suspense>
-        </div>
+        </section>
 
         {/* Sales Overview Chart */}
-        <div className="mt-8">
+        <section className="mt-8" aria-label="Sales overview chart">
           <Suspense fallback={<Shimmer className="h-[450px]" />}>
-            <SalesOverviewChart data={saleOverview?.data || {}} year={2025} />
+            <SalesOverviewChart data={combinedSalesData} year={currentYear} />
           </Suspense>
-        </div>
+        </section>
 
         {/* Product & Category Charts */}
-        <div className="grid gap-6 md:grid-cols-2 mt-8">
+        <section className="grid gap-6 md:grid-cols-2 mt-8" aria-label="Product and category distribution">
           <Suspense fallback={<Shimmer className="h-[380px]" />}>
             <ProductPerformanceChart data={fallbackProductData} />
           </Suspense>
           <Suspense fallback={<Shimmer className="h-[380px]" />}>
             <CategoryDistributionChart data={fallbackCategoryData} />
           </Suspense>
-        </div>
+        </section>
       </div>
     </div>
   )

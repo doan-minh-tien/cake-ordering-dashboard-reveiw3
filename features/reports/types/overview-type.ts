@@ -33,21 +33,6 @@ export type ICategoryDistributionType = {
     cake_quantities: number[];
 };
 
-export type SalesOverviewItemType = {
-    month: string;
-    value: number;
-    target?: number;
-};
 
-export type SalesOverviewType = {
-    REVENUE?: SalesOverviewItemType[];
-    ORDERS?: SalesOverviewItemType[];
-    CUSTOMERS?: SalesOverviewItemType[];
-};
-
-export type SalesOverviewParams = {
-    type: 'REVENUE' | 'ORDERS' | 'CUSTOMERS';
-    year: number;
-};
 
 
