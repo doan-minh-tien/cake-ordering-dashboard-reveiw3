@@ -12,6 +12,7 @@ interface UserJWT extends JWT {
   name: string;
   phone: string;
   gender: string;
+  wallet_id: string;
   entity: {
     id: string;
   }
@@ -80,6 +81,7 @@ export const authOptions: NextAuthConfig = {
           name,
           phone,
           gender,
+          wallet_id,
           avatarUrl,
           roleId,
           access_token  ,
@@ -92,6 +94,7 @@ export const authOptions: NextAuthConfig = {
           name,
           phone,
           gender,
+          wallet_id,
           avatarUrl,
           roleId,
           access_token,

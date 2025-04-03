@@ -13,6 +13,7 @@ declare module "next-auth" {
       name: string;
       phone:string;
       gender:string;
+      wallet_id: string;
       entity: {
         id: string;
       }
