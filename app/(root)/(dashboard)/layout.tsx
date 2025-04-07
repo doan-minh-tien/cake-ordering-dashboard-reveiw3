@@ -12,8 +12,7 @@ import { usePathname } from "next/navigation";
 import { breadcrumbTranslations } from "@/constants/bread-crumb-tranlate";
 import Breadcrumb from "@/components/shared/dashboard/bread-crumb";
 import { FeatureFlagsProvider } from "@/hooks/use-feature-flag";
-import { ModeToggleAnimate } from "@/components/shared/custom-ui/mode-toggle-animate";
-import UserProfileDropdown from "@/components/shared/dashboard/sidebar/user-header-profile";
+import TopRightHeaderButtons from "@/components/shared/dashboard/TopRightHeaderButtons";
 
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const pathName = usePathname();
@@ -42,9 +41,8 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
                 <Breadcrumb items={breadcrumbItems} />
               </div>
 
-              <div>
-                <ModeToggleAnimate />
-                <UserProfileDropdown/>
+              <div className="px-4">
+                <TopRightHeaderButtons />
               </div>
             </header>
 

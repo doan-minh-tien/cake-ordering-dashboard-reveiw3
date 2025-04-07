@@ -18,7 +18,7 @@ export type ModalType =
   | "collectionCakeExtraOptionModal"
   | "collectionCakeMessageModal"
   | "collectionCakePartModal"
-  ;
+  | "bakeryDetailModal";
 
 export interface ModalData {
   // user   -- example
@@ -28,6 +28,7 @@ export interface ModalData {
   cakeExtra?: ICakeExtraOptionItem;
   cakeMessage?: ICakeMessageOptionItem;
   cakePart?: ICakePartItem;
+  bakeryId?: string;
 }
 
 interface ModalStore {

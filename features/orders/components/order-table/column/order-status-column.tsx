@@ -23,7 +23,7 @@ export const orderStatusColumn = {
       switch (status.toUpperCase()) {
         case "PENDING":
           return {
-            label: "Chờ xử lý",
+            label: "Chờ thanh toán",
             bgColor: "bg-amber-100",
             textColor: "text-amber-700",
           };
@@ -48,14 +48,15 @@ export const orderStatusColumn = {
             textColor: "text-red-700",
           };
         case "DELIVERING":
+        case "SHIPPING":
           return {
-            label: "Đang giao",
+            label: "Vận chuyển",
             bgColor: "bg-purple-100",
             textColor: "text-purple-700",
           };
         case "READY_FOR_PICKUP":
           return {
-            label: "Sẵn sàng nhận",
+            label: "Sẵn sàng giao",
             bgColor: "bg-indigo-100",
             textColor: "text-indigo-700",
           };

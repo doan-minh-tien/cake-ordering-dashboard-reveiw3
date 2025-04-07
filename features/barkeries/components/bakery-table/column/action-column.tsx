@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
-import { Contact, Edit, Trash2, Eye } from "lucide-react";
+import { Contact, Edit, Trash2, Eye, CheckCircle } from "lucide-react";
 // import { IUser } from "@/features/users/types/user-type";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { useModal } from "@/hooks/use-modal";
@@ -26,6 +26,8 @@ interface ActionMenuProps {
 
 const ActionMenu = ({ row }: ActionMenuProps) => {
   const router = useRouter();
+  const { onOpen } = useModal();
+  const isPending = row.original.status === "PENDING";
 
   return (
     <DropdownMenu>
@@ -43,6 +45,18 @@ const ActionMenu = ({ row }: ActionMenuProps) => {
         align="end"
         className="w-[180px] border shadow-md rounded-md"
       >
+        {isPending && (
+          <DropdownMenuItem
+            onClick={() =>
+              onOpen("bakeryDetailModal", { bakeryId: row.original.id })
+            }
+            className="cursor-pointer hover:bg-accent/50 focus:bg-accent/50"
+          >
+            <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
+            <span>Xét duyệt</span>
+          </DropdownMenuItem>
+        )}
+
         <DropdownMenuItem
           onClick={() => router.push(`/dashboard/bakeries/${row.original.id}`)}
           className="cursor-pointer hover:bg-accent/50 focus:bg-accent/50"
@@ -50,8 +64,6 @@ const ActionMenu = ({ row }: ActionMenuProps) => {
           <Contact className="mr-2 h-4 w-4 text-green-500" />
           <span>Chi tiết</span>
         </DropdownMenuItem>
-
-       
       </DropdownMenuContent>
     </DropdownMenu>
   );

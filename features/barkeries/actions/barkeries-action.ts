@@ -1,9 +1,10 @@
 "use server";
 import { unstable_noStore as noStore, revalidatePath } from "next/cache";
 
-import { ApiListResponse, fetchListData, ApiSingleResponse,fetchSingleData, apiRequest } from "@/lib/api/api-handler/generic";
+import { ApiListResponse, fetchListData, ApiSingleResponse,fetchSingleData, apiRequest, Result } from "@/lib/api/api-handler/generic";
 import { SearchParams } from "@/types/table";
 import { IBarkery } from "../types/barkeries-type";
+import { axiosAuth } from "@/lib/api/api-interceptor/api";
 
 export const getBakeries = async (
   searchParams: SearchParams
@@ -36,3 +37,22 @@ export async function getBakery(
   return result.data;
 }
 
+
+
+export async function approveBakery(
+  params: string
+): Promise<Result<void>> {
+  noStore();
+
+  console.log(params);
+  const result = await apiRequest(() =>
+    axiosAuth.get(`/bakeries/${params}/approve`)
+  );
+  if (!result.success) {
+    return { success: false, error: result.error };
+  }
+
+  revalidatePath(`/dashboard/bakeries/${params}`);
+
+  return { success: true, data: undefined };
+}
