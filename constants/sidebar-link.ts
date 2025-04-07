@@ -52,7 +52,7 @@ export const routes: Route[] = [
     icon: Store,
     activeIcon: Store,
     href: "/dashboard/bakeries",
-    allowsRoles: [ UserRole.ADMIN],
+    allowsRoles: [UserRole.ADMIN],
   },
   // {
   //   label: "Quản lý nhân sự",
@@ -147,7 +147,7 @@ export const routes: Route[] = [
     href: "/dashboard/transactions",
     allowsRoles: [UserRole.BAKERY, UserRole.ADMIN],
   },
-    {
+  {
     label: "Danh sách khuyến mãi",
     icon: FaGifts,
     activeIcon: FaGifts,
@@ -158,7 +158,7 @@ export const routes: Route[] = [
     label: "Hỗ trợ khách hàng",
     icon: FaRegMoneyBillAlt,
     activeIcon: FaMoneyBillAlt,
-    href: "/dashboard/refund",
+    href: "/dashboard/reports",
     allowsRoles: [UserRole.BAKERY, UserRole.ADMIN],
   },
   // {
