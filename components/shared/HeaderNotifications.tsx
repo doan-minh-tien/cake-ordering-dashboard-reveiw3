@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import ButtonNotification from "@/features/notifications/components/ButtonNotification";
+import ButtonNotification from "@/components/shared/custom-ui/notification-component";
 import {
   DropdownMenu,
   DropdownMenuContent,
