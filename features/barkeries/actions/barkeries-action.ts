@@ -56,3 +56,21 @@ export async function approveBakery(
 
   return { success: true, data: undefined };
 }
+
+
+
+export async function banBakery(params: string): Promise<Result<void>> {
+  noStore();
+
+  console.log(params);
+  const result = await apiRequest(() =>
+    axiosAuth.get(`/bakeries/${params}/ban_action`)
+  );
+  if (!result.success) {
+    return { success: false, error: result.error };
+  }
+
+  revalidatePath(`/dashboard/bakeries/${params}`);
+
+  return { success: true, data: undefined };
+}
