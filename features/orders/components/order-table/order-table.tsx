@@ -15,23 +15,19 @@ import { toast } from "sonner";
 
 import { generateColumnLabels } from "@/components/data-table/column-label-mapping";
 
-
-import { fetchOrderTableColumnDefs} from "./order-table-column-def";
+import { fetchOrderTableColumnDefs } from "./order-table-column-def";
 import { useFeatureFlagsStore } from "@/hooks/use-feature-flag";
 // import { TasksTableFloatingBar } from "@/components/data-table/custom-table/data-table-floating-bar";
 import { getOrders } from "../../actions/order-action";
 import { IOrder } from "../../types/order-type";
 
 interface OrderTableProps {
-    orderPromise: ReturnType<typeof getOrders>;
+  orderPromise: ReturnType<typeof getOrders>;
 }
 
 export function OrderTable({ orderPromise }: OrderTableProps) {
-
   const featureFlags = useFeatureFlagsStore((state) => state.featureFlags);
-
   const enableFloatingBar = featureFlags.includes("floatingBar");
-
   const { data, pageCount } = React.use(orderPromise);
 
   const columns = React.useMemo<ColumnDef<IOrder, unknown>[]>(
@@ -40,54 +36,50 @@ export function OrderTable({ orderPromise }: OrderTableProps) {
   );
   const labels = generateColumnLabels(columns);
 
+  // Status options for filtering
+  const orderStatusOptions: Option[] = [
+    { label: "Chờ xử lý", value: "PENDING" },
+    { label: "Đang xử lý", value: "PROCESSING" },
+    { label: "Hoàn thành", value: "COMPLETED" },
+    { label: "Đã hủy", value: "CANCELLED" },
+    { label: "Đang giao", value: "DELIVERING" },
+    { label: "Sẵn sàng nhận", value: "READY_FOR_PICKUP" },
+  ];
 
-console.log(enableFloatingBar)
-  
+  // Payment type options for filtering
+  const paymentTypeOptions: Option[] = [
+    { label: "Tiền mặt", value: "CASH" },
+    { label: "Thẻ tín dụng", value: "CREDIT_CARD" },
+    { label: "Chuyển khoản", value: "BANK_TRANSFER" },
+    { label: "Ví điện tử", value: "E_WALLET" },
+  ];
 
   const searchableColumns: DataTableSearchableColumn<IOrder>[] = [
-    // {
-    //   id: "id",
-    //   title: "dịch vụ",
-    // },
+    {
+      id: "order_code",
+      title: "Mã đơn hàng",
+    },
+    {
+      id: "customer_id",
+      title: "Tên khách hàng",
+    },
+    {
+      id: "shipping_address",
+      title: "Địa chỉ giao hàng",
+    },
   ];
 
   const filterableColumns: DataTableFilterableColumn<IOrder>[] = [
-    // {
-    //   id: "name",
-    //   title: "Trạng thái",
-    //   options: Object.entries(ServiceTypeNames).map(([value, label]) => ({
-    //     label,
-    //     value,
-    //   })),
-    // },
-    // {
-    //   id: "id",
-    //   title: "Tiến Lọc",
-    //   options: Object.entries(ServiceTypeNames).map(([value, label]) => ({
-    //     label,
-    //     value,
-    //   })),
-    // },
-    // test mode
-    // {
-    //   id: "status",
-    //   title: "Trạng thái xử lý",
-    //   options: Object.entries(ProcessStatusNames).map(([value, label]) => ({
-    //     label,
-    //     value,
-    //   })),
-    // },
-    // test mode
-    // {
-    //   id: "status",
-    //   title: "Trạng thái đơn",
-    //   options: Object.entries(OrderStatusMap).reduce((acc, [value, label]) => {
-    //     if (typeof label === "string") {
-    //       acc.push({ label, value });
-    //     }
-    //     return acc;
-    //   }, [] as Option[]),
-    // },
+    {
+      id: "order_status",
+      title: "Trạng thái đơn hàng",
+      options: orderStatusOptions,
+    },
+    {
+      id: "payment_type",
+      title: "Phương thức thanh toán",
+      options: paymentTypeOptions,
+    },
   ];
 
   const { dataTable } = useDataTable({

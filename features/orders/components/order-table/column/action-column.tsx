@@ -5,21 +5,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DotsHorizontalIcon } from "@radix-ui/react-icons";
-import { Contact, Edit, Trash2, Eye } from "lucide-react";
-// import { IUser } from "@/features/users/types/user-type";
+import { MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
 import { ColumnDef, Row } from "@tanstack/react-table";
-import { useModal } from "@/hooks/use-modal";
-import { useSession } from "next-auth/react";
-import { IOrder } from "@/features/orders/types/order-type";
 import { useRouter } from "nextjs-toploader/app";
+import { IOrder } from "@/features/orders/types/order-type";
+
 interface ActionMenuProps {
   row: Row<IOrder>;
 }
@@ -28,32 +20,37 @@ const ActionMenu = ({ row }: ActionMenuProps) => {
   const router = useRouter();
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          aria-label="Open actions menu"
-          variant="ghost"
-          className="flex size-8 p-0 hover:bg-accent/50 focus:ring-2 focus:ring-primary/30"
-        >
-          <DotsHorizontalIcon className="size-4" aria-hidden="true" />
-        </Button>
-      </DropdownMenuTrigger>
+    <div className="flex justify-end">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            aria-label="Open actions menu"
+            variant="ghost"
+            className="h-8 w-8 p-0"
+          >
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
 
-      <DropdownMenuContent
-        align="end"
-        className="w-[180px] border shadow-md rounded-md"
-      >
-        <DropdownMenuItem
-          onClick={() => router.push(`/dashboard/orders/${row.original.id}`)}
-          className="cursor-pointer hover:bg-accent/50 focus:bg-accent/50"
-        >
-          <Contact className="mr-2 h-4 w-4 text-green-500" />
-          <span>Chi tiết</span>
-        </DropdownMenuItem>
-
-       
-      </DropdownMenuContent>
-    </DropdownMenu>
+        <DropdownMenuContent align="end" className="w-[160px]">
+          <DropdownMenuItem
+            onClick={() => router.push(`/dashboard/orders/${row.original.id}`)}
+            className="cursor-pointer"
+          >
+            <Eye className="mr-2 h-4 w-4" />
+            <span>Xem chi tiết</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer">
+            <Edit className="mr-2 h-4 w-4" />
+            <span>Chỉnh sửa</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive">
+            <Trash2 className="mr-2 h-4 w-4" />
+            <span>Xóa</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 };
 
