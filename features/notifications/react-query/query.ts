@@ -1,5 +1,12 @@
-import { getNotifications } from "../actions/notification-action";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import {
+  getNotifications,
+  markAllNotificationsAsRead,
+} from "../actions/notification-action";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { SearchParams } from "@/types/table";
 
 export const useInfiniteNotifications = (pageSize = 10) => {
@@ -35,5 +42,17 @@ export const useInfiniteNotifications = (pageSize = 10) => {
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false,
+  });
+};
+
+export const useMarkAllNotificationsAsRead = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: markAllNotificationsAsRead,
+    onSuccess: () => {
+      // Invalidate the notifications query to refetch the data
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
   });
 };
