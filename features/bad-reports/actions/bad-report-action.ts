@@ -10,19 +10,25 @@ import {
   Result,
 } from "@/lib/api/api-handler/generic";
 import { SearchParams } from "@/types/table";
-import { IBadReport } from "../types/bad-report";
+import {
+  IBadReport,
+  IAdminBadReportsResponse,
+  IBadReportStatistics,
+  IUpdateBadReportStatusParams,
+  IRespondToBadReportParams,
+  IAssignBadReportParams,
+  IUpdateBadReportPriorityParams,
+} from "../types/bad-report-type";
 import { axiosAuth } from "@/lib/api/api-interceptor/api";
 import { auth } from "@/lib/next-auth/auth";
 
+// Action dành cho Bakery
 export const getBadReports = async (
   searchParams: SearchParams
 ): Promise<ApiListResponse<IBadReport>> => {
   noStore();
   const session = await auth();
-  const result = await fetchListData<IBadReport>(
-    `/bakeries/${session?.user.entity.id}/reports`,
-    searchParams
-  );
+  const result = await fetchListData<IBadReport>(`/reports`, searchParams);
 
   if (!result.success) {
     console.error("Failed to fetch list IBadReport:", result.error);
@@ -32,3 +38,18 @@ export const getBadReports = async (
   return result.data;
 };
 
+// Lấy chi tiết báo cáo
+export const getBadReportById = async (
+  reportId: string
+): Promise<ApiSingleResponse<IBadReport>> => {
+  noStore();
+  const session = await auth();
+  const result = await fetchSingleData<IBadReport>(`/reports/${reportId}`);
+
+  if (!result.success) {
+    console.error(`Failed to fetch bad report ${reportId}:`, result.error);
+    return { data: null, error: result.error };
+  }
+
+  return result.data;
+};

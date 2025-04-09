@@ -1,10 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  useInfiniteNotifications,
-  useMarkAllNotificationsAsRead,
-} from "@/features/notifications/react-query/query";
+import { useInfiniteNotifications } from "@/features/notifications/react-query/query";
 import {
   INotification,
   NotificationType,
@@ -47,8 +44,6 @@ export default function NotificationsList() {
     error,
   } = useInfiniteNotifications(10);
 
-  const markAllAsRead = useMarkAllNotificationsAsRead();
-
   const getNotificationTypeColor = (type: NotificationType) => {
     const colors: Record<NotificationType, string> = {
       NEW_ORDER: "bg-blue-500 dark:bg-blue-600",
@@ -64,22 +59,6 @@ export default function NotificationsList() {
   const unreadCount = allNotifications.filter(
     (notification) => !notification.is_read
   ).length;
-
-  const handleMarkAllAsRead = async () => {
-    try {
-      await markAllAsRead.mutateAsync();
-      toast({
-        title: "Thành công",
-        description: "Tất cả thông báo đã được đánh dấu là đã đọc",
-      });
-    } catch (error) {
-      toast({
-        title: "Lỗi",
-        description: "Không thể đánh dấu tất cả thông báo đã đọc",
-        variant: "destructive",
-      });
-    }
-  };
 
   const filteredNotifications = allNotifications.filter((notification) => {
     const matchesSearch =
@@ -131,19 +110,6 @@ export default function NotificationsList() {
               <SelectItem value="read">Đã đọc</SelectItem>
             </SelectContent>
           </Select>
-
-          {unreadCount > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-1"
-              onClick={handleMarkAllAsRead}
-              disabled={markAllAsRead.isPending}
-            >
-              <CheckCheck className="h-4 w-4" />
-              <span>Đánh dấu tất cả đã đọc</span>
-            </Button>
-          )}
         </div>
       </div>
 
