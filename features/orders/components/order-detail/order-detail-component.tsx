@@ -402,13 +402,15 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
               {statusInfo.label}
             </span>
           </div>
-          <p className="text-muted-foreground mt-1 flex items-center gap-1">
-            <Clock size={14} />
-            Đặt ngày:{" "}
-            <span className="font-medium text-foreground ml-1">
-              {formatDate(order.paid_at)}
-            </span>
-          </p>
+          {order.order_status.toUpperCase() !== "PENDING" && (
+            <p className="text-muted-foreground mt-1 flex items-center gap-1">
+              <Clock size={14} />
+              Đặt ngày:{" "}
+              <span className="font-medium text-foreground ml-1">
+                {formatDate(order.paid_at)}
+              </span>
+            </p>
+          )}
         </CardHeader>
       </Card>
 
