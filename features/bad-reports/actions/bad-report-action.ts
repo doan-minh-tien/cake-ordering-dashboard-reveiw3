@@ -10,15 +10,7 @@ import {
   Result,
 } from "@/lib/api/api-handler/generic";
 import { SearchParams } from "@/types/table";
-import {
-  IBadReport,
-  IAdminBadReportsResponse,
-  IBadReportStatistics,
-  IUpdateBadReportStatusParams,
-  IRespondToBadReportParams,
-  IAssignBadReportParams,
-  IUpdateBadReportPriorityParams,
-} from "../types/bad-report-type";
+import { IBadReport } from "../types/bad-report-type";
 import { axiosAuth } from "@/lib/api/api-interceptor/api";
 import { auth } from "@/lib/next-auth/auth";
 
