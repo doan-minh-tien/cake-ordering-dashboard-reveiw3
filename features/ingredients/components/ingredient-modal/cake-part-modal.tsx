@@ -67,13 +67,20 @@ import {
   uploadCakeImage,
 } from "../../../cakes/actions/cake-image-action";
 
-const TYPE_OPTIONS = [
-  "Goo",
-  "Icing",
-  "Filling",
-  "Sponge",
-  "Size",
-];
+const TYPE_OPTIONS = ["Goo", "Icing", "Filling", "Sponge", "Size"];
+
+// Tên hiển thị tiếng Việt cho các loại phần bánh
+const getTypeDisplayName = (type: string): string => {
+  const typeNameMap: Record<string, string> = {
+    Goo: "Kem Nhân",
+    Icing: "Lớp Phủ",
+    Filling: "Nhân Bánh",
+    Sponge: "Tầng Bánh",
+    Size: "Kích Thước",
+  };
+
+  return typeNameMap[type] || type;
+};
 
 const cakePartSchema = z.object({
   name: z.string().min(2, { message: "Tối thiểu 2 ký tự" }),
@@ -82,7 +89,7 @@ const cakePartSchema = z.object({
   is_default: z.boolean().default(false),
   description: z.string().optional(),
   image_id: z.string().optional(),
-  type: z.string().min(1, { message: "Chọn loại trang trí" }),
+  type: z.string().min(1, { message: "Chọn loại phần bánh" }),
 });
 
 const CakePartModal = () => {
@@ -93,7 +100,7 @@ const CakePartModal = () => {
   const { COLOR_OPTIONS, getColorValue } = useColorSelection(
     data?.cakePart?.color
   );
-  const {data: session} = useSession();
+  const { data: session } = useSession();
 
   // Image handling states
   const [imageLoading, setImageLoading] = useState(false);
@@ -175,17 +182,17 @@ const CakePartModal = () => {
       const result = await uploadCakeImage(base64, file.name, file.type);
 
       if (!result.success) {
-        toast.error(result.error || "Failed to upload image");
+        toast.error(result.error || "Lỗi khi tải lên hình ảnh");
         return;
       }
 
       setUploadedFileUrl(result.data.file_url);
       form.setValue("image_id", result.data.id);
 
-      toast.success("Image uploaded successfully");
+      toast.success("Tải lên hình ảnh thành công");
     } catch (error: any) {
-      toast.error("Failed to upload image");
-      console.error("Image upload error:", error);
+      toast.error("Lỗi khi tải lên hình ảnh");
+      console.error("Lỗi tải lên hình ảnh:", error);
     } finally {
       setImageLoading(false);
     }
@@ -203,19 +210,16 @@ const CakePartModal = () => {
   const onSubmit = async (values: z.infer<typeof cakePartSchema>) => {
     try {
       startTransition(async () => {
-        const result = await updateCakePart(
-          values,
-          data?.cakePart?.id!
-        );
+        const result = await updateCakePart(values, data?.cakePart?.id!);
         if (!result.success) {
           toast.error(result.error);
         } else {
-          toast.success("Cập nhật part thành công !");
+          toast.success("Cập nhật phần bánh thành công!");
           onClose();
         }
       });
     } catch (error) {
-      console.error("Error updating cake part:", error);
+      console.error("Lỗi cập nhật phần bánh:", error);
     }
   };
 
@@ -232,7 +236,7 @@ const CakePartModal = () => {
         <DialogHeader className="pb-2">
           <DialogTitle className="text-2xl font-bold flex items-center gap-2">
             <CakeSlice className="w-6 h-6" />
-            Cập Nhật Part
+            Cập Nhật Phần Bánh
           </DialogTitle>
         </DialogHeader>
 
@@ -246,7 +250,7 @@ const CakePartModal = () => {
                 render={({ field }) => (
                   <FormItem className="col-span-2">
                     <FormLabel className="flex items-center gap-2 text-sm">
-                      Hình Ảnh Part
+                      Hình Ảnh Phần Bánh
                     </FormLabel>
                     <FormControl>
                       <div className="flex flex-col gap-3">
@@ -272,7 +276,9 @@ const CakePartModal = () => {
                           ) : (
                             <div className="flex flex-col items-center justify-center text-gray-400 text-center px-2">
                               <ImagePlus className="h-8 w-8 mb-1" />
-                              <p className="text-xs">Upload part image</p>
+                              <p className="text-xs">
+                                Tải lên hình ảnh phần bánh
+                              </p>
                             </div>
                           )}
 
@@ -289,7 +295,9 @@ const CakePartModal = () => {
                               disabled={imageLoading || fetchingImage}
                               className="text-xs"
                             >
-                              {imageLoading ? "Uploading..." : "Change Image"}
+                              {imageLoading
+                                ? "Đang tải lên..."
+                                : "Thay đổi hình ảnh"}
                             </Button>
                           </div>
                         </div>
@@ -316,7 +324,7 @@ const CakePartModal = () => {
                   <FormItem>
                     <FormLabel className="flex items-center gap-2 text-sm">
                       <CakeSlice className="w-4 h-4 text-primary" />
-                      Tên part
+                      Tên phần bánh
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -448,7 +456,7 @@ const CakePartModal = () => {
                   <FormItem>
                     <FormLabel className="flex items-center gap-2 text-sm">
                       <CakeSlice className="w-4 h-4 text-primary" />
-                      Loại part
+                      Loại phần bánh
                     </FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
@@ -459,7 +467,7 @@ const CakePartModal = () => {
                       <SelectContent>
                         {TYPE_OPTIONS.map((type) => (
                           <SelectItem key={type} value={type}>
-                            {type}
+                            {getTypeDisplayName(type)}
                           </SelectItem>
                         ))}
                       </SelectContent>

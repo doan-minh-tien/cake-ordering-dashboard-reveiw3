@@ -43,7 +43,7 @@ import { deleteCakeExtraOption } from "@/features/ingredients/actions/cake-extra
 import { toast } from "sonner";
 
 // Utility function to format VND
-const formatVND = (price: number) => 
+const formatVND = (price: number) =>
   new Intl.NumberFormat("vi-VN", {
     style: "currency",
     currency: "VND",
@@ -60,16 +60,30 @@ const getItemIcon = (type: string) => {
   return iconMap[type as keyof typeof iconMap] || iconMap["default"];
 };
 
+// Tên hiển thị tiếng Việt cho các loại tùy chọn thêm
+const getTypeDisplayName = (type: string): string => {
+  const typeNameMap: Record<string, string> = {
+    Candles: "Nến",
+    CakeBoard: "Đế Bánh",
+  };
+
+  return typeNameMap[type] || type;
+};
+
 interface CakeExtraOptionTableProps {
   data: ApiListResponse<ICakeExtraOptionType>;
 }
 
 export function CakeExtraOptionTable({ data }: CakeExtraOptionTableProps) {
-  const [expandedRows, setExpandedRows] = React.useState<Record<string, boolean>>({});
+  const [expandedRows, setExpandedRows] = React.useState<
+    Record<string, boolean>
+  >({});
   const { onOpen } = useModal();
   const [openDeleteModal, setOpenDeleteModal] = React.useState(false);
   const [isPending, startTransition] = React.useTransition();
-  const [openDeleteId, setOpenDeleteId] = React.useState<string | undefined>(undefined);
+  const [openDeleteId, setOpenDeleteId] = React.useState<string | undefined>(
+    undefined
+  );
 
   const { data: cakeData, pageCount } = data;
 
@@ -98,7 +112,7 @@ export function CakeExtraOptionTable({ data }: CakeExtraOptionTableProps) {
         accessorKey: "type",
         header: "Loại Tùy Chọn Thêm",
         cell: ({ row }) => (
-          <motion.div 
+          <motion.div
             className="flex items-center space-x-3"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -122,7 +136,7 @@ export function CakeExtraOptionTable({ data }: CakeExtraOptionTableProps) {
               variant="secondary"
               className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700"
             >
-              {row.original.type}
+              {getTypeDisplayName(row.original.type)}
             </Badge>
           </motion.div>
         ),
@@ -183,7 +197,7 @@ export function CakeExtraOptionTable({ data }: CakeExtraOptionTableProps) {
         <TableCell colSpan={columns.length} className="p-0">
           <motion.div
             initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
+            animate={{ opacity: 1, height: "auto" }}
             transition={{ duration: 0.3 }}
           >
             <Card className="m-2 rounded-lg overflow-hidden shadow-sm">
@@ -192,7 +206,7 @@ export function CakeExtraOptionTable({ data }: CakeExtraOptionTableProps) {
                   {React.createElement(getItemIcon(type), {
                     className: "h-5 w-5 mr-2",
                   })}
-                  Danh sách {type.toLowerCase()}
+                  Danh sách {getTypeDisplayName(type).toLowerCase()}
                 </h3>
               </div>
               <Table>

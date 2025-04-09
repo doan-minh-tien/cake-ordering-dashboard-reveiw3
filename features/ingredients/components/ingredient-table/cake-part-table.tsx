@@ -60,6 +60,19 @@ const getItemIcon = (type: string) => {
   return iconMap[type as keyof typeof iconMap] || iconMap["default"];
 };
 
+// Tên hiển thị tiếng Việt cho các loại phần bánh
+const getTypeDisplayName = (type: string): string => {
+  const typeNameMap: Record<string, string> = {
+    Goo: "Kem Nhân",
+    Icing: "Lớp Phủ",
+    Filling: "Nhân Bánh",
+    Sponge: "Tầng Bánh",
+    Size: "Kích Thước",
+  };
+
+  return typeNameMap[type] || type;
+};
+
 interface CakePartTableProps {
   data: ApiListResponse<ICakePartType>;
 }
@@ -71,7 +84,9 @@ export function CakePartTable({ data }: CakePartTableProps) {
   const { onOpen } = useModal();
   const [openDeleteModal, setOpenDeleteModal] = React.useState(false);
   const [isPending, startTransition] = React.useTransition();
-  const [openDeleteId, setOpenDeleteId] = React.useState<string | undefined>(undefined);
+  const [openDeleteId, setOpenDeleteId] = React.useState<string | undefined>(
+    undefined
+  );
 
   const { data: cakeData, pageCount } = data;
 
@@ -124,7 +139,7 @@ export function CakePartTable({ data }: CakePartTableProps) {
               variant="secondary"
               className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700"
             >
-              {row.original.type}
+              {getTypeDisplayName(row.original.type)}
             </Badge>
           </motion.div>
         ),
@@ -194,7 +209,7 @@ export function CakePartTable({ data }: CakePartTableProps) {
                   {React.createElement(getItemIcon(type), {
                     className: "h-5 w-5 mr-2",
                   })}
-                  Danh sách {type.toLowerCase()}
+                  Danh sách {getTypeDisplayName(type).toLowerCase()}
                 </h3>
               </div>
               <Table>

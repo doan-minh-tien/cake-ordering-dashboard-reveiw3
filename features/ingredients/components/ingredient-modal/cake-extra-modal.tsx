@@ -68,6 +68,16 @@ import {
 
 const TYPE_OPTIONS = ["Candles", "CakeBoard"];
 
+// Tên hiển thị tiếng Việt cho các loại tùy chọn thêm
+const getTypeDisplayName = (type: string): string => {
+  const typeNameMap: Record<string, string> = {
+    Candles: "Nến",
+    CakeBoard: "Đế Bánh",
+  };
+
+  return typeNameMap[type] || type;
+};
+
 const cakeExtraSchema = z.object({
   name: z.string().min(2, { message: "Tối thiểu 2 ký tự" }),
   price: z.coerce.number().min(0, { message: "Giá không hợp lệ" }),
@@ -451,7 +461,7 @@ const CakeExtraModal = () => {
                       <SelectContent>
                         {TYPE_OPTIONS.map((type) => (
                           <SelectItem key={type} value={type}>
-                            {type}
+                            {getTypeDisplayName(type)}
                           </SelectItem>
                         ))}
                       </SelectContent>

@@ -58,12 +58,18 @@ import {
 import { cn } from "@/lib/utils";
 import { updateCakeMessage } from "../../actions/cake-message-option-action";
 
-const TYPE_OPTIONS = [
-  "PLAQUE_COLOUR",
-  "PIPING_COLOUR",
-  "TEXT"
+const TYPE_OPTIONS = ["PLAQUE_COLOUR", "PIPING_COLOUR", "TEXT"];
 
-];
+// Tên hiển thị tiếng Việt cho các loại tin nhắn
+const getTypeDisplayName = (type: string): string => {
+  const typeNameMap: Record<string, string> = {
+    PLAQUE_COLOUR: "Màu Thông Điệp",
+    PIPING_COLOUR: "Màu Viền",
+    TEXT: "Nội Dung",
+  };
+
+  return typeNameMap[type] || type;
+};
 
 const cakeMessageSchema = z.object({
   name: z.string().min(2, { message: "Tối thiểu 2 ký tự" }),
@@ -118,13 +124,13 @@ const CakeMessageOptionModal = () => {
         if (!result.success) {
           toast.error(result.error);
         } else {
-          toast.success("Cập nhật message thành công !");
+          toast.success("Cập nhật thông điệp thành công !");
         }
       });
 
       onClose();
     } catch (error) {
-      console.error("Error updating cake message:", error);
+      console.error("Lỗi cập nhật thông điệp:", error);
     }
   };
 
@@ -161,8 +167,6 @@ const CakeMessageOptionModal = () => {
                   </FormItem>
                 )}
               />
-
- 
 
               <FormField
                 control={form.control}
@@ -263,7 +267,7 @@ const CakeMessageOptionModal = () => {
                       <SelectContent>
                         {TYPE_OPTIONS.map((type) => (
                           <SelectItem key={type} value={type}>
-                            {type}
+                            {getTypeDisplayName(type)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -273,8 +277,6 @@ const CakeMessageOptionModal = () => {
                 )}
               />
             </div>
-
-            
 
             <DialogFooter className="flex justify-end gap-2">
               <Button

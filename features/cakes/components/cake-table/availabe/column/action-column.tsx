@@ -35,7 +35,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { deleteCakeWithFeedback } from "@/features/cakes/actions/cake-action";
+import { deleteCake } from "@/features/cakes/actions/cake-action";
 
 interface ActionMenuProps {
   row: Row<ICake>;
@@ -56,21 +56,24 @@ const ActionMenu = ({ row }: ActionMenuProps) => {
     router.push(`/dashboard/cakes/${cakeId}`);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     startTransition(async () => {
       try {
-        // Use the new action function that handles API call and feedback
-        const result = await deleteCakeWithFeedback(cakeId, cakeName);
+        const result = await deleteCake(cakeId);
 
-        if (result.success && result.data) {
-          toast.success(result.data.message);
+        if (result.success) {
+          toast.success(`Đã xóa bánh "${cakeName}" thành công`);
           router.refresh();
-        } else if (!result.success) {
-          toast.error(result.error || "Có lỗi xảy ra khi xóa bánh");
+        } else {
+          toast.error(
+            `Lỗi khi xóa bánh: ${
+              result.error || "Đã xảy ra lỗi không xác định"
+            }`
+          );
         }
       } catch (error) {
-        console.error("Error in delete confirmation:", error);
-        toast.error("Đã xảy ra lỗi không mong muốn. Vui lòng thử lại sau.");
+        console.error("Error deleting cake:", error);
+        toast.error("Đã xảy ra lỗi khi xóa bánh. Vui lòng thử lại sau.");
       } finally {
         setIsDeleteDialogOpen(false);
       }

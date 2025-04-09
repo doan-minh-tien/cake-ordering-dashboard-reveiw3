@@ -59,6 +59,20 @@ const getItemIcon = (type: string) => {
   return iconMap[type as keyof typeof iconMap] || iconMap["default"];
 };
 
+// Tên hiển thị tiếng Việt cho các loại trang trí
+const getTypeDisplayName = (type: string): string => {
+  const typeNameMap: Record<string, string> = {
+    Sprinkles: "Hạt Rắc",
+    Decoration: "Trang Trí",
+    Bling: "Đồ Trang Trí Lấp Lánh",
+    TallSkirt: "Phần Kem Phía Trên",
+    Drip: "Sốt Kem",
+    ShortSkirt: "Phần Kem Phía Dưới",
+  };
+
+  return typeNameMap[type] || type;
+};
+
 interface CakeDecorationTableProps {
   data: ApiListResponse<ICakeDecorationType>;
 }
@@ -123,7 +137,7 @@ export function CakeDecorationTable({ data }: CakeDecorationTableProps) {
               variant="secondary"
               className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700"
             >
-              {row.original.type}
+              {getTypeDisplayName(row.original.type)}
             </Badge>
           </motion.div>
         ),
@@ -193,7 +207,7 @@ export function CakeDecorationTable({ data }: CakeDecorationTableProps) {
                   {React.createElement(getItemIcon(type), {
                     className: "h-5 w-5 mr-2",
                   })}
-                  Danh sách {type.toLowerCase()}
+                  Danh sách {getTypeDisplayName(type).toLowerCase()}
                 </h3>
               </div>
               <Table>

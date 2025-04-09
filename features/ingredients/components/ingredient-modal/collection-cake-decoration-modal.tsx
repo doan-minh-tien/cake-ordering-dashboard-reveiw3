@@ -73,6 +73,20 @@ import {
 } from "../../../cakes/actions/cake-image-action";
 import { Checkbox } from "@/components/ui/checkbox";
 
+// Tên hiển thị tiếng Việt cho các loại trang trí
+const getTypeDisplayName = (type: string): string => {
+  const typeNameMap: Record<string, string> = {
+    Sprinkles: "Hạt Rắc",
+    Decoration: "Trang Trí",
+    Bling: "Đồ Trang Trí Lấp Lánh",
+    TallSkirt: "Váy Bánh Cao",
+    Drip: "Dòng Chảy",
+    ShortSkirt: "Váy Bánh Ngắn",
+  };
+
+  return typeNameMap[type] || type;
+};
+
 const cakeDecorationItemSchema = z.object({
   name: z.string().min(2, { message: "Tối thiểu 2 ký tự" }),
   price: z.coerce.number().min(0, { message: "Giá không hợp lệ" }),
@@ -175,7 +189,7 @@ const CollectionCakeDecorationModal = () => {
       setFetchingImage(true);
       const result = await getCakeImageById(imageId);
       console.log("Fetch image result:", result);
-      
+
       if (result.success && result.data) {
         // Trực tiếp lấy file_url từ kết quả API
         setUploadedFileUrl(result.data.file_url);
@@ -214,7 +228,7 @@ const CollectionCakeDecorationModal = () => {
       // Lưu URL từ kết quả API
       setUploadedFileUrl(result.data.file_url);
       console.log("Uploaded image URL:", result.data.file_url);
-      
+
       // Cập nhật image_id cho item hiện tại
       updateCurrentItem("image_id", result.data.id);
 
@@ -723,7 +737,9 @@ const CollectionCakeDecorationModal = () => {
                   <SelectValue placeholder="Chọn loại" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={itemType}>{itemType}</SelectItem>
+                  <SelectItem value={itemType}>
+                    {getTypeDisplayName(itemType)}
+                  </SelectItem>
                 </SelectContent>
               </Select>
               {isFieldTouched("type") && !validation.typeValid && (
@@ -812,7 +828,7 @@ const CollectionCakeDecorationModal = () => {
                         {item.name || "Chưa có tên"}
                       </div>
                       <div className="text-xs text-gray-500">
-                        {item.type} -{" "}
+                        {getTypeDisplayName(item.type)} -{" "}
                         {new Intl.NumberFormat("vi-VN").format(item.price)}đ
                         {item.is_default && " - Mặc định"}
                       </div>

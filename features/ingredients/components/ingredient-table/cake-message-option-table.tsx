@@ -54,16 +54,31 @@ const getItemIcon = (type: string) => {
   return iconMap[type as keyof typeof iconMap] || iconMap["default"];
 };
 
+// Tên hiển thị tiếng Việt cho các loại tin nhắn
+const getTypeDisplayName = (type: string): string => {
+  const typeNameMap: Record<string, string> = {
+    PLAQUE_COLOUR: "Màu Bảng Tin",
+    PIPING_COLOUR: "Màu Viền",
+    TEXT: "Nội Dung",
+  };
+
+  return typeNameMap[type] || type;
+};
+
 interface CakeMessageOptionTableProps {
   data: ApiListResponse<ICakeMessageOptionType>;
 }
 
 export function CakeMessageOptionTable({ data }: CakeMessageOptionTableProps) {
-  const [expandedRows, setExpandedRows] = React.useState<Record<string, boolean>>({});
+  const [expandedRows, setExpandedRows] = React.useState<
+    Record<string, boolean>
+  >({});
   const { onOpen } = useModal();
   const [openDeleteModal, setOpenDeleteModal] = React.useState(false);
   const [isPending, startTransition] = React.useTransition();
-  const [openDeleteId, setOpenDeleteId] = React.useState<string | undefined>(undefined);
+  const [openDeleteId, setOpenDeleteId] = React.useState<string | undefined>(
+    undefined
+  );
 
   const { data: cakeData, pageCount } = data;
 
@@ -92,7 +107,7 @@ export function CakeMessageOptionTable({ data }: CakeMessageOptionTableProps) {
         accessorKey: "type",
         header: "Tùy Chọn Tin Nhắn",
         cell: ({ row }) => (
-          <motion.div 
+          <motion.div
             className="flex items-center space-x-3"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -116,7 +131,7 @@ export function CakeMessageOptionTable({ data }: CakeMessageOptionTableProps) {
               variant="secondary"
               className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700"
             >
-              {row.original.type}
+              {getTypeDisplayName(row.original.type)}
             </Badge>
           </motion.div>
         ),
@@ -128,7 +143,9 @@ export function CakeMessageOptionTable({ data }: CakeMessageOptionTableProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 text-gray-600">
               <TagIcon className="h-4 w-4 text-indigo-500" />
-              <span className="font-medium">{row.original.items.length} danh mục</span>
+              <span className="font-medium">
+                {row.original.items.length} danh mục
+              </span>
             </div>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -175,7 +192,7 @@ export function CakeMessageOptionTable({ data }: CakeMessageOptionTableProps) {
         <TableCell colSpan={columns.length} className="p-0">
           <motion.div
             initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
+            animate={{ opacity: 1, height: "auto" }}
             transition={{ duration: 0.3 }}
           >
             <Card className="m-2 rounded-lg overflow-hidden shadow-sm">
@@ -184,17 +201,22 @@ export function CakeMessageOptionTable({ data }: CakeMessageOptionTableProps) {
                   {React.createElement(getItemIcon(type), {
                     className: "h-5 w-5 mr-2",
                   })}
-                  Danh sách {type.toLowerCase()}
+                  Danh sách {getTypeDisplayName(type).toLowerCase()}
                 </h3>
               </div>
               <Table>
                 <TableHeader className="bg-indigo-50/50 dark:bg-indigo-900/10">
                   <TableRow>
-                    {["Nội dung", "Màu Sắc", "Mặc Định", "Thao Tác"].map((header) => (
-                      <TableHead key={header} className="text-indigo-700 dark:text-indigo-300">
-                        {header}
-                      </TableHead>
-                    ))}
+                    {["Nội dung", "Màu Sắc", "Mặc Định", "Thao Tác"].map(
+                      (header) => (
+                        <TableHead
+                          key={header}
+                          className="text-indigo-700 dark:text-indigo-300"
+                        >
+                          {header}
+                        </TableHead>
+                      )
+                    )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -206,9 +228,9 @@ export function CakeMessageOptionTable({ data }: CakeMessageOptionTableProps) {
                           key={item.id}
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ 
+                          transition={{
                             delay: index * 0.05,
-                            duration: 0.3 
+                            duration: 0.3,
                           }}
                           className="hover:bg-indigo-50/60 dark:hover:bg-indigo-900/20 transition-colors"
                         >
@@ -252,7 +274,11 @@ export function CakeMessageOptionTable({ data }: CakeMessageOptionTableProps) {
                                     variant="outline"
                                     size="icon"
                                     className="hover:bg-indigo-50 group"
-                                    onClick={() => onOpen("cakeMessageModal", {cakeMessage: item})}
+                                    onClick={() =>
+                                      onOpen("cakeMessageModal", {
+                                        cakeMessage: item,
+                                      })
+                                    }
                                   >
                                     <Edit2Icon className="h-4 w-4 text-indigo-600 group-hover:rotate-12 transition-transform" />
                                   </Button>

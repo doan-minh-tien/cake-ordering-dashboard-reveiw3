@@ -67,12 +67,12 @@ import {
 } from "../../../cakes/actions/cake-image-action";
 
 const TYPE_OPTIONS = [
-  "Sprinkles",
-  "Decoration",
-  "Bling",
-  "TallSkirt",
-  "Drip",
-  "ShortSkirt",
+  "Sprinkles", // Hạt rắc
+  "Decoration", // Trang trí
+  "Bling", // Đồ trang trí lấp lánh
+  "TallSkirt", // Váy bánh cao
+  "Drip", // Dòng chảy
+  "ShortSkirt", // Váy bánh ngắn
 ];
 
 const cakeDecorationSchema = z.object({
@@ -451,12 +451,18 @@ const CakeDecorationModal = () => {
                     </FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger className="rounded-md h-9" disabled={true}>
+                        <SelectTrigger
+                          className="rounded-md h-9"
+                          disabled={true}
+                        >
                           <SelectValue placeholder="Chọn loại" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem key={data?.cakeDecoration?.type} value={data?.cakeDecoration?.type!}>
+                        <SelectItem
+                          key={data?.cakeDecoration?.type}
+                          value={data?.cakeDecoration?.type!}
+                        >
                           {data?.cakeDecoration?.type}
                         </SelectItem>
                       </SelectContent>

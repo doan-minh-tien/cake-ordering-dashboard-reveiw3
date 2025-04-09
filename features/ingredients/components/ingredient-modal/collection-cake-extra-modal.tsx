@@ -29,10 +29,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import {
-  Form,
-  FormLabel,
-} from "@/components/ui/form";
+import { Form, FormLabel } from "@/components/ui/form";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -67,6 +64,16 @@ import {
   uploadCakeImage,
 } from "../../../cakes/actions/cake-image-action";
 import { Checkbox } from "@/components/ui/checkbox";
+
+// Tên hiển thị tiếng Việt cho các loại tùy chọn thêm
+const getTypeDisplayName = (type: string): string => {
+  const typeNameMap: Record<string, string> = {
+    Candles: "Nến",
+    CakeBoard: "Đế Bánh",
+  };
+
+  return typeNameMap[type] || type;
+};
 
 const cakeExtraItemSchema = z.object({
   name: z.string().min(2, { message: "Tối thiểu 2 ký tự" }),
@@ -170,7 +177,7 @@ const CollectionCakeExtraModal = () => {
       setFetchingImage(true);
       const result = await getCakeImageById(imageId);
       console.log("Fetch image result:", result);
-      
+
       if (result.success && result.data) {
         // Trực tiếp lấy file_url từ kết quả API
         setUploadedFileUrl(result.data.file_url);
@@ -209,7 +216,7 @@ const CollectionCakeExtraModal = () => {
       // Lưu URL từ kết quả API
       setUploadedFileUrl(result.data.file_url);
       console.log("Uploaded image URL:", result.data.file_url);
-      
+
       // Cập nhật image_id cho item hiện tại
       updateCurrentItem("image_id", result.data.id);
 
@@ -300,9 +307,7 @@ const CollectionCakeExtraModal = () => {
   const removeCurrentItem = () => {
     if (extraItems.length <= 1) return;
 
-    const updatedItems = extraItems.filter(
-      (_, i) => i !== currentItemIndex
-    );
+    const updatedItems = extraItems.filter((_, i) => i !== currentItemIndex);
     setExtraItems(updatedItems);
     form.setValue("extras", updatedItems);
 
@@ -807,7 +812,7 @@ const CollectionCakeExtraModal = () => {
                         {item.name || "Chưa có tên"}
                       </div>
                       <div className="text-xs text-gray-500">
-                        {item.type} -{" "}
+                        {getTypeDisplayName(item.type)} -{" "}
                         {new Intl.NumberFormat("vi-VN").format(item.price)}đ
                         {item.is_default && " - Mặc định"}
                       </div>
@@ -833,8 +838,7 @@ const CollectionCakeExtraModal = () => {
       <DialogContent className="max-w-xl rounded-xl">
         <DialogHeader className="pb-2">
           <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-            <CakeSlice className="w-6 h-6"
-            />
+            <CakeSlice className="w-6 h-6" />
             {currentStep === "form"
               ? "Thêm Tùy Chọn Thêm"
               : "Xác nhận Thêm Tùy Chọn Thêm"}
@@ -883,7 +887,7 @@ const CollectionCakeExtraModal = () => {
                     ? "Đang xử lý..."
                     : !allItemsValid
                     ? "Một số tùy chọn thêm chưa hoàn thành"
-                        : `Xác nhận thêm ${extraItems.length} tùy chọn thêm`}
+                    : `Xác nhận thêm ${extraItems.length} tùy chọn thêm`}
                 </Button>
               )}
 
@@ -904,4 +908,3 @@ const CollectionCakeExtraModal = () => {
 };
 
 export default CollectionCakeExtraModal;
-
