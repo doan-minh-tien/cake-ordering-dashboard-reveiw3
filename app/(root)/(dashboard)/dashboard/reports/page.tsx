@@ -2,7 +2,6 @@ import { FeatureFlagsToggle } from "@/components/data-table/custom-table/feature
 import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
 import { Shell } from "@/components/shared/custom-ui/shell";
 import { getBadReports } from "@/features/bad-reports/actions/bad-report-action";
-import { ReportsTable } from "@/features/bad-reports/reports-table/report-table";
 import { getPromotions } from "@/features/promotions/action/promotion-action";
 import { PromotionsTable } from "@/features/promotions/components/promotion-table/promotion-table";
 import { SearchParams } from "@/types/table";
@@ -30,7 +29,7 @@ const ReportsPage = ({ searchParams }: IndexPageProps) => {
         >
           <FeatureFlagsToggle />
 
-          <ReportsTable reportPromise={reportPromise} />
+          {/* <ReportsTable reportPromise={reportPromise} /> */}
         </React.Suspense>
       </Shell>
     </div>
