@@ -16,62 +16,62 @@ export const orderStatusColumn = {
       if (!status)
         return {
           label: "Không xác định",
-          bgColor: "bg-gray-100",
-          textColor: "text-gray-700",
+          bgColor: "bg-gray-100 dark:bg-gray-800",
+          textColor: "text-gray-700 dark:text-gray-300",
         };
 
       switch (status.toUpperCase()) {
         case "PENDING":
           return {
             label: "Chờ thanh toán",
-            bgColor: "bg-amber-100",
-            textColor: "text-amber-700",
+            bgColor: "bg-amber-100 dark:bg-amber-900/30",
+            textColor: "text-amber-700 dark:text-amber-400",
           };
         case "PROCESSING":
           return {
             label: "Đang xử lý",
-            bgColor: "bg-blue-100",
-            textColor: "text-blue-700",
+            bgColor: "bg-blue-100 dark:bg-blue-900/30",
+            textColor: "text-blue-700 dark:text-blue-400",
           };
         case "COMPLETED":
         case "HOÀN THÀNH":
           return {
             label: "Hoàn thành",
-            bgColor: "bg-green-100",
-            textColor: "text-green-700",
+            bgColor: "bg-green-500 dark:bg-green-600",
+            textColor: "text-white",
           };
         case "CANCELLED":
         case "CANCELED":
           return {
             label: "Đã hủy",
-            bgColor: "bg-red-100",
-            textColor: "text-red-700",
+            bgColor: "bg-red-100 dark:bg-red-900/30",
+            textColor: "text-red-700 dark:text-red-400",
           };
         case "DELIVERING":
         case "SHIPPING":
           return {
             label: "Vận chuyển",
-            bgColor: "bg-purple-100",
-            textColor: "text-purple-700",
+            bgColor: "bg-purple-100 dark:bg-purple-900/30",
+            textColor: "text-purple-700 dark:text-purple-400",
           };
         case "READY_FOR_PICKUP":
           return {
             label: "Sẵn sàng giao",
-            bgColor: "bg-indigo-100",
-            textColor: "text-indigo-700",
+            bgColor: "bg-indigo-100 dark:bg-indigo-900/30",
+            textColor: "text-indigo-700 dark:text-indigo-400",
           };
         case "WAITING_BAKERY_CONFIRM":
           return {
             label: "Đợi xác nhận",
-            bgColor: "bg-slate-100",
-            textColor: "text-slate-700",
+            bgColor: "bg-cyan-100 dark:bg-cyan-800/50",
+            textColor: "text-cyan-800 dark:text-cyan-200",
           };
         default:
           // For any other value, just use the value directly
           return {
             label: status,
-            bgColor: "bg-gray-100",
-            textColor: "text-gray-700",
+            bgColor: "bg-gray-100 dark:bg-gray-800",
+            textColor: "text-gray-700 dark:text-gray-300",
           };
       }
     };

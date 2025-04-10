@@ -28,6 +28,7 @@ import {
   TrashIcon,
   PlusCircle,
   Settings,
+  Cake,
 } from "lucide-react";
 import { ExpandDataTable } from "@/components/data-table/expand-data-table";
 import { Badge } from "@/components/ui/badge";
@@ -201,17 +202,17 @@ export function CakeDecorationTable({ data }: CakeDecorationTableProps) {
             animate={{ opacity: 1, height: "auto" }}
             transition={{ duration: 0.3 }}
           >
-            <Card className="m-2 rounded-lg overflow-hidden shadow-sm">
-              <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 flex justify-between items-center">
-                <h3 className="text-indigo-700 dark:text-indigo-300 font-medium flex items-center">
+            <Card className="m-2 rounded-lg overflow-hidden shadow-md border-amber-200">
+              <div className="p-3 bg-gradient-to-r from-amber-100 to-amber-50 border-b border-amber-200 flex justify-between items-center">
+                <h3 className="text-amber-800 font-medium flex items-center">
                   {React.createElement(getItemIcon(type), {
-                    className: "h-5 w-5 mr-2",
+                    className: "h-5 w-5 mr-2 text-amber-600",
                   })}
                   Danh sách {getTypeDisplayName(type).toLowerCase()}
                 </h3>
               </div>
               <Table>
-                <TableHeader className="bg-indigo-50/50 dark:bg-indigo-900/10">
+                <TableHeader className="bg-amber-50/70">
                   <TableRow>
                     {[
                       "Tên",
@@ -223,7 +224,7 @@ export function CakeDecorationTable({ data }: CakeDecorationTableProps) {
                     ].map((header) => (
                       <TableHead
                         key={header}
-                        className="text-indigo-700 dark:text-indigo-300"
+                        className="text-amber-700 font-medium"
                       >
                         {header}
                       </TableHead>
@@ -243,20 +244,20 @@ export function CakeDecorationTable({ data }: CakeDecorationTableProps) {
                             delay: index * 0.05,
                             duration: 0.3,
                           }}
-                          className="hover:bg-indigo-50/60 dark:hover:bg-indigo-900/20 transition-colors"
+                          className="hover:bg-amber-50/60 transition-colors border-b border-amber-100"
                         >
                           <TableCell className="flex items-center space-x-3">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/50">
-                              <ItemIcon className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 shadow-sm">
+                              <ItemIcon className="h-4 w-4 text-amber-600" />
                             </div>
-                            <span className="font-medium text-gray-800 dark:text-gray-200">
+                            <span className="font-medium text-gray-800">
                               {item.name}
                             </span>
                           </TableCell>
                           <TableCell>
                             <Badge
                               variant="outline"
-                              className="bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800/50"
+                              className="bg-green-50 text-green-700 border-green-200 shadow-sm"
                             >
                               {formatVND(item.price)}
                             </Badge>
@@ -267,12 +268,12 @@ export function CakeDecorationTable({ data }: CakeDecorationTableProps) {
                                 className="w-5 h-5 rounded-full inline-block mr-2 shadow-sm border border-gray-200"
                                 style={{ backgroundColor: item.color }}
                               />
-                              <span className="text-gray-700 dark:text-gray-300">
+                              <span className="text-gray-700">
                                 {item.color}
                               </span>
                             </div>
                           </TableCell>
-                          <TableCell className="text-gray-600 dark:text-gray-400 max-w-xs truncate">
+                          <TableCell className="text-gray-600 max-w-xs truncate">
                             {item.description || "Không có mô tả"}
                           </TableCell>
                           <TableCell>
@@ -281,8 +282,8 @@ export function CakeDecorationTable({ data }: CakeDecorationTableProps) {
                               className={cn(
                                 "text-center",
                                 item.is_default
-                                  ? "bg-indigo-500 text-white dark:bg-indigo-600"
-                                  : "text-gray-500 border-gray-300 dark:text-gray-400 dark:border-gray-700"
+                                  ? "bg-amber-500 text-white"
+                                  : "text-gray-500 border-gray-300"
                               )}
                             >
                               {item.is_default ? "Có" : "Không"}
@@ -295,14 +296,14 @@ export function CakeDecorationTable({ data }: CakeDecorationTableProps) {
                                   <Button
                                     variant="outline"
                                     size="icon"
-                                    className="hover:bg-indigo-50 group"
+                                    className="hover:bg-amber-50 group border-amber-200"
                                     onClick={() =>
                                       onOpen("cakeDecorationModal", {
                                         cakeDecoration: item,
                                       })
                                     }
                                   >
-                                    <Edit2Icon className="h-4 w-4 text-indigo-600 group-hover:rotate-12 transition-transform" />
+                                    <Edit2Icon className="h-4 w-4 text-amber-600 group-hover:rotate-12 transition-transform" />
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
@@ -314,7 +315,7 @@ export function CakeDecorationTable({ data }: CakeDecorationTableProps) {
                                   <Button
                                     variant="outline"
                                     size="icon"
-                                    className="hover:bg-red-50 group"
+                                    className="hover:bg-red-50 group border-red-200"
                                     onClick={() => {
                                       setOpenDeleteId(item.id);
                                       setOpenDeleteModal(true);
@@ -336,18 +337,18 @@ export function CakeDecorationTable({ data }: CakeDecorationTableProps) {
                 </TableBody>
               </Table>
               {items.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
-                  <Package className="h-12 w-12 text-indigo-200 mb-4" />
-                  <h3 className="text-gray-700 font-medium mb-1">
+                <div className="flex flex-col items-center justify-center py-8 px-4 text-center bg-amber-50/30">
+                  <Package className="h-12 w-12 text-amber-200 mb-4" />
+                  <h3 className="text-amber-700 font-medium mb-1">
                     Chưa có danh mục nào
                   </h3>
-                  <p className="text-gray-500 mb-4">
+                  <p className="text-amber-600 mb-4">
                     Hãy thêm danh mục đầu tiên cho loại trang trí này
                   </p>
                   <Button
                     variant="default"
                     size="sm"
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                    className="bg-amber-600 hover:bg-amber-700 text-white shadow-sm"
                     onClick={() =>
                       onOpen("collectionCakeDecorationModal", {
                         ingredientType: type,
@@ -376,20 +377,12 @@ export function CakeDecorationTable({ data }: CakeDecorationTableProps) {
         description="Bạn có chắc chắn với hành động này không?"
       />
       <div className="space-y-4">
-        <Card className="shadow-sm border-indigo-100">
-          <div className="p-4 border-b border-indigo-100 flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-indigo-800">
+        <Card className="shadow-md border-amber-200 overflow-hidden">
+          <div className="p-4 bg-gradient-to-r from-amber-50 to-amber-100/50 border-b border-amber-200 flex justify-between items-center">
+            <h2 className="text-xl font-semibold text-amber-800 flex items-center">
+              <Cake className="h-5 w-5 mr-2 text-amber-600" />
               Quản lý trang trí bánh
             </h2>
-            <Button
-              variant="default"
-              size="sm"
-              className="bg-indigo-600 hover:bg-indigo-700 text-black "
-              // onClick={() => onOpen("newCakeDecorationTypeModal")}
-            >
-              <PlusCircle className="h-4 w-4 mr-1" />
-              Thêm loại trang trí mới
-            </Button>
           </div>
           <CardContent>
             <ExpandDataTable

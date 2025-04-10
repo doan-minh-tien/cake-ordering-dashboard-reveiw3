@@ -359,6 +359,8 @@ export function CakeMessageOptionTable({ data }: CakeMessageOptionTableProps) {
             <h2 className="text-xl font-semibold text-indigo-800">
               Quản lý tin nhắn bánh
             </h2>
+            {/* Button hidden per client request */}
+            {/*
             <Button
               variant="default"
               size="sm"
@@ -368,6 +370,7 @@ export function CakeMessageOptionTable({ data }: CakeMessageOptionTableProps) {
               <PlusCircle className="h-4 w-4 mr-1" />
               Thêm loại tin nhắn mới
             </Button>
+            */}
           </div>
           <CardContent>
             <ExpandDataTable

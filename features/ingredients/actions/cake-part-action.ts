@@ -16,6 +16,9 @@ import { ICakePartType } from "../types/cake-part-type";
 import { axiosAuth } from "@/lib/api/api-interceptor/api";
 import { auth } from "@/lib/next-auth/auth";
 
+// Default cake part categories that all bakeries should have
+const defaultCakePartTypes = ["Goo", "Icing", "Filling", "Sponge", "Size"];
+
 export const getCakeParts = async (
   searchParams: SearchParams
 ): Promise<ApiListResponse<ICakePartType>> => {
@@ -57,9 +60,7 @@ export const updateCakePart = async (
 export const createCakePart = async (data: any): Promise<Result<void>> => {
   noStore();
 
-  const result = await apiRequest(() =>
-    axiosAuth.post("/part_options", data)
-  );
+  const result = await apiRequest(() => axiosAuth.post("/part_options", data));
 
   if (!result.success) {
     return { success: false, error: result.error };
@@ -68,7 +69,6 @@ export const createCakePart = async (data: any): Promise<Result<void>> => {
   revalidatePath("/dashboard/ingredients");
   return { success: true, data: result.data };
 };
-
 
 export const deleteCakePart = async (id: string): Promise<Result<void>> => {
   noStore();
@@ -83,4 +83,29 @@ export const deleteCakePart = async (id: string): Promise<Result<void>> => {
 
   revalidatePath("/dashboard/ingredients");
   return { success: true, data: result.data };
-};        
+};
+
+// Initialize default cake part types for a new bakery
+export const initializeDefaultCakeParts = async (
+  bakeryId: string
+): Promise<Result<void>> => {
+  noStore();
+
+  try {
+    // Create default cake part types for the bakery
+    for (const cakePartType of defaultCakePartTypes) {
+      await apiRequest(() =>
+        axiosAuth.post("/part_options", {
+          type: cakePartType,
+          bakeryId: bakeryId,
+          items: [], // Initially empty items, bakery will add their own items
+        })
+      );
+    }
+
+    return { success: true, data: undefined };
+  } catch (error) {
+    console.error("Failed to initialize default cake parts:", error);
+    return { success: false, error: "Failed to initialize default cake parts" };
+  }
+};

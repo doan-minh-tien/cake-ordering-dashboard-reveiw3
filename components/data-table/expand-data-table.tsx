@@ -54,19 +54,19 @@ export function ExpandDataTable<TData, TValue>({
         columnLabels={columnLabels}
         newRowLink={newRowLink}
       />
-      <div className="rounded-lg border border-green-200 dark:border-green-800 shadow-md overflow-hidden">
+      <div className="rounded-lg border border-slate-200 dark:border-slate-800 shadow-md overflow-hidden">
         <div className="overflow-auto">
           <Table className="w-full">
-            <TableHeader className="bg-green-50 dark:bg-green-900/30 sticky top-0 z-4">
+            <TableHeader className="bg-slate-50 dark:bg-slate-900/70 sticky top-0 z-4">
               {dataTable.getHeaderGroups().map((headerGroup) => (
                 <TableRow
                   key={headerGroup.id}
-                  className="border-b border-gray-200 dark:border-gray-700"
+                  className="border-b border-slate-200 dark:border-slate-800"
                 >
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
-                      className="text-gray-900 dark:text-gray-100 font-bold"
+                      className="text-slate-800 dark:text-slate-200 font-bold"
                     >
                       {header.isPlaceholder
                         ? null
@@ -85,15 +85,14 @@ export function ExpandDataTable<TData, TValue>({
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
-                    className="hover:bg-green-100 dark:hover:bg-green-800/50"
+                    className="hover:bg-slate-100 dark:hover:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800/60"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell
                         key={cell.id}
-                        className="text-gray-800 dark:text-gray-200 font-semibold"
+                        className="text-slate-700 dark:text-slate-300"
                         style={{
-                          minWidth:
-                            cell.column.id === "name" ? "50px" : "20px",
+                          minWidth: cell.column.id === "name" ? "50px" : "20px",
                           maxWidth:
                             cell.column.id === "name" ? "250px" : "150px",
                         }}
@@ -105,13 +104,13 @@ export function ExpandDataTable<TData, TValue>({
                       </TableCell>
                     ))}
                   </TableRow>,
-                  renderAdditionalRows && renderAdditionalRows(row)
+                  renderAdditionalRows && renderAdditionalRows(row),
                 ])
               ) : (
                 <TableRow>
                   <TableCell
                     colSpan={columns.length}
-                    className="h-24 text-center text-gray-500 dark:text-gray-400 italic"
+                    className="h-24 text-center text-slate-500 dark:text-slate-400 italic"
                   >
                     Không có dữ liệu
                   </TableCell>

@@ -10,7 +10,38 @@ import {
 import { SearchParams } from "@/types/table";
 import { ICakeExtraOptionType } from "../types/cake-extra-option-type";
 import { axiosAuth } from "@/lib/api/api-interceptor/api";
-import { auth } from "@/lib/next-auth/auth";  
+import { auth } from "@/lib/next-auth/auth";
+
+// Default extra option categories that all bakeries should have
+const defaultExtraTypes = ["Candles", "CakeBoard"];
+
+export const initializeDefaultExtraOptions = async (
+  bakeryId: string
+): Promise<Result<void>> => {
+  noStore();
+
+  try {
+    // Create default extra option types for the bakery
+    for (const extraType of defaultExtraTypes) {
+      await apiRequest(() =>
+        axiosAuth.post("/extra_options", {
+          type: extraType,
+          bakeryId: bakeryId,
+          items: [], // Initially empty items, bakery will add their own items
+        })
+      );
+    }
+
+    return { success: true, data: undefined };
+  } catch (error) {
+    console.error("Failed to initialize default extra options:", error);
+    return {
+      success: false,
+      error: "Failed to initialize default extra options",
+    };
+  }
+};
+
 export const getCakeExtraOptions = async (
   searchParams: SearchParams
 ): Promise<ApiListResponse<ICakeExtraOptionType>> => {
@@ -49,12 +80,12 @@ export const updateCakeExtraOption = async (
   return { success: true, data: result.data };
 };
 
-export const createCakeExtraOption = async (data: any): Promise<Result<void>> => {
+export const createCakeExtraOption = async (
+  data: any
+): Promise<Result<void>> => {
   noStore();
 
-  const result = await apiRequest(() =>
-    axiosAuth.post("/extra_options", data)
-  );
+  const result = await apiRequest(() => axiosAuth.post("/extra_options", data));
 
   if (!result.success) {
     return { success: false, error: result.error };
@@ -64,8 +95,9 @@ export const createCakeExtraOption = async (data: any): Promise<Result<void>> =>
   return { success: true, data: result.data };
 };
 
-
-export const deleteCakeExtraOption = async (id: string): Promise<Result<void>> => {
+export const deleteCakeExtraOption = async (
+  id: string
+): Promise<Result<void>> => {
   noStore();
 
   const result = await apiRequest(() =>
@@ -78,4 +110,4 @@ export const deleteCakeExtraOption = async (id: string): Promise<Result<void>> =
 
   revalidatePath("/dashboard/ingredients");
   return { success: true, data: result.data };
-};    
+};

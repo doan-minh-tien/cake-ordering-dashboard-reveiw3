@@ -28,6 +28,7 @@ import {
   TrashIcon,
   PlusCircle,
   Settings,
+  BoxIcon,
 } from "lucide-react";
 import { ExpandDataTable } from "@/components/data-table/expand-data-table";
 import { Badge } from "@/components/ui/badge";
@@ -124,20 +125,20 @@ export function CakePartTable({ data }: CakePartTableProps) {
             <Button
               variant="outline"
               size="icon"
-              className="rounded-full hover:bg-indigo-50 transition-all"
+              className="rounded-full hover:bg-blue-50 dark:hover:bg-gray-800 transition-all border-blue-200 dark:border-gray-700"
               onClick={() => toggleRowExpansion(row.original.type)}
             >
               <AnimatePresence mode="wait">
                 {expandedRows[row.original.type] ? (
-                  <ChevronDown className="text-indigo-600" />
+                  <ChevronDown className="text-blue-600 dark:text-gray-300" />
                 ) : (
-                  <ChevronRight className="text-indigo-600" />
+                  <ChevronRight className="text-blue-600 dark:text-gray-300" />
                 )}
               </AnimatePresence>
             </Button>
             <Badge
               variant="secondary"
-              className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700"
+              className="px-3 py-1 rounded-full bg-blue-50 dark:bg-gray-800 text-blue-700 dark:text-gray-200 border border-blue-200 dark:border-gray-700"
             >
               {getTypeDisplayName(row.original.type)}
             </Badge>
@@ -149,8 +150,8 @@ export function CakePartTable({ data }: CakePartTableProps) {
         header: "Số Lượng Danh Mục",
         cell: ({ row }) => (
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 text-gray-600">
-              <TagIcon className="h-4 w-4 text-indigo-500" />
+            <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
+              <TagIcon className="h-4 w-4 text-blue-500 dark:text-gray-400" />
               <span className="font-medium">
                 {row.original.items.length} danh mục
               </span>
@@ -160,7 +161,7 @@ export function CakePartTable({ data }: CakePartTableProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="rounded-full px-3 bg-indigo-50 hover:bg-indigo-100 border-indigo-200 text-indigo-700 hover:text-indigo-800 transition-all"
+                  className="rounded-full px-3 bg-blue-50 dark:bg-gray-800 hover:bg-blue-100 dark:hover:bg-gray-700 border-blue-200 dark:border-gray-700 text-blue-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-white transition-all"
                   onClick={() =>
                     onOpen("collectionCakePartModal", {
                       ingredientType: row.original.type,
@@ -203,33 +204,28 @@ export function CakePartTable({ data }: CakePartTableProps) {
             animate={{ opacity: 1, height: "auto" }}
             transition={{ duration: 0.3 }}
           >
-            <Card className="m-2 rounded-lg overflow-hidden shadow-sm">
-              <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 flex justify-between items-center">
-                <h3 className="text-indigo-700 dark:text-indigo-300 font-medium flex items-center">
+            <Card className="m-2 rounded-lg overflow-hidden shadow-md border-blue-200 dark:border-gray-700">
+              <div className="p-3 bg-gradient-to-r from-blue-100 to-blue-50 dark:from-gray-800 dark:to-gray-900 border-b border-blue-200 dark:border-gray-700 flex justify-between items-center">
+                <h3 className="text-blue-800 dark:text-gray-200 font-medium flex items-center">
                   {React.createElement(getItemIcon(type), {
-                    className: "h-5 w-5 mr-2",
+                    className: "h-5 w-5 mr-2 text-blue-600 dark:text-gray-400",
                   })}
                   Danh sách {getTypeDisplayName(type).toLowerCase()}
                 </h3>
               </div>
               <Table>
-                <TableHeader className="bg-indigo-50/50 dark:bg-indigo-900/10">
+                <TableHeader className="bg-blue-50/70 dark:bg-gray-800">
                   <TableRow>
-                    {[
-                      "Tên",
-                      "Giá",
-                      "Màu Sắc",
-                      "Mô Tả",
-                      "Mặc Định",
-                      "Thao Tác",
-                    ].map((header) => (
-                      <TableHead
-                        key={header}
-                        className="text-indigo-700 dark:text-indigo-300"
-                      >
-                        {header}
-                      </TableHead>
-                    ))}
+                    {["Tên", "Giá", "Mô Tả", "Mặc Định", "Thao Tác"].map(
+                      (header) => (
+                        <TableHead
+                          key={header}
+                          className="text-blue-700 dark:text-gray-200 font-medium"
+                        >
+                          {header}
+                        </TableHead>
+                      )
+                    )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -245,11 +241,11 @@ export function CakePartTable({ data }: CakePartTableProps) {
                             delay: index * 0.05,
                             duration: 0.3,
                           }}
-                          className="hover:bg-indigo-50/60 dark:hover:bg-indigo-900/20 transition-colors"
+                          className="hover:bg-blue-50/60 dark:hover:bg-gray-800 transition-colors border-b border-blue-100 dark:border-gray-700"
                         >
                           <TableCell className="flex items-center space-x-3">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/50">
-                              <ItemIcon className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 dark:bg-gray-700 shadow-sm">
+                              <ItemIcon className="h-4 w-4 text-blue-600 dark:text-gray-300" />
                             </div>
                             <span className="font-medium text-gray-800 dark:text-gray-200">
                               {item.name}
@@ -258,21 +254,10 @@ export function CakePartTable({ data }: CakePartTableProps) {
                           <TableCell>
                             <Badge
                               variant="outline"
-                              className="bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800/50"
+                              className="bg-green-50 dark:bg-gray-700 text-green-700 dark:text-gray-200 border-green-200 dark:border-gray-600 shadow-sm"
                             >
                               {formatVND(item.price)}
                             </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center">
-                              <div
-                                className="w-5 h-5 rounded-full inline-block mr-2 shadow-sm border border-gray-200"
-                                style={{ backgroundColor: item.color }}
-                              />
-                              <span className="text-gray-700 dark:text-gray-300">
-                                {item.color}
-                              </span>
-                            </div>
                           </TableCell>
                           <TableCell className="text-gray-600 dark:text-gray-400 max-w-xs truncate">
                             {item.description || "Không có mô tả"}
@@ -283,8 +268,8 @@ export function CakePartTable({ data }: CakePartTableProps) {
                               className={cn(
                                 "text-center",
                                 item.is_default
-                                  ? "bg-indigo-500 text-white dark:bg-indigo-600"
-                                  : "text-gray-500 border-gray-300 dark:text-gray-400 dark:border-gray-700"
+                                  ? "bg-blue-500 dark:bg-gray-600 text-white"
+                                  : "text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-700"
                               )}
                             >
                               {item.is_default ? "Có" : "Không"}
@@ -297,14 +282,14 @@ export function CakePartTable({ data }: CakePartTableProps) {
                                   <Button
                                     variant="outline"
                                     size="icon"
-                                    className="hover:bg-indigo-50 group"
+                                    className="hover:bg-blue-50 dark:hover:bg-gray-700 group border-blue-200 dark:border-gray-700"
                                     onClick={() =>
                                       onOpen("cakePartModal", {
                                         cakePart: item,
                                       })
                                     }
                                   >
-                                    <Edit2Icon className="h-4 w-4 text-indigo-600 group-hover:rotate-12 transition-transform" />
+                                    <Edit2Icon className="h-4 w-4 text-blue-600 dark:text-gray-300 group-hover:rotate-12 transition-transform" />
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
@@ -316,13 +301,13 @@ export function CakePartTable({ data }: CakePartTableProps) {
                                   <Button
                                     variant="outline"
                                     size="icon"
-                                    className="hover:bg-red-50 group"
+                                    className="hover:bg-red-50 dark:hover:bg-gray-700 group border-red-200 dark:border-gray-700"
                                     onClick={() => {
                                       setOpenDeleteId(item.id);
                                       setOpenDeleteModal(true);
                                     }}
                                   >
-                                    <TrashIcon className="h-4 w-4 text-red-500 group-hover:scale-90 transition-transform" />
+                                    <TrashIcon className="h-4 w-4 text-red-500 dark:text-red-400 group-hover:scale-90 transition-transform" />
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
@@ -338,18 +323,18 @@ export function CakePartTable({ data }: CakePartTableProps) {
                 </TableBody>
               </Table>
               {items.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
-                  <Package className="h-12 w-12 text-indigo-200 mb-4" />
-                  <h3 className="text-gray-700 font-medium mb-1">
+                <div className="flex flex-col items-center justify-center py-8 px-4 text-center bg-blue-50/30 dark:bg-gray-800/50">
+                  <Package className="h-12 w-12 text-blue-200 dark:text-gray-600 mb-4" />
+                  <h3 className="text-blue-700 dark:text-gray-300 font-medium mb-1">
                     Chưa có danh mục nào
                   </h3>
-                  <p className="text-gray-500 mb-4">
-                    Hãy thêm danh mục đầu tiên cho phần bánh này
+                  <p className="text-blue-600 dark:text-gray-400 mb-4">
+                    Hãy thêm danh mục đầu tiên cho loại phần bánh này
                   </p>
                   <Button
                     variant="default"
                     size="sm"
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                    className="bg-blue-600 dark:bg-gray-700 hover:bg-blue-700 dark:hover:bg-gray-600 text-white shadow-sm"
                     onClick={() =>
                       onOpen("collectionCakePartModal", {
                         ingredientType: type,
@@ -373,25 +358,17 @@ export function CakePartTable({ data }: CakePartTableProps) {
       <AlertModal
         isOpen={openDeleteModal}
         onClose={() => setOpenDeleteModal(false)}
-        onConfirm={() => handleDelete(openDeleteId)}
+        onConfirm={() => handleDelete(openDeleteId!)}
         title="Xóa"
         description="Bạn có chắc chắn với hành động này không?"
       />
       <div className="space-y-4">
-        <Card className="shadow-sm border-indigo-100">
-          <div className="p-4 border-b border-indigo-100 flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-indigo-800">
+        <Card className="shadow-md border-blue-200 dark:border-gray-700 overflow-hidden">
+          <div className="p-4 bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-gray-800 dark:to-gray-900 border-b border-blue-200 dark:border-gray-700 flex justify-between items-center">
+            <h2 className="text-xl font-semibold text-blue-800 dark:text-gray-200 flex items-center">
+              <BoxIcon className="h-5 w-5 mr-2 text-blue-600 dark:text-gray-400" />
               Quản lý phần bánh
             </h2>
-            <Button
-              variant="default"
-              size="sm"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white"
-              onClick={() => onOpen("collectionCakePartModal", {})}
-            >
-              <PlusCircle className="h-4 w-4 mr-1" />
-              Thêm loại phần bánh mới
-            </Button>
           </div>
           <CardContent>
             <ExpandDataTable

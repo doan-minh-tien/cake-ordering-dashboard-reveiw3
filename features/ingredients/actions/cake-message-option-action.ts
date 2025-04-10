@@ -6,17 +6,54 @@
 "use server";
 import { unstable_noStore as noStore, revalidatePath } from "next/cache";
 
-import { ApiListResponse, fetchListData, Result, apiRequest } from "@/lib/api/api-handler/generic";
+import {
+  ApiListResponse,
+  fetchListData,
+  Result,
+  apiRequest,
+} from "@/lib/api/api-handler/generic";
 import { SearchParams } from "@/types/table";
 import { ICakeMessageOptionType } from "../types/cake-message-option-type";
 import { axiosAuth } from "@/lib/api/api-interceptor/api";
 import { auth } from "@/lib/next-auth/auth";
+
+const defaultMessageTypes = [
+  "Message",
+  "Congratulations",
+  "Birthday",
+  "Anniversary",
+  "Special Occasion",
+];
+
+export const initializeDefaultMessages = async (
+  bakeryId: string
+): Promise<void> => {
+  try {
+    const session = await auth();
+
+    for (const type of defaultMessageTypes) {
+      await axiosAuth.post("/message_options", {
+        name: type,
+        bakeryId: bakeryId,
+        items: [],
+      });
+    }
+
+    console.log(`Default message types initialized for bakery ${bakeryId}`);
+  } catch (error) {
+    console.error("Failed to initialize default message types:", error);
+  }
+};
+
 export const getCakeMessageOptions = async (
   searchParams: SearchParams
 ): Promise<ApiListResponse<ICakeMessageOptionType>> => {
   noStore();
   const session = await auth();
-  const result = await fetchListData<ICakeMessageOptionType>(`/message_options?bakeryId=${session?.user.entity.id}`, searchParams);
+  const result = await fetchListData<ICakeMessageOptionType>(
+    `/message_options?bakeryId=${session?.user.entity.id}`,
+    searchParams
+  );
 
   if (!result.success) {
     console.error("Failed to fetch list ICakeMessageOptionType:", result.error);
@@ -26,17 +63,16 @@ export const getCakeMessageOptions = async (
   return result.data;
 };
 
-
 export const updateCakeMessage = async (
   data: any,
   id: string
 ): Promise<Result<void>> => {
   noStore();
   const result = await apiRequest(() =>
-    axiosAuth.put(`/message_options/${id}`, data,{
+    axiosAuth.put(`/message_options/${id}`, data, {
       headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+        "Content-Type": "multipart/form-data",
+      },
     })
   );
 
@@ -62,8 +98,7 @@ export const createCakeMessage = async (data: any): Promise<Result<void>> => {
 
   revalidatePath("/dashboard/ingredients");
   return { success: true, data: result.data };
-};  
-
+};
 
 export const deleteCakeMessage = async (id: string): Promise<Result<void>> => {
   noStore();
@@ -78,4 +113,4 @@ export const deleteCakeMessage = async (id: string): Promise<Result<void>> => {
 
   revalidatePath("/dashboard/ingredients");
   return { success: true, data: result.data };
-};        
+};

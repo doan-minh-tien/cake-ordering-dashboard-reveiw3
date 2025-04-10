@@ -380,6 +380,8 @@ export function CakeExtraOptionTable({ data }: CakeExtraOptionTableProps) {
             <h2 className="text-xl font-semibold text-indigo-800">
               Quản lý tùy chọn thêm
             </h2>
+            {/* Button hidden per client request */}
+            {/*
             <Button
               variant="default"
               size="sm"
@@ -389,6 +391,7 @@ export function CakeExtraOptionTable({ data }: CakeExtraOptionTableProps) {
               <PlusCircle className="h-4 w-4 mr-1" />
               Thêm loại tùy chọn thêm mới
             </Button>
+            */}
           </div>
           <CardContent>
             <ExpandDataTable

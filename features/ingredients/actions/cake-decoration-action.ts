@@ -12,6 +12,16 @@ import { ICakeDecorationType } from "../types/cake-decoration-type";
 import { axiosAuth } from "@/lib/api/api-interceptor/api";
 import { auth } from "@/lib/next-auth/auth";
 
+// Default decoration categories that all bakeries should have
+const defaultDecorationTypes = [
+  "Sprinkles",
+  "Decoration",
+  "Bling",
+  "TallSkirt",
+  "Drip",
+  "ShortSkirt",
+];
+
 export const getCakeDecorations = async (
   searchParams: SearchParams
 ): Promise<ApiListResponse<ICakeDecorationType>> => {
@@ -50,8 +60,9 @@ export const updateCakeDecoration = async (
   return { success: true, data: result.data };
 };
 
-
-export const createCakeDecoration = async (data: any): Promise<Result<void>> => {
+export const createCakeDecoration = async (
+  data: any
+): Promise<Result<void>> => {
   noStore();
 
   const result = await apiRequest(() =>
@@ -66,8 +77,9 @@ export const createCakeDecoration = async (data: any): Promise<Result<void>> => 
   return { success: true, data: result.data };
 };
 
-
-export const deleteCakeDecoration = async (id: string): Promise<Result<void>> => {
+export const deleteCakeDecoration = async (
+  id: string
+): Promise<Result<void>> => {
   noStore();
 
   const result = await apiRequest(() =>
@@ -80,4 +92,32 @@ export const deleteCakeDecoration = async (id: string): Promise<Result<void>> =>
 
   revalidatePath("/dashboard/ingredients");
   return { success: true, data: result.data };
+};
+
+// Initialize default decoration types for a new bakery
+export const initializeDefaultDecorations = async (
+  bakeryId: string
+): Promise<Result<void>> => {
+  noStore();
+
+  try {
+    // Create default decoration types for the bakery
+    for (const decorationType of defaultDecorationTypes) {
+      await apiRequest(() =>
+        axiosAuth.post("/decoration_options", {
+          type: decorationType,
+          bakeryId: bakeryId,
+          items: [], // Initially empty items, bakery will add their own items
+        })
+      );
+    }
+
+    return { success: true, data: undefined };
+  } catch (error) {
+    console.error("Failed to initialize default decorations:", error);
+    return {
+      success: false,
+      error: "Failed to initialize default decorations",
+    };
+  }
 };
