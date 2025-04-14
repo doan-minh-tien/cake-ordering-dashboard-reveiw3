@@ -35,7 +35,7 @@ export function NavUser() {
 
   const router = useRouter();
   const handleLogout = async () => {
-    await signOut({ callbackUrl: '/' });
+    await signOut({ callbackUrl: "/" });
   };
 
   return (
@@ -52,7 +52,9 @@ export function NavUser() {
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{session?.user?.name}</span>
+                <span className="truncate font-semibold">
+                  {session?.user?.name}
+                </span>
                 <span className="truncate text-xs">{session?.user?.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
@@ -72,8 +74,12 @@ export function NavUser() {
                     <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{session?.user?.name}</span>
-                    <span className="truncate text-xs">{session?.user?.email}</span>
+                    <span className="truncate font-semibold">
+                      {session?.user?.name}
+                    </span>
+                    <span className="truncate text-xs">
+                      {session?.user?.email}
+                    </span>
                   </div>
                 </div>
 
@@ -81,15 +87,21 @@ export function NavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
+            {/* <DropdownMenuGroup>
               <DropdownMenuItem>
                 <Sparkles />
                 Upgrade to Pro
               </DropdownMenuItem>
-            </DropdownMenuGroup>
+            </DropdownMenuGroup> */}
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() =>
+                  router.push(
+                    `/dashboard/bakeries/${session?.user?.entity?.id}`
+                  )
+                }
+              >
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>
@@ -103,7 +115,10 @@ export function NavUser() {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950" onClick={handleLogout}>
+            <DropdownMenuItem
+              className="gap-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
+              onClick={handleLogout}
+            >
               <LogOut className="h-4 w-4" />
               Đăng xuất
             </DropdownMenuItem>
