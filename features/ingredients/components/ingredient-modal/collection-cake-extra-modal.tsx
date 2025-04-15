@@ -27,6 +27,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 
 import { Form, FormLabel } from "@/components/ui/form";
@@ -84,7 +85,7 @@ const cakeExtraItemSchema = z.object({
     hex: z.string(),
   }),
   description: z.string().optional(),
-  type: z.string().min(1, { message: "Chọn loại tùy chọn thêm" }),
+  type: z.string().min(1, { message: "Chọn loại extra" }),
   is_default: z.boolean().default(false),
   image_id: z.string().optional(),
 });
@@ -92,7 +93,7 @@ const cakeExtraItemSchema = z.object({
 const collectionSchema = z.object({
   extras: z
     .array(cakeExtraItemSchema)
-    .min(1, { message: "Thêm ít nhất 1 tùy chọn thêm" }),
+    .min(1, { message: "Thêm ít nhất 1 extra" }),
 });
 
 const CollectionCakeExtraModal = () => {
@@ -364,7 +365,7 @@ const CollectionCakeExtraModal = () => {
       if (validateAllItems()) {
         setCurrentStep("summary");
       } else {
-        toast.error("Vui lòng điền đầy đủ thông tin cho tất cả tùy chọn thêm");
+        toast.error("Vui lòng điền đầy đủ thông tin cho tất cả extra");
       }
     }
   };
@@ -390,16 +391,14 @@ const CollectionCakeExtraModal = () => {
           toast.error(result.error);
           return;
         } else {
-          toast.success(
-            `Đã thêm ${formattedItems.length} tùy chọn thêm thành công!`
-          );
+          toast.success(`Đã thêm ${formattedItems.length} extra thành công!`);
         }
 
         handleClose();
       });
     } catch (error) {
       console.error("Error processing cake extras:", error);
-      toast.error("Có lỗi xảy ra khi xử lý tùy chọn thêm");
+      toast.error("Có lỗi xảy ra khi xử lý extra");
     }
   };
 
@@ -423,15 +422,15 @@ const CollectionCakeExtraModal = () => {
 
     if (!currentItem) {
       return (
-        <div className="flex justify-center items-center p-8">
+        <div className="flex justify-center items-center p-4">
           <Button
             type="button"
             onClick={addNewItem}
             variant="outline"
-            className="gap-2 rounded-md"
+            className="gap-2 rounded-md h-8 text-xs"
           >
-            <Plus className="w-4 h-4" />
-            Thêm tùy chọn mới
+            <Plus className="w-3.5 h-3.5" />
+            Thêm extra mới
           </Button>
         </div>
       );
@@ -449,318 +448,317 @@ const CollectionCakeExtraModal = () => {
     };
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="px-3 py-1">
+            <Badge variant="outline" className="px-2 py-0.5 text-xs">
               {currentItemIndex + 1} / {extraItems.length}
             </Badge>
-            <h3 className="text-sm font-medium">
-              Tùy chọn thêm #{currentItemIndex + 1}
+            <h3 className="text-xs font-medium">
+              Extra #{currentItemIndex + 1}
             </h3>
           </div>
           <div className="flex gap-1">
             <Button
               variant="outline"
               size="icon"
-              className="h-8 w-8"
+              className="h-7 w-7"
               onClick={goToPrevItem}
               disabled={currentItemIndex === 0}
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-3.5 w-3.5" />
             </Button>
             <Button
               variant="outline"
               size="icon"
-              className="h-8 w-8"
+              className="h-7 w-7"
               onClick={goToNextItem}
               disabled={currentItemIndex === extraItems.length - 1}
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-3.5 w-3.5" />
             </Button>
             <Button
               variant="destructive"
               size="icon"
-              className="h-8 w-8 ml-1"
+              className="h-7 w-7 ml-1"
               onClick={removeCurrentItem}
               disabled={extraItems.length <= 1}
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>
 
-        <div className="flex space-x-2">
-          {/* Image Upload Field */}
-          <div className="col-span-2">
-            <FormLabel className="flex items-center gap-2 text-sm">
-              Hình Ảnh Tùy Chọn
-            </FormLabel>
-            <div className="flex flex-col gap-3">
-              <div className="relative w-full h-40 border rounded-md border-dashed flex items-center justify-center bg-gray-50/50 group">
-                {imageLoading || fetchingImage ? (
-                  <div className="flex items-center justify-center">
-                    <Loader className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                ) : uploadedFileUrl ? (
-                  <Image
-                    src={uploadedFileUrl}
-                    alt="Extra option preview"
-                    fill
-                    className="object-contain p-2"
-                  />
-                ) : imagePreview ? (
-                  <Image
-                    src={imagePreview}
-                    alt="Extra option preview"
-                    fill
-                    className="object-contain p-2"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center text-gray-400 text-center px-2">
-                    <ImagePlus className="h-8 w-8 mb-1" />
-                    <p className="text-xs">Upload extra option image</p>
-                  </div>
-                )}
-
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={() =>
-                      document
-                        .getElementById(
-                          `extra-image-upload-${currentItemIndex}`
-                        )
-                        ?.click()
-                    }
-                    disabled={imageLoading || fetchingImage}
-                    className="text-xs"
-                  >
-                    {imageLoading ? "Uploading..." : "Change Image"}
-                  </Button>
+        {/* Image Upload Field */}
+        <div>
+          <FormLabel className="flex items-center gap-2 text-xs mb-1">
+            <ImagePlus className="w-3.5 h-3.5 text-primary" />
+            Hình Ảnh Extra
+          </FormLabel>
+          <div className="flex flex-col gap-2">
+            <div className="relative w-full h-32 border rounded-md border-dashed flex items-center justify-center bg-gray-50/50 group">
+              {imageLoading || fetchingImage ? (
+                <div className="flex items-center justify-center">
+                  <Loader className="h-5 w-5 animate-spin text-primary" />
                 </div>
-              </div>
+              ) : uploadedFileUrl ? (
+                <Image
+                  src={uploadedFileUrl}
+                  alt="Extra preview"
+                  fill
+                  className="object-contain p-2"
+                />
+              ) : imagePreview ? (
+                <Image
+                  src={imagePreview}
+                  alt="Extra preview"
+                  fill
+                  className="object-contain p-2"
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center text-gray-400 text-center px-2">
+                  <ImagePlus className="h-6 w-6 mb-1" />
+                  <p className="text-xs">Upload extra image</p>
+                </div>
+              )}
 
-              <Input
-                type="file"
-                accept="image/*"
-                id={`extra-image-upload-${currentItemIndex}`}
-                className="hidden"
-                onChange={handleImageUpload}
-                disabled={imageLoading}
-              />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() =>
+                    document
+                      .getElementById(`extra-image-upload-${currentItemIndex}`)
+                      ?.click()
+                  }
+                  disabled={imageLoading || fetchingImage}
+                  className="text-xs h-7 px-2"
+                >
+                  {imageLoading ? "Uploading..." : "Change Image"}
+                </Button>
+              </div>
             </div>
+
+            <Input
+              type="file"
+              accept="image/*"
+              id={`extra-image-upload-${currentItemIndex}`}
+              className="hidden"
+              onChange={handleImageUpload}
+              disabled={imageLoading}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          {/* Name Field */}
+          <div className="space-y-1">
+            <FormLabel className="flex items-center gap-2 text-xs">
+              <CakeSlice className="w-3.5 h-3.5 text-primary" />
+              Tên extra <span className="text-red-500">*</span>
+            </FormLabel>
+            <Input
+              placeholder="Nhập tên"
+              value={currentItem.name || ""}
+              onChange={(e) => updateCurrentItem("name", e.target.value)}
+              onBlur={() =>
+                setTouchedFields((prev) => ({ ...prev, name: true }))
+              }
+              className={cn(
+                "rounded-md h-8 text-sm",
+                isFieldTouched("name") &&
+                  !validation.nameValid &&
+                  "border-red-500"
+              )}
+            />
+            {isFieldTouched("name") && !validation.nameValid && (
+              <p className="text-xs text-red-500">Tối thiểu 2 ký tự</p>
+            )}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            {/* Name Field */}
-            <div className="space-y-1.5">
-              <FormLabel className="flex items-center gap-2 text-sm">
-                <CakeSlice className="w-4 h-4 text-primary" />
-                Tên tùy chọn <span className="text-red-500">*</span>
-              </FormLabel>
-              <Input
-                placeholder="Nhập tên"
-                value={currentItem.name || ""}
-                onChange={(e) => updateCurrentItem("name", e.target.value)}
-                onBlur={() =>
-                  setTouchedFields((prev) => ({ ...prev, name: true }))
+          {/* Type Field */}
+          <div className="space-y-1">
+            <FormLabel className="flex items-center gap-2 text-xs">
+              <CakeSlice className="w-3.5 h-3.5 text-primary" />
+              Loại extra <span className="text-red-500">*</span>
+            </FormLabel>
+            <Select
+              value={itemType}
+              onValueChange={(value) => {
+                updateCurrentItem("type", value);
+                setTouchedFields((prev) => ({ ...prev, type: true }));
+              }}
+              onOpenChange={(open) => {
+                if (!open) {
+                  setTouchedFields((prev) => ({ ...prev, type: true }));
                 }
+              }}
+            >
+              <SelectTrigger
                 className={cn(
-                  "rounded-md h-9",
-                  isFieldTouched("name") &&
-                    !validation.nameValid &&
+                  "rounded-md h-8 text-sm",
+                  isFieldTouched("type") &&
+                    !validation.typeValid &&
                     "border-red-500"
                 )}
-              />
-              {isFieldTouched("name") && !validation.nameValid && (
-                <p className="text-xs text-red-500">Tối thiểu 2 ký tự</p>
-              )}
-            </div>
-
-            <div className="flex justify-between space-x-2">
-              {/* Price Field */}
-              <div className="space-y-1.5">
-                <FormLabel className="flex items-center gap-2 text-sm">
-                  <DollarSign className="w-4 h-4 text-primary" />
-                  Giá <span className="text-red-500">*</span>
-                </FormLabel>
-                <Input
-                  type="number"
-                  placeholder="Nhập giá"
-                  value={currentItem.price}
-                  onChange={(e) =>
-                    updateCurrentItem("price", parseFloat(e.target.value) || 0)
-                  }
-                  onBlur={() =>
-                    setTouchedFields((prev) => ({ ...prev, price: true }))
-                  }
-                  className={cn(
-                    "rounded-md h-9",
-                    isFieldTouched("price") &&
-                      !validation.priceValid &&
-                      "border-red-500"
-                  )}
-                />
-                {isFieldTouched("price") && !validation.priceValid && (
-                  <p className="text-xs text-red-500">Giá không hợp lệ</p>
-                )}
-              </div>
-
-              {/* Color Field */}
-              <div className="space-y-1.5">
-                <FormLabel className="flex items-center gap-2 text-sm text-gray-700">
-                  <Palette className="w-4 h-4 text-purple-500" />
-                  Màu sắc <span className="text-red-500">*</span>
-                </FormLabel>
-                <Popover
-                  open={currentColorPopover}
-                  onOpenChange={(open) => {
-                    setCurrentColorPopover(open);
-                    if (!open) {
-                      setTouchedFields((prev) => ({ ...prev, color: true }));
-                    }
-                  }}
-                >
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      className={cn(
-                        "w-full justify-between rounded-xl h-10  hover:bg-transparent",
-                        isFieldTouched("color") &&
-                          !validation.colorValid &&
-                          "border-red-500"
-                      )}
-                    >
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-4 h-4 rounded-full"
-                          style={{
-                            backgroundColor:
-                              currentItem.color?.hex || "#FFFFFF",
-                          }}
-                        />
-                        {currentItem.color?.name || "White"} (
-                        {currentItem.color?.hex || "#FFFFFF"})
-                      </div>
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="p-0 w-[300px]">
-                    <Command>
-                      <CommandInput placeholder="Tìm màu..." className="h-9" />
-                      <CommandList>
-                        <CommandEmpty>Không tìm thấy màu.</CommandEmpty>
-                        <CommandGroup>
-                          {COLOR_OPTIONS.map((color) => (
-                            <CommandItem
-                              key={color.hex}
-                              value={color.name}
-                              onSelect={() => {
-                                updateCurrentItem("color", color);
-                                setCurrentColorPopover(false);
-                              }}
-                            >
-                              <div className="flex items-center gap-3 w-full">
-                                <div
-                                  className="w-5 h-5 rounded-full border border-gray-200"
-                                  style={{ backgroundColor: color.hex }}
-                                />
-                                <span className="text-sm">
-                                  {color.name} ({color.hex})
-                                </span>
-                              </div>
-                              <Check
-                                className={cn(
-                                  "ml-auto h-4 w-4",
-                                  color.hex === currentItem.color?.hex
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
-                              />
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                {isFieldTouched("color") && !validation.colorValid && (
-                  <p className="text-xs text-red-500">Vui lòng chọn màu sắc</p>
-                )}
-              </div>
-            </div>
-
-            {/* Type Field */}
-            <div className="space-y-1.5">
-              <FormLabel className="flex items-center gap-2 text-sm">
-                <CakeSlice className="w-4 h-4 text-primary" />
-                Loại tùy chọn <span className="text-red-500">*</span>
-              </FormLabel>
-              <Select
-                value={itemType}
-                onValueChange={(value) => {
-                  updateCurrentItem("type", value);
-                  setTouchedFields((prev) => ({ ...prev, type: true }));
-                }}
-                onOpenChange={(open) => {
-                  if (!open) {
-                    setTouchedFields((prev) => ({ ...prev, type: true }));
-                  }
-                }}
               >
-                <SelectTrigger
+                <SelectValue placeholder="Chọn loại" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={itemType} className="text-xs">
+                  {getTypeDisplayName(itemType)}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            {isFieldTouched("type") && !validation.typeValid && (
+              <p className="text-xs text-red-500">Vui lòng chọn loại extra</p>
+            )}
+          </div>
+
+          {/* Price Field */}
+          <div className="space-y-1">
+            <FormLabel className="flex items-center gap-2 text-xs">
+              <DollarSign className="w-3.5 h-3.5 text-primary" />
+              Giá <span className="text-red-500">*</span>
+            </FormLabel>
+            <Input
+              type="number"
+              placeholder="Nhập giá"
+              value={currentItem.price}
+              onChange={(e) =>
+                updateCurrentItem("price", parseFloat(e.target.value) || 0)
+              }
+              onBlur={() =>
+                setTouchedFields((prev) => ({ ...prev, price: true }))
+              }
+              className={cn(
+                "rounded-md h-8 text-sm",
+                isFieldTouched("price") &&
+                  !validation.priceValid &&
+                  "border-red-500"
+              )}
+            />
+            {isFieldTouched("price") && !validation.priceValid && (
+              <p className="text-xs text-red-500">Giá không hợp lệ</p>
+            )}
+          </div>
+
+          {/* Color Field */}
+          <div className="space-y-1">
+            <FormLabel className="flex items-center gap-2 text-xs text-gray-700">
+              <Palette className="w-3.5 h-3.5 text-purple-500" />
+              Màu sắc <span className="text-red-500">*</span>
+            </FormLabel>
+            <Popover
+              open={currentColorPopover}
+              onOpenChange={(open) => {
+                setCurrentColorPopover(open);
+                if (!open) {
+                  setTouchedFields((prev) => ({ ...prev, color: true }));
+                }
+              }}
+            >
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
                   className={cn(
-                    "rounded-md h-9",
-                    isFieldTouched("type") &&
-                      !validation.typeValid &&
+                    "w-full justify-between rounded-md h-8 hover:bg-transparent text-sm",
+                    isFieldTouched("color") &&
+                      !validation.colorValid &&
                       "border-red-500"
                   )}
                 >
-                  <SelectValue placeholder="Chọn loại" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={itemType}>{itemType}</SelectItem>
-                </SelectContent>
-              </Select>
-              {isFieldTouched("type") && !validation.typeValid && (
-                <p className="text-xs text-red-500">
-                  Vui lòng chọn loại tùy chọn
-                </p>
-              )}
-            </div>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-3 h-3 rounded-full flex-shrink-0"
+                      style={{
+                        backgroundColor: currentItem.color?.hex || "#FFFFFF",
+                      }}
+                    />
+                    <span className="truncate text-xs">
+                      {currentItem.color?.name || "White"}
+                    </span>
+                  </div>
+                  <ChevronsUpDown className="ml-1 h-3 w-3 flex-shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="p-0 w-[180px] shadow-md"
+                align="center"
+                side="bottom"
+                sideOffset={4}
+              >
+                <Command className="max-h-[150px]">
+                  <CommandInput
+                    placeholder="Tìm màu..."
+                    className="h-7 text-xs"
+                  />
+                  <CommandList className="max-h-[100px]">
+                    <CommandEmpty>Không tìm thấy màu.</CommandEmpty>
+                    <CommandGroup className="overflow-y-auto">
+                      {COLOR_OPTIONS.map((color) => (
+                        <CommandItem
+                          key={color.name}
+                          value={color.name}
+                          onSelect={() => {
+                            updateCurrentItem("color", color);
+                            setCurrentColorPopover(false);
+                          }}
+                          className="flex items-center gap-2 cursor-pointer py-1 px-2 text-xs"
+                        >
+                          <div
+                            className="w-3 h-3 rounded-full border border-gray-200 flex-shrink-0"
+                            style={{ backgroundColor: color.hex }}
+                          />
+                          <span className="truncate">{color.displayName}</span>
+                          <Check
+                            className={cn(
+                              "ml-auto h-3 w-3 flex-shrink-0",
+                              color.hex === currentItem.color?.hex
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            {isFieldTouched("color") && !validation.colorValid && (
+              <p className="text-xs text-red-500">Vui lòng chọn màu sắc</p>
+            )}
+          </div>
+        </div>
 
-            {/* Is Default Checkbox */}
-            <div className="col-span-2">
-              <div className="flex flex-row items-start space-x-3 space-y-0 p-2">
-                <Checkbox
-                  checked={currentItem.is_default || false}
-                  onCheckedChange={(checked) =>
-                    updateCurrentItem("is_default", !!checked)
-                  }
-                />
-                <div className="space-y-1 leading-none">
-                  <FormLabel className="text-sm">Đặt làm mặc định</FormLabel>
-                </div>
-              </div>
-            </div>
+        {/* Is Default Checkbox */}
+        <div>
+          <div className="flex items-center gap-2 py-0">
+            <Checkbox
+              checked={currentItem.is_default || false}
+              onCheckedChange={(checked) =>
+                updateCurrentItem("is_default", !!checked)
+              }
+              className="h-3.5 w-3.5"
+            />
+            <FormLabel className="text-xs !mt-0">Đặt làm mặc định</FormLabel>
           </div>
         </div>
 
         {/* Description Field */}
-        <div className="mt-4 space-y-1.5">
-          <FormLabel className="flex items-center gap-2 text-sm">
-            <FileText className="w-4 h-4 text-primary" />
+        <div className="space-y-1">
+          <FormLabel className="flex items-center gap-2 text-xs">
+            <FileText className="w-3.5 h-3.5 text-primary" />
             Mô tả
           </FormLabel>
           <textarea
             placeholder="Nhập mô tả"
             value={currentItem.description || ""}
             onChange={(e) => updateCurrentItem("description", e.target.value)}
-            className="w-full rounded-md border p-2 text-sm min-h-[80px]"
+            className="w-full rounded-md border p-2 text-sm min-h-[60px]"
           />
         </div>
       </div>
@@ -770,17 +768,22 @@ const CollectionCakeExtraModal = () => {
   // Render the summary view
   const renderSummary = () => {
     return (
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="font-medium">
-            Danh sách tùy chọn thêm ({extraItems.length})
+          <h3 className="text-sm font-medium">
+            Danh sách extra ({extraItems.length})
           </h3>
-          <Button variant="outline" size="sm" onClick={() => backToForm()}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => backToForm()}
+            className="h-7 text-xs"
+          >
             Chỉnh sửa
           </Button>
         </div>
 
-        <ScrollArea className="h-[300px] pr-4">
+        <ScrollArea className="h-[250px] pr-4">
           <div className="space-y-2">
             {extraItems.map((item, index) => {
               const isItemValid =
@@ -797,18 +800,18 @@ const CollectionCakeExtraModal = () => {
                 <div
                   key={index}
                   className={cn(
-                    "flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer",
+                    "flex items-center justify-between p-2 border rounded-lg hover:bg-gray-50 cursor-pointer",
                     !isItemValid && "border-red-500 bg-red-50"
                   )}
                   onClick={() => backToForm(index)}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     <div
-                      className="w-4 h-4 rounded-full border"
+                      className="w-3 h-3 rounded-full border"
                       style={{ backgroundColor: item.color?.hex || "#FFFFFF" }}
                     />
                     <div>
-                      <div className="font-medium">
+                      <div className="text-sm font-medium">
                         {item.name || "Chưa có tên"}
                       </div>
                       <div className="text-xs text-gray-500">
@@ -819,11 +822,14 @@ const CollectionCakeExtraModal = () => {
                     </div>
                   </div>
                   {!isItemValid && (
-                    <Badge variant="destructive" className="mr-2">
+                    <Badge
+                      variant="destructive"
+                      className="mr-2 text-[10px] px-1 py-0"
+                    >
                       Thiếu thông tin
                     </Badge>
                   )}
-                  <ChevronRight className="h-4 w-4 text-gray-400" />
+                  <ChevronRight className="h-3.5 w-3.5 text-gray-400" />
                 </div>
               );
             })}
@@ -835,21 +841,19 @@ const CollectionCakeExtraModal = () => {
 
   return (
     <Dialog open={isOpenModal} onOpenChange={handleClose}>
-      <DialogContent className="max-w-xl rounded-xl">
+      <DialogContent className="max-w-xl max-h-[85vh] rounded-xl overflow-y-auto">
         <DialogHeader className="pb-2">
           <DialogTitle className="text-2xl font-bold flex items-center gap-2">
             <CakeSlice className="w-6 h-6" />
-            {currentStep === "form"
-              ? "Thêm Tùy Chọn Thêm"
-              : "Xác nhận Thêm Tùy Chọn Thêm"}
+            {currentStep === "form" ? "Thêm Extra" : "Xác nhận Thêm Extra"}
           </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
             {currentStep === "form" ? renderItemForm() : renderSummary()}
 
-            <div className="flex flex-col gap-2 pt-4">
+            <div className="flex flex-col gap-1.5 pt-2">
               {currentStep === "form" && (
                 <>
                   <div className="flex gap-2 w-full">
@@ -857,18 +861,18 @@ const CollectionCakeExtraModal = () => {
                       type="button"
                       onClick={addNewItem}
                       variant="outline"
-                      className="gap-2 rounded-md flex-1"
+                      className="gap-2 rounded-md flex-1 h-8 text-xs"
                     >
-                      <Plus className="w-4 h-4" />
-                      Thêm tùy chọn thêm mới
+                      <Plus className="w-3.5 h-3.5" />
+                      Thêm extra mới
                     </Button>
                     <Button
                       type="button"
                       onClick={goToSummary}
                       disabled={!currentItemValidated}
-                      className="gap-2 rounded-md flex-1"
+                      className="gap-2 rounded-md flex-1 h-8 text-xs"
                     >
-                      <ListFilter className="w-4 h-4" />
+                      <ListFilter className="w-3.5 h-3.5" />
                       Xem danh sách ({extraItems.length})
                     </Button>
                   </div>
@@ -878,7 +882,7 @@ const CollectionCakeExtraModal = () => {
               {currentStep === "summary" && (
                 <Button
                   type="submit"
-                  className="w-full rounded-md h-10"
+                  className="w-full rounded-md h-8 text-xs"
                   disabled={
                     isPending || extraItems.length === 0 || !allItemsValid
                   }
@@ -886,8 +890,8 @@ const CollectionCakeExtraModal = () => {
                   {isPending
                     ? "Đang xử lý..."
                     : !allItemsValid
-                    ? "Một số tùy chọn thêm chưa hoàn thành"
-                    : `Xác nhận thêm ${extraItems.length} tùy chọn thêm`}
+                    ? "Một số extra chưa hoàn thành"
+                    : `Xác nhận thêm ${extraItems.length} extra`}
                 </Button>
               )}
 
@@ -895,7 +899,7 @@ const CollectionCakeExtraModal = () => {
                 type="button"
                 variant="outline"
                 onClick={handleClose}
-                className="rounded-md h-9 w-full"
+                className="rounded-md h-8 text-xs w-full"
               >
                 Hủy bỏ
               </Button>
