@@ -9,6 +9,7 @@ export const orderDateColumn = {
   ),
   cell: ({ row }: { row: Row<IOrder> }) => {
     const paidAt = row.original.paid_at || "";
+    const createdAt = row.original.created_at || "";
 
     // Format the date
     const formatDate = (dateString: string) => {
@@ -18,13 +19,6 @@ export const orderDateColumn = {
         const date = new Date(dateString);
         if (isNaN(date.getTime())) return "Không hợp lệ";
 
-        // Format time as HH:MM
-        const time = date.toLocaleTimeString("vi-VN", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        });
-
         // Format date as DD/MM/YYYY
         const formattedDate = date.toLocaleDateString("vi-VN", {
           day: "2-digit",
@@ -32,15 +26,20 @@ export const orderDateColumn = {
           year: "numeric",
         });
 
-        return `${time} ${formattedDate}`;
+        return formattedDate;
       } catch (error) {
         return "Không xác định";
       }
     };
 
+    // Use paid_at if available, otherwise use created_at
+    const dateToShow = paidAt || createdAt;
+
     return (
-      <div className="flex items-center min-w-[150px]">
-        <span className="text-sm text-foreground">{formatDate(paidAt)}</span>
+      <div className="flex items-center min-w-[120px]">
+        <span className="text-sm text-foreground">
+          {formatDate(dateToShow)}
+        </span>
       </div>
     );
   },

@@ -173,7 +173,7 @@ export const routes: Route[] = [
     label: "Hỗ trợ khách hàng",
     icon: FaRegMoneyBillAlt,
     activeIcon: FaMoneyBillAlt,
-    href: "/dashboard/bad-reports/admin",
+    href: "/dashboard/bad-reports",
     allowsRoles: [UserRole.ADMIN],
   },
   // {

@@ -4,33 +4,12 @@ import { IOrder } from "../types/order-type";
 import { cn } from "@/lib/utils";
 
 const OrderStatus = {
-  PENDING: 0,
   WAITING_BAKERY_CONFIRM: 1,
   PROCESSING: 2,
   READY_FOR_PICKUP: 3,
   SHIPPING: 4,
   COMPLETED: 5,
   CANCELED: -1,
-};
-
-const orderStatusLabels = {
-  PENDING: "Chờ thanh toán",
-  WAITING_BAKERY_CONFIRM: "Chờ xác nhận",
-  PROCESSING: "Đang xử lý",
-  READY_FOR_PICKUP: "Sẵn sàng giao",
-  SHIPPING: "Vận chuyển",
-  COMPLETED: "Hoàn thành",
-  CANCELED: "Đã hủy",
-};
-
-const orderStatusDescriptions = {
-  PENDING: "Đơn hàng mới được tạo, chờ khách hàng thanh toán",
-  WAITING_BAKERY_CONFIRM: "Chờ bakery xác nhận đơn hàng",
-  PROCESSING: "Bakery đang xử lý đơn hàng",
-  READY_FOR_PICKUP: "Bakery đã hoàn thành, sẵn sàng giao",
-  SHIPPING: "Đang vận chuyển đơn hàng đến khách",
-  COMPLETED: "Khách hàng đã xác nhận đơn hàng",
-  CANCELED: "Đơn hàng đã bị hủy",
 };
 
 interface OrderFlowVisualizationProps {
@@ -42,25 +21,45 @@ export default function OrderFlowVisualization({
 }: OrderFlowVisualizationProps) {
   const currentStatus = order.order_status;
   const currentStep =
-    OrderStatus[currentStatus as keyof typeof OrderStatus] || -2;
+    OrderStatus[currentStatus as keyof typeof OrderStatus] || 0;
+
+  // Determine step labels based on shipping_type
+  const getStepLabel = (stepId: string) => {
+    if (stepId === "SHIPPING") {
+      return `Đang giao hàng${
+        order.shipping_type ? ` (${order.shipping_type})` : ""
+      }`;
+    } else if (stepId === "READY_FOR_PICKUP") {
+      return "Sẵn sàng giao";
+    } else if (stepId === "WAITING_BAKERY_CONFIRM") {
+      return "Chờ xác nhận";
+    } else if (stepId === "PROCESSING") {
+      return "Đang xử lý";
+    } else if (stepId === "COMPLETED") {
+      return "Hoàn thành";
+    }
+    return stepId;
+  };
 
   const steps = [
-    { id: "PENDING", label: "Chờ thanh toán" },
-    { id: "WAITING_BAKERY_CONFIRM", label: "Chờ xác nhận" },
-    { id: "PROCESSING", label: "Đang xử lý" },
-    { id: "READY_FOR_PICKUP", label: "Sẵn sàng giao" },
-    { id: "SHIPPING", label: "Vận chuyển" },
-    { id: "COMPLETED", label: "Hoàn thành" },
+    {
+      id: "WAITING_BAKERY_CONFIRM",
+      label: getStepLabel("WAITING_BAKERY_CONFIRM"),
+    },
+    { id: "PROCESSING", label: getStepLabel("PROCESSING") },
+    { id: "READY_FOR_PICKUP", label: getStepLabel("READY_FOR_PICKUP") },
+    { id: "SHIPPING", label: getStepLabel("SHIPPING") },
+    { id: "COMPLETED", label: getStepLabel("COMPLETED") },
   ];
 
   if (currentStatus === "CANCELED") {
     return (
-      <div className="w-full p-4 bg-red-50 border border-red-200 rounded-lg">
+      <div className="w-full p-4 bg-red-50 dark:bg-slate-800/70 border border-red-200 dark:border-red-700/50 rounded-lg">
         <div className="text-center">
-          <div className="text-lg font-semibold text-red-700">
+          <div className="text-lg font-semibold text-red-700 dark:text-red-400">
             Đơn hàng đã bị hủy
           </div>
-          <p className="text-sm text-red-600 mt-1">
+          <p className="text-sm text-red-600 dark:text-red-400/80 mt-1">
             {order.canceled_reason
               ? `Lý do: ${order.canceled_reason}`
               : "Không có lý do"}
@@ -71,82 +70,76 @@ export default function OrderFlowVisualization({
   }
 
   return (
-    <div className="w-full py-6 px-4 bg-white border rounded-lg">
-      <div className="relative">
-        {/* Progress Bar */}
-        <div className="absolute top-5 left-0 w-full h-1 bg-slate-200">
-          <div
-            className={cn(
-              "absolute top-0 left-0 h-full bg-teal-500 transition-all duration-500",
-              currentStep === -2 ? "w-0" : ""
-            )}
-            style={{
-              width: `${Math.max(
-                0,
-                Math.min(100, (currentStep / (steps.length - 1)) * 100)
-              )}%`,
-            }}
-          />
-        </div>
+    <div className="w-full py-6 bg-gray-50 dark:bg-slate-800/50 rounded-lg border border-gray-200 dark:border-slate-700/30">
+      <div className="w-full relative flex items-center justify-between px-4 sm:px-8">
+        {/* Background connecting line (gray) */}
+        <div className="absolute top-5 left-0 right-0 h-[6px] bg-gray-200 dark:bg-gray-700"></div>
 
-        {/* Steps */}
-        <div className="flex justify-between relative z-10">
-          {steps.map((step, index) => {
-            const isActive =
-              OrderStatus[step.id as keyof typeof OrderStatus] <= currentStep;
-            const isCurrent =
-              OrderStatus[step.id as keyof typeof OrderStatus] === currentStep;
+        {/* Completed connecting line (blue) */}
+        <div
+          className="absolute top-5 left-0 h-[6px] bg-blue-500 dark:bg-blue-400 transition-all duration-500"
+          style={{
+            width: `calc(${Math.max(
+              0,
+              Math.min(100, ((currentStep - 1) / (steps.length - 1)) * 100)
+            )}% + ${currentStep > 1 ? "10px" : "0px"})`,
+            zIndex: 1,
+          }}
+        ></div>
 
-            return (
-              <div key={step.id} className="flex flex-col items-center">
-                <div
+        {steps.map((step, index) => {
+          const stepValue = OrderStatus[step.id as keyof typeof OrderStatus];
+          const isCompleted = stepValue < currentStep;
+          const isActive = stepValue === currentStep;
+          const isPending = stepValue > currentStep;
+
+          // Only show relevant steps based on current status
+          const isHidden =
+            (step.id === "SHIPPING" && currentStatus === "READY_FOR_PICKUP") ||
+            (step.id === "READY_FOR_PICKUP" && currentStatus === "SHIPPING");
+
+          if (isHidden && !isActive && !isCompleted) {
+            return null;
+          }
+
+          return (
+            <div
+              key={step.id}
+              className="flex flex-col items-center"
+              style={{ zIndex: 2 }}
+            >
+              {/* Step number indicator */}
+              <div
+                className={cn(
+                  "w-12 h-12 rounded-full border-[3px] flex items-center justify-center text-base font-semibold mb-2 shadow-md",
+                  isActive
+                    ? "bg-blue-500 border-white text-white dark:bg-blue-400 dark:border-blue-200"
+                    : isCompleted
+                    ? "bg-blue-500 border-blue-500 text-white dark:bg-blue-400 dark:border-blue-400"
+                    : "bg-white border-gray-300 text-gray-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-400"
+                )}
+              >
+                {index + 1}
+              </div>
+
+              {/* Step label */}
+              <div className="text-center max-w-[120px]">
+                <span
                   className={cn(
-                    "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300",
+                    "text-sm font-medium",
                     isActive
-                      ? "border-teal-500 bg-teal-500 text-white"
-                      : "border-slate-300 bg-white text-slate-400",
-                    isCurrent ? "ring-4 ring-teal-100" : ""
+                      ? "text-gray-700 dark:text-gray-200"
+                      : isCompleted
+                      ? "text-gray-700 dark:text-gray-200"
+                      : "text-gray-500 dark:text-gray-400"
                   )}
                 >
-                  {index + 1}
-                </div>
-                <div className="mt-2 text-xs font-medium text-center">
-                  <span
-                    className={cn(
-                      isActive ? "text-teal-700" : "text-slate-500",
-                      isCurrent ? "font-semibold" : ""
-                    )}
-                  >
-                    {step.label}
-                  </span>
-                </div>
-                {isCurrent && (
-                  <div className="mt-1 text-xs text-teal-600 max-w-[100px] text-center">
-                    {
-                      orderStatusDescriptions[
-                        step.id as keyof typeof orderStatusDescriptions
-                      ]
-                    }
-                  </div>
-                )}
+                  {step.label}
+                </span>
               </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Current Status Description */}
-      <div className="mt-8 text-center text-sm text-slate-600">
-        {currentStatus && (
-          <div>
-            <span className="font-semibold">Trạng thái hiện tại:</span>{" "}
-            <span className="text-teal-700 font-medium">
-              {orderStatusLabels[
-                currentStatus as keyof typeof orderStatusLabels
-              ] || currentStatus}
-            </span>
-          </div>
-        )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

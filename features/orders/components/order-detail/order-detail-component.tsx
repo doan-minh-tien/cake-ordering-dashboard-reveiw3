@@ -15,10 +15,10 @@ import {
   CheckCircle,
   AlertCircle,
   ArrowRight,
-  X,
   Upload,
   Image as ImageIcon,
   Loader,
+  ArrowLeft,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -43,12 +43,11 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { useRouter } from "nextjs-toploader/app";
+import { useRouter } from "next/navigation";
 import {
   beingToNext,
   beingToNextWithFiles,
   beingToNextWithFileBase64,
-  cancelOrder,
 } from "../../actions/order-action";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -61,8 +60,6 @@ interface OrderDetailComponentProps {
 const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [cancelReason, setCancelReason] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [filePreview, setFilePreview] = useState<string | null>(null);
@@ -335,35 +332,6 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
     }
   };
 
-  const handleCancelOrder = async () => {
-    if (!cancelReason.trim()) {
-      toast.error("Vui lòng nhập lý do hủy đơn");
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const result = await cancelOrder(order.id, cancelReason);
-      if (result.success) {
-        toast.success("Đã hủy đơn hàng");
-        setIsDialogOpen(false);
-        setCancelReason("");
-        router.refresh();
-      } else {
-        toast.error("Không thể hủy đơn hàng");
-      }
-    } catch (error) {
-      toast.error("Đã xảy ra lỗi");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const showCancelOption =
-    order.order_status !== "PENDING" &&
-    order.order_status !== "COMPLETED" &&
-    order.order_status !== "CANCELED" &&
-    order.order_status === "WAITING_BAKERY_CONFIRM";
   const showActionButton =
     order.order_status !== "PENDING" &&
     order.order_status !== "COMPLETED" &&
@@ -374,250 +342,69 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
   const actionConfig = getActionButtonConfig(order.order_status);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-8">
-      {/* Header Section */}
-      <Card className="border dark:border-gray-800 shadow-sm overflow-hidden">
-        <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-blue-400 to-purple-500"></div>
-        <CardHeader className="pb-3 pt-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <CardTitle className="text-2xl font-bold">
-                Chi tiết đơn hàng
-              </CardTitle>
-              <p className="text-muted-foreground flex items-center gap-2 mt-2">
-                <Tag size={16} className="text-primary" />
-                <span>Mã đơn: </span>
-                <span className="font-semibold text-foreground">
-                  {order.order_code}
-                </span>
-              </p>
-            </div>
-            <span
-              className={cn(
-                "px-3 py-1.5 rounded-full text-sm font-medium",
-                statusInfo.bgColor,
-                statusInfo.textColor
-              )}
-            >
-              {statusInfo.label}
-            </span>
-          </div>
-          {order.order_status.toUpperCase() !== "PENDING" && (
-            <p className="text-muted-foreground mt-1 flex items-center gap-1">
-              <Clock size={14} />
-              Đặt ngày:{" "}
-              <span className="font-medium text-foreground ml-1">
-                {formatDate(order.paid_at)}
-              </span>
-            </p>
-          )}
-        </CardHeader>
-      </Card>
+    <div className="space-y-6">
+      <Button
+        onClick={() => router.back()}
+        variant="ghost"
+        size="default"
+        className="mb-5 flex items-center text-blue-600 hover:text-blue-800 hover:bg-blue-50 font-medium"
+      >
+        <ArrowLeft className="h-5 w-5 mr-2" />
+        <span className="text-base">Quay lại</span>
+      </Button>
 
-      {/* Order Status Visualization */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-indigo-600">
+          Chi tiết đơn hàng
+        </h1>
+      </div>
+
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 p-4 bg-blue-50 border border-blue-100 rounded-lg">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-full bg-blue-100 text-blue-600">
+            <Tag size={18} />
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Mã đơn hàng</p>
+            <p className="font-semibold text-blue-700">{order.order_code}</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-full bg-blue-100 text-blue-600">
+            <Clock size={18} />
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Ngày tạo đơn</p>
+            <p className="font-semibold text-blue-700">
+              {order.created_at
+                ? formatDate(order.created_at)
+                : "Không xác định"}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-full bg-blue-100 text-blue-600">
+            <CreditCard size={18} />
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Trạng thái đơn hàng</p>
+            <p className="font-semibold text-blue-700">
+              {order.order_status
+                ? getStatusInfo(order.order_status).label
+                : "Không xác định"}
+            </p>
+          </div>
+        </div>
+      </div>
+
       <OrderFlowVisualization order={order} />
 
       {/* Order Status Notes */}
       <OrderStatusNotes order={order} />
 
-      {/* Action Buttons */}
-      {(showActionButton || showCancelOption) && (
-        <Card className="border dark:border-gray-800 shadow-sm relative overflow-hidden">
-          <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500"></div>
-          <CardHeader className="pb-2 pt-6">
-            <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              <ArrowRight size={18} className="text-primary" /> Thao tác đơn
-              hàng
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-3">
-              {showActionButton && (
-                <Dialog
-                  open={isActionDialogOpen}
-                  onOpenChange={setIsActionDialogOpen}
-                >
-                  <DialogTrigger asChild>
-                    <Button
-                      className={`flex items-center ${actionConfig.color} transition-all hover:shadow-md`}
-                      disabled={isLoading || actionConfig.disableAction}
-                    >
-                      <ArrowRight className="mr-2 h-4 w-4" />
-                      {actionConfig.text}
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>Xác nhận thao tác</DialogTitle>
-                      <DialogDescription>
-                        {actionConfig.description}
-                      </DialogDescription>
-                    </DialogHeader>
-
-                    {actionConfig.requiresFile && (
-                      <div className="my-4 space-y-4">
-                        <div className="grid gap-2">
-                          <Label
-                            htmlFor="cake-image"
-                            className="text-md font-medium"
-                          >
-                            Hình ảnh bánh hoàn thiện
-                          </Label>
-
-                          <div className="flex items-center gap-2">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => fileInputRef.current?.click()}
-                              className="flex items-center gap-1 hover:border-primary/70 transition-colors"
-                            >
-                              <Upload className="h-4 w-4" />
-                              Tải ảnh lên
-                            </Button>
-                            <span className="text-sm text-muted-foreground">
-                              {uploadedFiles.length > 0
-                                ? uploadedFiles[0].name
-                                : "Chưa chọn tệp nào"}
-                            </span>
-                          </div>
-
-                          <Input
-                            ref={fileInputRef}
-                            id="cake-image"
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={handleFileUpload}
-                          />
-
-                          {filePreview && (
-                            <div className="mt-2 relative w-full h-48 border dark:border-gray-700 rounded-md overflow-hidden shadow-sm">
-                              <div
-                                className="absolute inset-0 bg-center bg-cover bg-no-repeat"
-                                style={{
-                                  backgroundImage: `url(${filePreview})`,
-                                }}
-                              ></div>
-                            </div>
-                          )}
-
-                          {!filePreview && (
-                            <div className="mt-2 flex flex-col justify-center items-center border border-dashed dark:border-gray-700 rounded-md h-48 bg-muted/30 dark:bg-gray-800/30 transition-colors hover:border-primary/50">
-                              <ImageIcon className="h-10 w-10 text-muted-foreground/50" />
-                              <p className="text-sm text-muted-foreground mt-2">
-                                Hình ảnh bánh hoàn thiện
-                              </p>
-                              <p className="text-xs text-muted-foreground/70 mt-1">
-                                Nhấp vào "Tải ảnh lên" để chọn hình ảnh
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    <DialogFooter className="mt-4">
-                      <Button
-                        variant="outline"
-                        onClick={() => setIsActionDialogOpen(false)}
-                        disabled={isLoading}
-                        className="hover:bg-muted/50 transition-colors"
-                      >
-                        Hủy
-                      </Button>
-                      <Button
-                        onClick={handleMoveToNextStatus}
-                        disabled={
-                          isLoading ||
-                          (actionConfig.requiresFile &&
-                            uploadedFiles.length === 0)
-                        }
-                        className={`${actionConfig.color} transition-all hover:opacity-90`}
-                      >
-                        {isLoading ? (
-                          <div className="flex items-center gap-1.5">
-                            <Loader className="h-3 w-3 animate-spin" />
-                            <span>Đang xử lý...</span>
-                          </div>
-                        ) : (
-                          actionConfig.confirmText
-                        )}
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              )}
-
-              {showCancelOption && (
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="destructive"
-                      className="flex items-center transition-all hover:shadow-md"
-                      disabled={isLoading}
-                    >
-                      <X className="mr-2 h-4 w-4" />
-                      Hủy đơn hàng
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>Hủy đơn hàng</DialogTitle>
-                      <DialogDescription>
-                        Nhập lý do hủy đơn hàng này. Hành động này không thể
-                        hoàn tác.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="reason" className="text-md font-medium">
-                          Lý do hủy
-                        </Label>
-                        <Textarea
-                          id="reason"
-                          placeholder="Nhập lý do hủy đơn hàng..."
-                          value={cancelReason}
-                          onChange={(e) => setCancelReason(e.target.value)}
-                          className="min-h-[120px] resize-none focus-visible:ring-primary"
-                        />
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button
-                        variant="outline"
-                        onClick={() => setIsDialogOpen(false)}
-                        disabled={isLoading}
-                        className="hover:bg-muted/50 transition-colors"
-                      >
-                        Hủy
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        onClick={handleCancelOrder}
-                        disabled={isLoading}
-                        className="transition-all hover:opacity-90"
-                      >
-                        {isLoading ? (
-                          <div className="flex items-center gap-1.5">
-                            <Loader className="h-3 w-3 animate-spin" />
-                            <span>Đang xử lý...</span>
-                          </div>
-                        ) : (
-                          "Xác nhận hủy"
-                        )}
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Order Info and Customer Info */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Customer Information */}
         <Card className="border dark:border-gray-800 shadow-sm relative overflow-hidden">
           <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-green-400 to-teal-500"></div>
@@ -775,7 +562,10 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
             </div>
             {order.discount_amount > 0 && (
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Giảm giá:</span>
+                <span className="text-muted-foreground">
+                  Giảm giá{order.voucher_code ? ` (${order.voucher_code})` : ""}
+                  :
+                </span>
                 <span className="text-destructive">
                   -{formatCurrency(order.discount_amount)}
                 </span>
@@ -804,6 +594,137 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
           <CardContent>
             <div className="p-3 bg-muted/30 dark:bg-gray-800/30 rounded-lg">
               <p className="text-muted-foreground">{order.order_note}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Action Buttons */}
+      {showActionButton && (
+        <Card className="border dark:border-gray-800 shadow-sm relative overflow-hidden">
+          <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500"></div>
+          <CardHeader className="pb-2 pt-6">
+            <CardTitle className="text-lg font-semibold flex items-center gap-2">
+              <ArrowRight size={18} className="text-primary" /> Thao tác đơn
+              hàng
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-3">
+              <Dialog
+                open={isActionDialogOpen}
+                onOpenChange={setIsActionDialogOpen}
+              >
+                <DialogTrigger asChild>
+                  <Button
+                    className={`flex items-center ${actionConfig.color} transition-all hover:shadow-md`}
+                    disabled={isLoading || actionConfig.disableAction}
+                  >
+                    <ArrowRight className="mr-2 h-4 w-4" />
+                    {actionConfig.text}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Xác nhận thao tác</DialogTitle>
+                    <DialogDescription>
+                      {actionConfig.description}
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  {actionConfig.requiresFile && (
+                    <div className="my-4 space-y-4">
+                      <div className="grid gap-2">
+                        <Label
+                          htmlFor="cake-image"
+                          className="text-md font-medium"
+                        >
+                          Hình ảnh bánh hoàn thiện
+                        </Label>
+
+                        <div className="flex items-center gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="flex items-center gap-1 hover:border-primary/70 transition-colors"
+                          >
+                            <Upload className="h-4 w-4" />
+                            Tải ảnh lên
+                          </Button>
+                          <span className="text-sm text-muted-foreground">
+                            {uploadedFiles.length > 0
+                              ? uploadedFiles[0].name
+                              : "Chưa chọn tệp nào"}
+                          </span>
+                        </div>
+
+                        <Input
+                          ref={fileInputRef}
+                          id="cake-image"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleFileUpload}
+                        />
+
+                        {filePreview && (
+                          <div className="mt-2 relative w-full h-48 border dark:border-gray-700 rounded-md overflow-hidden shadow-sm">
+                            <div
+                              className="absolute inset-0 bg-center bg-cover bg-no-repeat"
+                              style={{
+                                backgroundImage: `url(${filePreview})`,
+                              }}
+                            ></div>
+                          </div>
+                        )}
+
+                        {!filePreview && (
+                          <div className="mt-2 flex flex-col justify-center items-center border border-dashed dark:border-gray-700 rounded-md h-48 bg-muted/30 dark:bg-gray-800/30 transition-colors hover:border-primary/50">
+                            <ImageIcon className="h-10 w-10 text-muted-foreground/50" />
+                            <p className="text-sm text-muted-foreground mt-2">
+                              Hình ảnh bánh hoàn thiện
+                            </p>
+                            <p className="text-xs text-muted-foreground/70 mt-1">
+                              Nhấp vào "Tải ảnh lên" để chọn hình ảnh
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <DialogFooter className="mt-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsActionDialogOpen(false)}
+                      disabled={isLoading}
+                      className="hover:bg-muted/50 transition-colors"
+                    >
+                      Hủy
+                    </Button>
+                    <Button
+                      onClick={handleMoveToNextStatus}
+                      disabled={
+                        isLoading ||
+                        (actionConfig.requiresFile &&
+                          uploadedFiles.length === 0)
+                      }
+                      className={`${actionConfig.color} transition-all hover:opacity-90`}
+                    >
+                      {isLoading ? (
+                        <div className="flex items-center gap-1.5">
+                          <Loader className="h-3 w-3 animate-spin" />
+                          <span>Đang xử lý...</span>
+                        </div>
+                      ) : (
+                        actionConfig.confirmText
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           </CardContent>
         </Card>
