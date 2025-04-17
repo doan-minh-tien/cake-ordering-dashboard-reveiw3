@@ -8,6 +8,7 @@ const StatusLabels = {
   PROCESSING: "Đang xử lý",
   RESOLVED: "Đã xử lý",
   REJECTED: "Từ chối",
+  ACCEPTED: "Đã chấp nhận",
 };
 
 const statusStyles = {
@@ -17,6 +18,7 @@ const statusStyles = {
   RESOLVED:
     "bg-green-200 text-green-800 hover:bg-green-300 hover:text-green-900",
   REJECTED: "bg-red-200 text-red-800 hover:bg-red-300 hover:text-red-900",
+  ACCEPTED: "bg-teal-200 text-teal-800 hover:bg-teal-300 hover:text-teal-900",
 };
 
 const statusColumn = {

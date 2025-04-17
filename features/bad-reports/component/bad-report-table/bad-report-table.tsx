@@ -86,7 +86,6 @@ export function BadReportTable({ badReportPromise }: BadReportTableProps) {
     <div className="h-full flex flex-col">
       <DataTable
         dataTable={dataTable}
-        newRowLink="/dashboard/bad-report/create"
         columns={columns}
         searchableColumns={searchableColumns}
         filterableColumns={filterableColumns}

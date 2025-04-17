@@ -13,7 +13,6 @@ const customerColumn = {
     return (
       <div className="flex flex-col">
         <span className="font-medium">{customer.name}</span>
-        <span className="text-sm text-muted-foreground">{customer.phone}</span>
       </div>
     );
   },
