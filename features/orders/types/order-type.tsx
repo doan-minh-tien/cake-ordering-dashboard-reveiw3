@@ -23,6 +23,7 @@ export interface IOrder {
   cancel_by: string;
   order_code: string;
   paid_at: string;
+  created_at: string;
   order_details: IOrderDetail[];
   order_supports: string;
   customer_id: string;

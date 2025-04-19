@@ -4,5 +4,5 @@ export const breadcrumbTranslations: { [key: string]: string } = {
   profile: "Hồ sơ",
   settings: "Cài đặt",
   promotions: "Khuyến mãi",
-  bakeries: "Danh sách cửa hàng"
+  bakeries: "Danh sách cửa hàng",
 };

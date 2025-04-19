@@ -14,12 +14,56 @@ import {
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { INotification } from "@/features/notifications/types/notification-type";
+import { useSession } from "next-auth/react";
+import { useEffect as useEffectOnce } from "react";
+import { apiRequest } from "@/lib/api/api-handler/generic";
+import { axiosAuth } from "@/lib/api/api-interceptor/api";
 
 export default function NotificationComponent() {
   const [isOpen, setIsOpen] = useState(false);
+  const [balance, setBalance] = useState<number | undefined>(undefined);
+  const [isLoadingBalance, setIsLoadingBalance] = useState(true);
+
   const router = useRouter();
   const popoverRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const { data: session } = useSession();
+
+  // Load balance on component mount
+  useEffect(() => {
+    async function getBalance() {
+      if (!session?.user?.wallet_id) return;
+
+      try {
+        setIsLoadingBalance(true);
+        const response = await apiRequest(() =>
+          axiosAuth.get(
+            `/wallets/${session.user.wallet_id}/transactions?limit=1`
+          )
+        );
+
+        if (response.success && response.data?.data?.[0]?.wallet) {
+          setBalance(response.data.data[0].wallet.balance);
+        }
+      } catch (error) {
+        console.error("Failed to fetch balance:", error);
+      } finally {
+        setIsLoadingBalance(false);
+      }
+    }
+
+    getBalance();
+  }, [session]);
+
+  const formatCurrency = (amount: number | undefined): string => {
+    if (amount === undefined) return "N/A";
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
 
   // Use the hook we created
   const {
@@ -127,118 +171,131 @@ export default function NotificationComponent() {
   }
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          {unreadCount > 0 ? (
-            <>
-              <BellRingIcon className="h-5 w-5" />
-              <Badge
-                className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white"
-                variant="destructive"
-              >
-                {unreadCount > 9 ? "9+" : unreadCount}
-              </Badge>
-            </>
-          ) : (
-            <BellIcon className="h-5 w-5" />
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent
-        ref={popoverRef}
-        className="w-80 p-0 max-h-[70vh] overflow-hidden"
-      >
-        <div className="flex items-center justify-between p-4 border-b">
-          <h3 className="font-semibold">Notifications</h3>
+    <div className="flex items-center gap-2">
+      <span className="text-sm font-medium">Số dư:</span>
+      {isLoadingBalance ? (
+        <Skeleton className="h-4 w-20" />
+      ) : (
+        <span className="text-sm font-medium text-primary">
+          {formatCurrency(balance)}
+        </span>
+      )}
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
           <Button
             variant="ghost"
-            size="sm"
-            className="text-xs"
-            onClick={() => router.push("/dashboard/notifications")}
+            size="icon"
+            className="relative"
+            onClick={() => setIsOpen(!isOpen)}
           >
-            View All
+            {unreadCount > 0 ? (
+              <>
+                <BellRingIcon className="h-5 w-5" />
+                <Badge
+                  className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white"
+                  variant="destructive"
+                >
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </Badge>
+              </>
+            ) : (
+              <BellIcon className="h-5 w-5" />
+            )}
           </Button>
-        </div>
+        </PopoverTrigger>
+        <PopoverContent
+          ref={popoverRef}
+          className="w-80 p-0 max-h-[70vh] overflow-hidden"
+        >
+          <div className="flex items-center justify-between p-4 border-b">
+            <h3 className="font-semibold">Notifications</h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs"
+              onClick={() => router.push("/dashboard/notifications")}
+            >
+              View All
+            </Button>
+          </div>
 
-        <div className="max-h-[60vh] overflow-y-auto py-1">
-          {isLoading ? (
-            Array(3)
-              .fill(0)
-              .map((_, index) => (
-                <div key={index} className="p-3 border-b flex gap-3">
-                  <Skeleton className="h-10 w-10 rounded-full" />
-                  <div className="space-y-2 flex-1">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-3 w-3/4" />
-                  </div>
-                </div>
-              ))
-          ) : allNotifications.length === 0 ? (
-            <div className="py-8 text-center text-sm text-muted-foreground">
-              No notifications yet
-            </div>
-          ) : (
-            <>
-              {allNotifications.map((notification: INotification) => (
-                <div
-                  key={notification.id}
-                  className={`p-3 border-b flex items-start gap-3 hover:bg-accent/50 cursor-pointer ${
-                    !notification.is_read ? "bg-accent/30" : ""
-                  }`}
-                  onClick={() => handleNotificationClick(notification)}
-                >
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-lg">
-                    {getNotificationIcon(notification.type)}
-                  </div>
-                  <div className="flex-1 space-y-1">
-                    <p className="text-sm font-medium line-clamp-1">
-                      {notification.title}
-                    </p>
-                    <p className="text-xs text-muted-foreground line-clamp-2">
-                      {notification.content}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(notification.created_at), {
-                        addSuffix: true,
-                      })}
-                    </p>
-                  </div>
-                  {!notification.is_read && (
-                    <div className="h-2 w-2 rounded-full bg-primary mt-2" />
-                  )}
-                </div>
-              ))}
-
-              {/* Load more reference element */}
-              {hasNextPage && (
-                <div
-                  ref={loadMoreRef}
-                  className="h-16 w-full flex items-center justify-center border-t"
-                >
-                  {isFetchingNextPage ? (
-                    <div className="py-2 flex flex-col items-center justify-center">
-                      <Skeleton className="h-5 w-5 rounded-full mb-1" />
-                      <span className="text-xs text-muted-foreground">
-                        Loading more...
-                      </span>
+          <div className="max-h-[60vh] overflow-y-auto py-1">
+            {isLoading ? (
+              Array(3)
+                .fill(0)
+                .map((_, index) => (
+                  <div key={index} className="p-3 border-b flex gap-3">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <div className="space-y-2 flex-1">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-3 w-3/4" />
                     </div>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">
-                      Scroll for more
-                    </span>
-                  )}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </PopoverContent>
-    </Popover>
+                  </div>
+                ))
+            ) : allNotifications.length === 0 ? (
+              <div className="py-8 text-center text-sm text-muted-foreground">
+                No notifications yet
+              </div>
+            ) : (
+              <>
+                {allNotifications.map((notification: INotification) => (
+                  <div
+                    key={notification.id}
+                    className={`p-3 border-b flex items-start gap-3 hover:bg-accent/50 cursor-pointer ${
+                      !notification.is_read ? "bg-accent/30" : ""
+                    }`}
+                    onClick={() => handleNotificationClick(notification)}
+                  >
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-lg">
+                      {getNotificationIcon(notification.type)}
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <p className="text-sm font-medium line-clamp-1">
+                        {notification.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground line-clamp-2">
+                        {notification.content}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(
+                          new Date(notification.created_at),
+                          {
+                            addSuffix: true,
+                          }
+                        )}
+                      </p>
+                    </div>
+                    {!notification.is_read && (
+                      <div className="h-2 w-2 rounded-full bg-primary mt-2" />
+                    )}
+                  </div>
+                ))}
+
+                {/* Load more reference element */}
+                {hasNextPage && (
+                  <div
+                    ref={loadMoreRef}
+                    className="h-16 w-full flex items-center justify-center border-t"
+                  >
+                    {isFetchingNextPage ? (
+                      <div className="py-2 flex flex-col items-center justify-center">
+                        <Skeleton className="h-5 w-5 rounded-full mb-1" />
+                        <span className="text-xs text-muted-foreground">
+                          Loading more...
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">
+                        Scroll for more
+                      </span>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 }

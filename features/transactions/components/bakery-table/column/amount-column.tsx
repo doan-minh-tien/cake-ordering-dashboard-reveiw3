@@ -3,6 +3,16 @@ import { TransactionType } from "@/features/transactions/types/transaction-type"
 import { Row, type Column } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { CaretSortIcon } from "@radix-ui/react-icons";
+import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
+
+const formatCurrency = (amount: number): string => {
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(Math.abs(amount));
+};
 
 export const amountColumn = {
   accessorKey: "amount",
@@ -17,11 +27,20 @@ export const amountColumn = {
     </Button>
   ),
   cell: ({ row }: { row: Row<TransactionType> }) => {
+    const amount = Number(row.getValue("amount"));
+    const isNegative = amount < 0;
+    const textColorClass = isNegative ? "text-red-600" : "text-green-600";
+
     return (
-      <div className="flex space-x-2">
-        <span className="max-w-[500px] truncate font-medium">
-          {/* // fotmat làm tron 2 số thập phân */}
-          {Number(row.getValue("amount")).toFixed(2)} đ
+      <div className="flex items-center gap-2">
+        {isNegative ? (
+          <ArrowDownIcon className="h-4 w-4 text-red-600" />
+        ) : (
+          <ArrowUpIcon className="h-4 w-4 text-green-600" />
+        )}
+        <span className={`font-medium ${textColorClass}`}>
+          {isNegative ? "-" : "+"}
+          {formatCurrency(amount)}
         </span>
       </div>
     );

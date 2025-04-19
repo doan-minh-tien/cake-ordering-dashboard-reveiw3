@@ -377,9 +377,7 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
           <div>
             <p className="text-sm text-muted-foreground">Ngày tạo đơn</p>
             <p className="font-semibold text-blue-700">
-              {order.created_at
-                ? formatDate(order.created_at)
-                : "Không xác định"}
+              {order.paid_at ? formatDate(order.paid_at) : "Không xác định"}
             </p>
           </div>
         </div>

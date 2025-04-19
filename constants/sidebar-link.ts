@@ -28,6 +28,8 @@ import {
   FileCog,
   Store,
   AlertTriangle,
+  BarChart3,
+  LayoutDashboard,
 } from "lucide-react";
 import { FaMailchimp, FaUserPen } from "react-icons/fa6";
 import { TbBrandBooking } from "react-icons/tb";
@@ -52,7 +54,14 @@ export const routes: Route[] = [
     icon: GoHome,
     activeIcon: GoHomeFill,
     href: "/dashboard",
-    allowsRoles: [UserRole.BAKERY, UserRole.ADMIN],
+    allowsRoles: [UserRole.BAKERY],
+  },
+  {
+    label: "Trang chủ",
+    icon: LayoutDashboard,
+    activeIcon: LayoutDashboard,
+    href: "/dashboard/admin",
+    allowsRoles: [UserRole.ADMIN],
   },
   {
     label: "Quản lý cửa hàng",
