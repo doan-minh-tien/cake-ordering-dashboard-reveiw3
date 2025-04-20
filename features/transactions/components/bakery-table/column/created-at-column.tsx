@@ -23,7 +23,7 @@ const formatDate = (dateString: string) => {
 };
 
 export const createdAtColumn = {
-  accessorKey: "created_at",
+  accessorKey: "updated_at",
   header: ({ column }: { column: Column<any, unknown> }) => (
     <Button
       variant="ghost"

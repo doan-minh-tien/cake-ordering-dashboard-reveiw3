@@ -192,36 +192,6 @@ const Dashboard = async () => {
       <div className="mx-auto max-w-7xl space-y-8">
         <DashboardHeader />
 
-        {/* Debug information - only visible in development */}
-        {process.env.NODE_ENV === "development" && (
-          <div className="p-4 bg-yellow-100 dark:bg-yellow-900 rounded-md mb-4 text-black dark:text-white text-sm overflow-auto max-h-[300px]">
-            <h3 className="font-bold mb-1">Debug Information:</h3>
-            <p>User Role: {user?.role || "Not found"}</p>
-            <p>Is Admin: {isAdmin ? "Yes" : "No"}</p>
-            <p>Role from UserRole enum: {UserRole.ADMIN}</p>
-            <p>Check by enum: {isAdminByEnum ? "Yes" : "No"}</p>
-            <p>Check by string: {isAdminByString ? "Yes" : "No"}</p>
-            <p>
-              Check by case insensitive:{" "}
-              {isAdminByCaseInsensitive ? "Yes" : "No"}
-            </p>
-            <details>
-              <summary className="cursor-pointer">
-                View full user object
-              </summary>
-              <pre className="mt-2 whitespace-pre-wrap">
-                {JSON.stringify(user, null, 2)}
-              </pre>
-            </details>
-            <details>
-              <summary className="cursor-pointer">View session info</summary>
-              <pre className="mt-2 whitespace-pre-wrap">
-                {JSON.stringify(session, null, 2)}
-              </pre>
-            </details>
-          </div>
-        )}
-
         {/* Stats Overview */}
         <section
           className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mt-8"

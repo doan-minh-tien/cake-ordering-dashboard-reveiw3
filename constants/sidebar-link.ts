@@ -57,7 +57,7 @@ export const routes: Route[] = [
     allowsRoles: [UserRole.BAKERY],
   },
   {
-    label: "Trang chủ",
+    label: "Trang quản trị",
     icon: LayoutDashboard,
     activeIcon: LayoutDashboard,
     href: "/dashboard/admin",
