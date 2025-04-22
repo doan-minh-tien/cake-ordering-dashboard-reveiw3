@@ -14,6 +14,9 @@ interface IBakeryFile {
 export type IBarkery = {
   id: string;
   bakery_name: string;
+  cake_description: string | null;
+  price_description: string | null;
+  bakery_description: string | null;
   email: string;
   password: string;
   phone: string;
@@ -31,8 +34,16 @@ export type IBarkery = {
   back_card_file: IBakeryFile;
   tax_code: string;
   status: string;
-  confirmed_at: string;
+  confirmed_at: string | null;
+  banned_at: string | null;
   shop_image_files: IBakeryFile[];
+  metric: any | null;
+  reviews: any | null;
+  created_at: string;
+  created_by: string;
+  updated_at: string | null;
+  updated_by: string | null;
+  is_deleted: boolean;
 };
 
 export type IAvatar = {
@@ -46,6 +57,3 @@ export type IShopImage = {
   fileUrl: string;
   id: string;
 };
-
-
-

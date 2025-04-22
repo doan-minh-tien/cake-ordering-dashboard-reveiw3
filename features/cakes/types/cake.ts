@@ -5,6 +5,7 @@ export interface ICake {
   available_cake_description: string;
   available_cake_type: string;
   available_cake_quantity: number;
+  quantity_default: number;
   available_main_image_id: string;
   available_cake_main_image: string | null;
   available_cake_image_files: ICakeImageFile[];
@@ -15,7 +16,7 @@ export interface ICake {
   is_quality_guaranteed: boolean;
   bakery: IBakery | null;
   cake_reviews: any | null;
-  metric: any | null;
+  metric: ICakeMetric | null;
   created_at: string;
   created_by: string;
   updated_at: string | null;
@@ -26,6 +27,20 @@ export interface ICake {
 export interface ICakeImageFile {
   file_name: string;
   file_url: string;
+  id: string;
+  created_at: string;
+  created_by: string;
+  updated_at: string | null;
+  updated_by: string | null;
+  is_deleted: boolean;
+}
+
+export interface ICakeMetric {
+  available_cake_id: string;
+  available_cake: any | null;
+  rating_average: number;
+  reviews_count: number;
+  quantity_sold: number;
   id: string;
   created_at: string;
   created_by: string;
@@ -49,18 +64,30 @@ export interface IBakery {
   bank_account: string | null;
   owner_name: string;
   avatar_file_id: string;
-  avatar_file: string | null;
+  avatar_file: IBakeryFile | null;
   identity_card_number: string;
   front_card_file_id: string;
-  front_card_file: string | null;
+  front_card_file: IBakeryFile | null;
   back_card_file_id: string;
-  back_card_file: string | null;
+  back_card_file: IBakeryFile | null;
   tax_code: string;
   status: string;
   confirmed_at: string | null;
   banned_at: string | null;
   shop_image_files: IShopImageFile[];
   metric: any | null;
+  reviews: any | null;
+  created_at: string;
+  created_by: string;
+  updated_at: string | null;
+  updated_by: string | null;
+  is_deleted: boolean;
+}
+
+export interface IBakeryFile {
+  file_name: string;
+  file_url: string;
+  id: string;
   created_at: string;
   created_by: string;
   updated_at: string | null;

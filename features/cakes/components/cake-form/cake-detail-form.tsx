@@ -4,6 +4,7 @@ import { ICake } from "../../types/cake";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 import {
   Form,
   FormControl,
@@ -33,26 +34,61 @@ import { updateCake, createCake } from "../../actions/cake-action";
 import { toast } from "sonner";
 import { uploadCakeImage } from "../../actions/cake-image-action";
 import Image from "next/image";
-import { Loader, ImagePlus, Cake } from "lucide-react";
+import {
+  Loader,
+  ImagePlus,
+  Cake,
+  ShoppingCart,
+  Award,
+  Ruler,
+  Users,
+  Star,
+  Check,
+} from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 
 interface CakeDetailFormProps {
   initialData: ICake | null;
 }
 
 const cakeSchema = z.object({
-  available_cake_name: z.string().min(1, "Cake name is required"),
-  available_cake_description: z.string().min(1, "Description is required"),
-  available_cake_price: z.number().min(1, "Price must be at least 1"),
-  available_cake_quantity: z.number().min(1, "Quantity must be at least 1"),
-  available_cake_type: z.string().min(1, "Cake type is required"),
+  available_cake_name: z.string().min(1, "Tên bánh không được bỏ trống"),
+  available_cake_description: z.string().min(1, "Mô tả không được bỏ trống"),
+  available_cake_price: z
+    .number()
+    .min(1000, "Giá phải từ 1.000đ trở lên")
+    .max(100000000, "Giá không được vượt quá 100.000.000đ")
+    .refine((val) => val % 100 === 0, {
+      message: "Giá phải là bội số của 100đ",
+    }),
+  available_cake_quantity: z
+    .number()
+    .min(1, "Số lượng phải lớn hơn hoặc bằng 1"),
+  quantity_default: z.number().default(0),
+  available_cake_type: z.string().min(1, "Loại bánh không được bỏ trống"),
   available_cake_image_file_ids: z.array(z.string()).optional(),
   available_main_image_id: z.string().optional(),
+  available_cake_size: z.string().optional().nullable(),
+  available_cake_serving_size: z.string().optional().nullable(),
+  has_low_shipping_fee: z.boolean().default(false),
+  is_quality_guaranteed: z.boolean().default(false),
 });
 
 type cakeFormValue = z.infer<typeof cakeSchema>;
 
+// Thêm hàm format số tiền
+const formatCurrency = (value: number): string => {
+  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
+
+const parseCurrency = (value: string): number => {
+  return parseInt(value.replace(/\./g, "")) || 0;
+};
+
 const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [loading, setLoading] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
@@ -60,6 +96,11 @@ const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  // Thêm state để quản lý giá trị hiển thị
+  const [displayPrice, setDisplayPrice] = useState<string>(
+    initialData ? formatCurrency(initialData.available_cake_price) : ""
+  );
 
   const getMainImageUrl = (): string | null => {
     if (initialData?.available_cake_main_image) {
@@ -79,14 +120,14 @@ const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
     return null;
   };
 
-  const title = initialData ? "Edit Cake Details" : "Add New Cake";
+  const title = initialData ? "Chỉnh sửa thông tin bánh" : "Thêm bánh mới";
   const description = initialData
-    ? "Edit the details of the cake."
-    : "Add a new cake to your collection.";
-  const action = initialData ? "Save Changes" : "Create";
+    ? "Chỉnh sửa thông tin chi tiết của bánh."
+    : "Thêm một loại bánh mới vào danh mục của bạn.";
+  const action = initialData ? "Lưu thay đổi" : "Tạo mới";
   const toastMessage = initialData
-    ? "Cake updated successfully."
-    : "Cake created successfully.";
+    ? "Cập nhật bánh thành công."
+    : "Tạo bánh mới thành công.";
 
   const defaultValues = initialData
     ? {
@@ -94,19 +135,29 @@ const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
         available_cake_description: initialData.available_cake_description,
         available_cake_price: initialData.available_cake_price,
         available_cake_quantity: initialData.available_cake_quantity,
+        quantity_default: initialData.quantity_default || 0,
         available_cake_type: initialData.available_cake_type,
         available_cake_image_file_ids:
           initialData.available_cake_image_files?.map((img) => img.id) || [],
         available_main_image_id: initialData.available_main_image_id,
+        available_cake_size: initialData.available_cake_size,
+        available_cake_serving_size: initialData.available_cake_serving_size,
+        has_low_shipping_fee: initialData.has_low_shipping_fee || false,
+        is_quality_guaranteed: initialData.is_quality_guaranteed || false,
       }
     : {
         available_cake_name: "",
         available_cake_description: "",
         available_cake_price: 0,
         available_cake_quantity: 0,
+        quantity_default: 0,
         available_cake_type: "",
         available_cake_image_file_ids: [],
         available_main_image_id: "",
+        available_cake_size: "",
+        available_cake_serving_size: "",
+        has_low_shipping_fee: false,
+        is_quality_guaranteed: false,
       };
 
   const form = useForm<cakeFormValue>({
@@ -129,7 +180,7 @@ const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
       const result = await uploadCakeImage(base64, file.name, file.type);
 
       if (!result.success) {
-        toast.error(result.error || "Failed to upload image");
+        toast.error(result.error || "Không thể tải ảnh lên");
         return;
       }
 
@@ -139,11 +190,11 @@ const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
 
       form.setValue("available_cake_image_file_ids", [result.data.id]);
 
-      toast.success("Image uploaded successfully");
-      console.log("Uploaded image:", result.data);
+      toast.success("Tải ảnh lên thành công");
+      console.log("Ảnh đã tải lên:", result.data);
     } catch (error: any) {
-      toast.error("Failed to upload image");
-      console.error("Image upload error:", error);
+      toast.error("Không thể tải ảnh lên");
+      console.error("Lỗi khi tải ảnh:", error);
     } finally {
       setImageLoading(false);
     }
@@ -187,7 +238,7 @@ const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
         });
       }
     } catch (error: any) {
-      toast.error("An error occurred.", error);
+      toast.error("Đã xảy ra lỗi.", error);
     } finally {
       setLoading(false);
     }
@@ -200,8 +251,8 @@ const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
     { label: "Bánh Trung Thu", value: "BANH_TRUNG_THU" },
     { label: "Bánh Chay", value: "BANH_CHAY" },
     { label: "Cupcake", value: "CUPCAKE" },
-    { label: "Bánh Theo Mùa", value: "BANH_THEO_MUA" }
-];
+    { label: "Bánh Theo Mùa", value: "BANH_THEO_MUA" },
+  ];
   const cakeTypes = [
     "BANH_KEM",
     "BANH_MI",
@@ -247,7 +298,7 @@ const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium">
-                        Cake Image
+                        Hình ảnh bánh
                       </FormLabel>
                       <FormControl>
                         <div className="flex flex-col gap-3">
@@ -259,28 +310,28 @@ const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
                             ) : uploadedFileUrl ? (
                               <Image
                                 src={uploadedFileUrl}
-                                alt="Cake preview"
+                                alt="Xem trước hình bánh"
                                 fill
                                 className="object-contain p-2"
                               />
                             ) : imagePreview ? (
                               <Image
                                 src={imagePreview}
-                                alt="Cake preview"
+                                alt="Xem trước hình bánh"
                                 fill
                                 className="object-contain p-2"
                               />
                             ) : getMainImageUrl() ? (
                               <Image
                                 src={getMainImageUrl()!}
-                                alt="Cake preview"
+                                alt="Xem trước hình bánh"
                                 fill
                                 className="object-contain p-2"
                               />
                             ) : (
                               <div className="flex flex-col items-center justify-center text-gray-400 text-center px-2">
                                 <ImagePlus className="h-8 w-8 mb-1" />
-                                <p className="text-xs">Upload cake image</p>
+                                <p className="text-xs">Tải ảnh bánh lên</p>
                               </div>
                             )}
 
@@ -297,7 +348,7 @@ const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
                                 disabled={imageLoading}
                                 className="text-xs"
                               >
-                                {imageLoading ? "Uploading..." : "Change Image"}
+                                {imageLoading ? "Đang tải..." : "Thay đổi ảnh"}
                               </Button>
                             </div>
                           </div>
@@ -323,7 +374,7 @@ const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
             <Card className="col-span-1 md:col-span-8 border shadow-sm">
               <CardHeader className="p-4 pb-2">
                 <CardTitle className="text-lg font-medium">
-                  Cake Information
+                  Thông tin bánh
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 p-4">
@@ -333,11 +384,11 @@ const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium">
-                        Cake Name
+                        Tên bánh
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Enter cake name"
+                          placeholder="Nhập tên bánh"
                           {...field}
                           className="h-9 text-sm focus:ring-1 focus:ring-primary/20"
                         />
@@ -353,7 +404,7 @@ const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium">
-                        Cake Type
+                        Loại bánh
                       </FormLabel>
                       <Select
                         onValueChange={field.onChange}
@@ -361,7 +412,7 @@ const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
                       >
                         <FormControl>
                           <SelectTrigger className="h-9 text-sm focus:ring-1 focus:ring-primary/20">
-                            <SelectValue placeholder="Select cake type" />
+                            <SelectValue placeholder="Chọn loại bánh" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="text-sm">
@@ -370,7 +421,7 @@ const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
                               key={category.value}
                               value={category.value}
                               className="text-sm"
-                            > 
+                            >
                               {category.label}
                             </SelectItem>
                           ))}
@@ -388,21 +439,48 @@ const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm font-medium">
-                          Price
+                          Giá (VNĐ)
                         </FormLabel>
                         <FormControl>
                           <Input
-                            type="number"
-                            min="1"
-                            step="0.01"
-                            placeholder="0.00"
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(parseFloat(e.target.value) || 0)
-                            }
+                            type="text"
+                            placeholder="Ví dụ: 150.000"
+                            value={displayPrice}
+                            onChange={(e) => {
+                              const rawValue = e.target.value.replace(
+                                /\./g,
+                                ""
+                              );
+                              const numericValue = rawValue.replace(
+                                /[^\d]/g,
+                                ""
+                              );
+
+                              if (numericValue) {
+                                const numberValue = parseInt(numericValue);
+                                const formattedValue =
+                                  formatCurrency(numberValue);
+                                setDisplayPrice(formattedValue);
+                                field.onChange(numberValue);
+                              } else {
+                                setDisplayPrice("");
+                                field.onChange(0);
+                              }
+                            }}
+                            onBlur={(e) => {
+                              const value = parseCurrency(displayPrice);
+                              if (value < 1000) {
+                                setDisplayPrice("1.000");
+                                field.onChange(1000);
+                              }
+                              field.onBlur();
+                            }}
                             className="h-9 text-sm focus:ring-1 focus:ring-primary/20"
                           />
                         </FormControl>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Nhập giá từ 1.000đ đến 100.000.000đ (bội số của 100đ)
+                        </p>
                         <FormMessage className="text-xs" />
                       </FormItem>
                     )}
@@ -414,7 +492,7 @@ const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm font-medium">
-                          Quantity Available
+                          Số lượng hiện có
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -441,11 +519,11 @@ const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium">
-                        Description
+                        Mô tả
                       </FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Enter cake description"
+                          placeholder="Nhập mô tả chi tiết về bánh"
                           className="min-h-24 text-sm resize-none focus:ring-1 focus:ring-primary/20"
                           {...field}
                         />
@@ -454,6 +532,163 @@ const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
                     </FormItem>
                   )}
                 />
+
+                {/* Size Information */}
+                <div className="space-y-4">
+                  <div className="flex items-center">
+                    <Ruler className="h-5 w-5 text-primary mr-2" />
+                    <h3 className="text-lg font-semibold">
+                      Kích thước và Phục vụ
+                    </h3>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="available_cake_size"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Kích thước bánh</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Ví dụ: 20cm"
+                              {...field}
+                              value={field.value || ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="available_cake_serving_size"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phù hợp cho</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Ví dụ: 6-8 người"
+                              {...field}
+                              value={field.value || ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                <Separator className="my-4" />
+
+                {/* Cake Features */}
+                <div className="space-y-4">
+                  <div className="flex items-center">
+                    <Award className="h-5 w-5 text-primary mr-2" />
+                    <h3 className="text-lg font-semibold">Đặc điểm</h3>
+                  </div>
+
+                  <div className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="has_low_shipping_fee"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>Phí giao hàng thấp</FormLabel>
+                            <p className="text-sm text-muted-foreground">
+                              Bánh này có phí giao hàng thấp hơn thông thường
+                            </p>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="is_quality_guaranteed"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>Đảm bảo chất lượng</FormLabel>
+                            <p className="text-sm text-muted-foreground">
+                              Cam kết chất lượng khi nhận hàng
+                            </p>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {/* Add Metrics Information if available */}
+                {initialData && initialData.metric && (
+                  <div className="mt-6">
+                    <Separator className="my-4" />
+
+                    <div className="space-y-4">
+                      <div className="flex items-center">
+                        <ShoppingCart className="h-5 w-5 text-primary mr-2" />
+                        <h3 className="text-lg font-semibold">
+                          Thống kê bán hàng
+                        </h3>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="bg-muted/30 p-4 rounded-md flex items-center space-x-3">
+                          <ShoppingCart className="h-5 w-5 text-primary" />
+                          <div>
+                            <p className="text-sm text-muted-foreground">
+                              Đã bán
+                            </p>
+                            <p className="font-medium text-lg">
+                              {initialData.metric.quantity_sold || 0}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="bg-muted/30 p-4 rounded-md flex items-center space-x-3">
+                          <Star className="h-5 w-5 text-amber-500" />
+                          <div>
+                            <p className="text-sm text-muted-foreground">
+                              Đánh giá trung bình
+                            </p>
+                            <p className="font-medium text-lg">
+                              {initialData.metric.rating_average ||
+                                "Chưa có đánh giá"}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="bg-muted/30 p-4 rounded-md flex items-center space-x-3">
+                          <Users className="h-5 w-5 text-indigo-500" />
+                          <div>
+                            <p className="text-sm text-muted-foreground">
+                              Số lượng đánh giá
+                            </p>
+                            <p className="font-medium text-lg">
+                              {initialData.metric.reviews_count || 0}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -462,11 +697,11 @@ const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
             <Button
               variant="outline"
               type="button"
-              onClick={() => form.reset()}
+              onClick={() => router.push("/dashboard/cakes")}
               disabled={isLoading || isPending}
               className="h-9 px-4 text-sm hover:bg-gray-50"
             >
-              Cancel
+              Hủy
             </Button>
             <Button
               type="submit"
@@ -476,7 +711,7 @@ const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
               {isPending ? (
                 <div className="flex items-center gap-1.5">
                   <Loader className="h-3 w-3 animate-spin" />
-                  <span>Saving...</span>
+                  <span>Đang lưu...</span>
                 </div>
               ) : (
                 action

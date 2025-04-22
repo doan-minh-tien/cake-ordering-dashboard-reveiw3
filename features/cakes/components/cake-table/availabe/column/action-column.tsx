@@ -44,7 +44,7 @@ interface ActionMenuProps {
 const ActionMenu = ({ row }: ActionMenuProps) => {
   const { onOpen } = useModal();
   const cakeId = row.original.id;
-  const cakeName = row.original.name;
+  const cakeName = row.original.available_cake_name;
 
   const [isPending, startTransition] = useTransition();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);

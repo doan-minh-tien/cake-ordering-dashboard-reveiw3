@@ -314,6 +314,96 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
 
                   <Separator />
 
+                  {/* New Descriptions Section */}
+                  <div>
+                    <h3 className="text-base font-medium mb-4 flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-primary" />
+                      Mô tả chi tiết
+                    </h3>
+
+                    <div className="space-y-4">
+                      {/* Bakery Description */}
+                      <div className="bg-muted/30 rounded-lg p-4">
+                        <h4 className="font-medium mb-2 flex items-center gap-2">
+                          <Store className="h-4 w-4 text-primary" />
+                          Mô tả cửa hàng
+                        </h4>
+                        <p className="text-muted-foreground">
+                          {bakery.bakery_description ||
+                            "Chưa có mô tả về cửa hàng"}
+                        </p>
+                      </div>
+
+                      {/* Cake Description */}
+                      <div className="bg-muted/30 rounded-lg p-4">
+                        <h4 className="font-medium mb-2 flex items-center gap-2">
+                          <Cake className="h-4 w-4 text-primary" />
+                          Mô tả sản phẩm
+                        </h4>
+                        <p className="text-muted-foreground">
+                          {bakery.cake_description ||
+                            "Chưa có mô tả về sản phẩm"}
+                        </p>
+                      </div>
+
+                      {/* Price Description */}
+                      <div className="bg-muted/30 rounded-lg p-4">
+                        <h4 className="font-medium mb-2 flex items-center gap-2">
+                          <DollarSign className="h-4 w-4 text-primary" />
+                          Mô tả giá cả
+                        </h4>
+                        <p className="text-muted-foreground">
+                          {bakery.price_description ||
+                            "Chưa có mô tả về giá cả"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Metrics Information */}
+                  {bakery.metric && (
+                    <>
+                      <div>
+                        <h3 className="text-base font-medium mb-4 flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-primary" />
+                          Thống kê
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="bg-muted/30 rounded-lg p-4">
+                            <p className="text-sm text-muted-foreground mb-1">
+                              Tổng đơn hàng
+                            </p>
+                            <p className="text-lg font-medium">
+                              {bakery.metric.orders_count || "0"}
+                            </p>
+                          </div>
+                          <div className="bg-muted/30 rounded-lg p-4">
+                            <p className="text-sm text-muted-foreground mb-1">
+                              Đánh giá trung bình
+                            </p>
+                            <p className="text-lg font-medium">
+                              {bakery.metric.average_rating ||
+                                "Chưa có đánh giá"}
+                            </p>
+                          </div>
+                          <div className="bg-muted/30 rounded-lg p-4">
+                            <p className="text-sm text-muted-foreground mb-1">
+                              Tỷ lệ hoàn thành
+                            </p>
+                            <p className="text-lg font-medium">
+                              {bakery.metric.completion_rate
+                                ? `${bakery.metric.completion_rate}%`
+                                : "Chưa có dữ liệu"}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <Separator />
+                    </>
+                  )}
+
                   <div>
                     <h3 className="text-base font-medium mb-4 flex items-center gap-2">
                       <Clock className="h-4 w-4 text-primary" />
@@ -679,44 +769,40 @@ const ActivityTimeline = ({
   bakery: IBarkery;
   formatDate: (date: string) => string;
 }) => (
-  <div className="relative pl-6 border-l border-muted">
-    <div className="space-y-6">
-      {bakery.confirmed_at && (
-        <TimelineItem
-          color="bg-green-500"
-          title="Xác nhận thông tin"
-          date={formatDate(bakery.confirmed_at)}
-          description="Admin đã xác nhận thông tin tiệm bánh và cho phép hoạt động trên hệ thống."
-        />
-      )}
+  <div className="space-y-6">
+    <TimelineItem
+      color="bg-green-500"
+      title="Tài khoản được tạo"
+      date={formatDate(bakery.created_at)}
+      description={`Tài khoản được tạo bởi ${bakery.created_by || "hệ thống"}`}
+    />
 
-      {bakery.shop_image_files?.length > 0 && (
-        <TimelineItem
-          color="bg-blue-500"
-          title="Cập nhật hình ảnh"
-          date={formatDate(
-            bakery.shop_image_files[0]?.created_at || bakery.confirmed_at
-          )}
-          description="Chủ tiệm đã cập nhật hình ảnh cửa hàng"
-        />
-      )}
-
-      {bakery.front_card_file && (
-        <TimelineItem
-          color="bg-blue-500"
-          title="Cập nhật thông tin xác minh"
-          date={formatDate(bakery.front_card_file.created_at)}
-          description="Chủ tiệm đã cập nhật thông tin CMND/CCCD và thông tin xác minh"
-        />
-      )}
-
+    {bakery.updated_at && bakery.updated_at !== bakery.created_at && (
       <TimelineItem
         color="bg-blue-500"
-        title="Tạo tài khoản"
-        date={formatDate(bakery.avatar_file.created_at)}
-        description="Chủ tiệm đã tạo tài khoản và nhập thông tin cơ bản"
+        title="Thông tin được cập nhật"
+        date={formatDate(bakery.updated_at)}
+        description={`Cập nhật bởi ${bakery.updated_by || "hệ thống"}`}
       />
-    </div>
+    )}
+
+    {bakery.confirmed_at && (
+      <TimelineItem
+        color="bg-teal-500"
+        title="Tài khoản được xác nhận"
+        date={formatDate(bakery.confirmed_at)}
+        description="Tài khoản đã được xác nhận và có thể hoạt động"
+      />
+    )}
+
+    {bakery.banned_at && (
+      <TimelineItem
+        color="bg-red-500"
+        title="Tài khoản bị cấm"
+        date={formatDate(bakery.banned_at)}
+        description="Tài khoản đã bị cấm và không thể hoạt động"
+      />
+    )}
   </div>
 );
 

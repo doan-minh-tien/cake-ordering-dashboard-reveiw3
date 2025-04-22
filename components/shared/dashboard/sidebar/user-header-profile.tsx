@@ -21,11 +21,15 @@ const UserProfileDropdown = () => {
 
   const handleLogout = useCallback(async () => {
     try {
-      await signOut({ callbackUrl: '/' });
+      await signOut({ callbackUrl: "/" });
     } catch (error) {
       console.error("Logout failed:", error);
     }
-  }, [router]);
+  }, []);
+
+  const handleClick = useCallback(() => {
+    router.push("/profile");
+  }, []);
 
   // fix bug need close dropdown befoce open modal -> bug pointer-none (fix done)
   useEffect(() => {

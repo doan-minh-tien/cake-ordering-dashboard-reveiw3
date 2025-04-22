@@ -41,7 +41,7 @@ export function CakeTable({ data }: CakeTableProps) {
 
   const searchableColumns: DataTableSearchableColumn<ICake>[] = [
     {
-      id: "name",
+      id: "available_cake_name",
       title: "Tên bánh",
     },
   ];
