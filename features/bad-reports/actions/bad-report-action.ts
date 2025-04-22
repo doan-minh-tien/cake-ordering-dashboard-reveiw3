@@ -45,3 +45,32 @@ export const getBadReportById = async (
 
   return result.data;
 };
+
+// Chấp nhận báo cáo
+export const approveBadReport = async (
+  reportId: string
+): Promise<Result<boolean>> => {
+  noStore();
+  const session = await auth();
+
+  try {
+    const result = await apiRequest<boolean>(() =>
+      axiosAuth.get(`/reports/${reportId}/approve`)
+    );
+
+    if (result.success) {
+      // Revalidate the reports list and detail page to reflect the changes
+      revalidatePath("/bad-reports");
+      revalidatePath(`/bad-reports/${reportId}`);
+      return { success: true, data: result.data };
+    }
+
+    return { success: false, error: result.error };
+  } catch (error) {
+    console.error(`Error approving bad report ${reportId}:`, error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error occurred",
+    };
+  }
+};

@@ -12,13 +12,11 @@ const StatusLabels = {
 };
 
 const statusStyles = {
-  PENDING:
-    "bg-yellow-200 text-yellow-800 hover:bg-yellow-300 hover:text-yellow-900",
-  PROCESSING: "bg-blue-200 text-blue-800 hover:bg-blue-300 hover:text-blue-900",
-  RESOLVED:
-    "bg-green-200 text-green-800 hover:bg-green-300 hover:text-green-900",
-  REJECTED: "bg-red-200 text-red-800 hover:bg-red-300 hover:text-red-900",
-  ACCEPTED: "bg-teal-200 text-teal-800 hover:bg-teal-300 hover:text-teal-900",
+  PENDING: "bg-yellow-500 text-white",
+  PROCESSING: "bg-blue-500 text-white",
+  RESOLVED: "bg-green-500 text-white",
+  REJECTED: "bg-red-500 text-white",
+  ACCEPTED: "bg-green-500 text-white",
 };
 
 const statusColumn = {
