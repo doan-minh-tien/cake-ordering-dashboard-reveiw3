@@ -399,6 +399,65 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
 
       <OrderFlowVisualization order={order} />
 
+      {/* Chi tiết sản phẩm */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold text-indigo-600">
+            Chi tiết sản phẩm
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {order.order_details.map((detail, index) => (
+              <div
+                key={detail.id}
+                className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 bg-white border rounded-lg shadow-sm"
+              >
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-gray-700">
+                      Bánh #{index + 1}
+                    </span>
+                    {detail.cake_note && (
+                      <Badge variant="secondary" className="text-xs">
+                        Có ghi chú
+                      </Badge>
+                    )}
+                  </div>
+                  {detail.cake_note && (
+                    <p className="text-sm text-gray-600">
+                      <span className="font-medium">Ghi chú:</span>{" "}
+                      {detail.cake_note}
+                    </p>
+                  )}
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium">Số lượng:</span>{" "}
+                    {detail.quantity}
+                  </p>
+                </div>
+                <div className="mt-2 md:mt-0 text-right">
+                  <p className="font-semibold text-green-600">
+                    {formatCurrency(detail.sub_total_price)}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+        <CardFooter className="flex justify-between items-center bg-gray-50">
+          <div className="text-sm text-gray-600">
+            Tổng số sản phẩm:{" "}
+            {order.order_details.reduce((acc, curr) => acc + curr.quantity, 0)}
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Tổng tiền sản phẩm:</p>
+            <p className="font-semibold text-lg text-green-600">
+              {formatCurrency(order.total_product_price)}
+            </p>
+          </div>
+        </CardFooter>
+      </Card>
+
       {/* Order Status Notes */}
       <OrderStatusNotes order={order} />
 

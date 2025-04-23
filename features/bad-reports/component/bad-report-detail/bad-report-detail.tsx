@@ -38,13 +38,22 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { IBadReport } from "../../types/bad-report-type";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import AlertModal from "../alert-modal/alert-modal";
+import { updateBadReportStatus } from "../../actions/bad-report-action";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface BadReportDetailProps {
   report: IBadReport | null;
 }
 
 const BadReportDetail = ({ report }: BadReportDetailProps) => {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
+  const [showStatusAlert, setShowStatusAlert] = useState(false);
+  const [isApprove, setIsApprove] = useState(false);
+  const [showResolveAlert, setShowResolveAlert] = useState(false);
+  const [isPending, setIsPending] = useState(false);
 
   if (!report) {
     return (
@@ -157,6 +166,32 @@ const BadReportDetail = ({ report }: BadReportDetailProps) => {
         };
     }
   }
+
+  const handleStatusUpdate = async () => {
+    try {
+      setIsPending(true);
+      const result = await updateBadReportStatus(report.id, isApprove);
+
+      if (result.success) {
+        toast.success(
+          isApprove ? "Đã bắt đầu xử lý báo cáo" : "Đã từ chối báo cáo"
+        );
+        router.refresh();
+      } else {
+        toast.error(result.error || "Đã có lỗi xảy ra");
+      }
+    } catch (error) {
+      toast.error("Đã có lỗi xảy ra khi cập nhật trạng thái");
+    } finally {
+      setIsPending(false);
+      setShowStatusAlert(false);
+    }
+  };
+
+  const handleResolve = () => {
+    // Add your resolve logic here
+    console.log("Resolving report...");
+  };
 
   return (
     <div className="container max-w-6xl mx-auto px-4 py-8">
@@ -523,23 +558,61 @@ const BadReportDetail = ({ report }: BadReportDetailProps) => {
                   <p className="font-medium">Thao tác</p>
 
                   {report.status === "PENDING" && (
-                    <>
-                      <Button className="w-full" variant="default">
-                        <Clock className="mr-2 h-4 w-4" />
-                        Bắt đầu xử lý
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        className="w-full"
+                        variant="default"
+                        onClick={() => {
+                          setIsApprove(true);
+                          setShowStatusAlert(true);
+                        }}
+                        disabled={isPending}
+                      >
+                        {isPending ? (
+                          <div className="flex items-center gap-2">
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                            Đang xử lý...
+                          </div>
+                        ) : (
+                          <>
+                            <Clock className="mr-2 h-4 w-4" />
+                            Bắt đầu xử lý
+                          </>
+                        )}
                       </Button>
-                    </>
+                      <Button
+                        className="w-full"
+                        variant="destructive"
+                        onClick={() => {
+                          setIsApprove(false);
+                          setShowStatusAlert(true);
+                        }}
+                        disabled={isPending}
+                      >
+                        {isPending ? (
+                          <div className="flex items-center gap-2">
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                            Đang xử lý...
+                          </div>
+                        ) : (
+                          <>
+                            <X className="mr-2 h-4 w-4" />
+                            Từ chối
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   )}
 
                   {report.status === "PROCESSING" && (
                     <>
-                      <Button className="w-full" variant="default">
+                      <Button
+                        className="w-full"
+                        variant="default"
+                        onClick={() => setShowResolveAlert(true)}
+                      >
                         <Check className="mr-2 h-4 w-4" />
                         Đánh dấu đã giải quyết
-                      </Button>
-                      <Button className="w-full" variant="outline">
-                        <X className="mr-2 h-4 w-4" />
-                        Từ chối báo cáo
                       </Button>
                     </>
                   )}
@@ -606,6 +679,32 @@ const BadReportDetail = ({ report }: BadReportDetailProps) => {
           </Card>
         </div>
       </div>
+
+      {/* Alert Modals */}
+      <AlertModal
+        isOpen={showStatusAlert}
+        onClose={() => !isPending && setShowStatusAlert(false)}
+        onConfirm={handleStatusUpdate}
+        title={isApprove ? "Xác nhận xử lý" : "Xác nhận từ chối"}
+        description={
+          isApprove
+            ? "Bạn có chắc chắn muốn bắt đầu xử lý báo cáo này?"
+            : "Bạn có chắc chắn muốn từ chối báo cáo này?"
+        }
+        actionLabel={
+          isPending ? "Đang xử lý..." : isApprove ? "Bắt đầu xử lý" : "Từ chối"
+        }
+        variant={isApprove ? "default" : "destructive"}
+      />
+
+      <AlertModal
+        isOpen={showResolveAlert}
+        onClose={() => setShowResolveAlert(false)}
+        onConfirm={handleResolve}
+        title="Xác nhận giải quyết"
+        description="Bạn có chắc chắn muốn đánh dấu báo cáo này là đã giải quyết?"
+        actionLabel="Đánh dấu đã giải quyết"
+      />
     </div>
   );
 };

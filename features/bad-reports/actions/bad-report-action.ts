@@ -46,28 +46,37 @@ export const getBadReportById = async (
   return result.data;
 };
 
-// Chấp nhận báo cáo
-export const approveBadReport = async (
-  reportId: string
-): Promise<Result<boolean>> => {
+// Chấp nhận hoặc từ chối báo cáo
+export const updateBadReportStatus = async (
+  reportId: string,
+  isApprove: boolean
+): Promise<Result<void>> => {
   noStore();
   const session = await auth();
 
+  console.log("Updating report status:", { reportId, isApprove });
+
   try {
-    const result = await apiRequest<boolean>(() =>
-      axiosAuth.get(`/reports/${reportId}/approve`)
+    const result = await apiRequest(() =>
+      axiosAuth.get(`/reports/${reportId}/approve`, {
+        params: { isApprove },
+      })
     );
 
-    if (result.success) {
-      // Revalidate the reports list and detail page to reflect the changes
-      revalidatePath("/bad-reports");
-      revalidatePath(`/bad-reports/${reportId}`);
-      return { success: true, data: result.data };
+    console.log("API response:", result);
+
+    if (!result.success) {
+      console.error("API error:", result.error);
+      return { success: false, error: result.error };
     }
 
-    return { success: false, error: result.error };
+    // Revalidate the reports list and detail page to reflect the changes
+    revalidatePath("/dashboard/bad-reports");
+    revalidatePath(`/dashboard/bad-reports/${reportId}`);
+
+    return { success: true, data: undefined };
   } catch (error) {
-    console.error(`Error approving bad report ${reportId}:`, error);
+    console.error("Unexpected error:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error occurred",
