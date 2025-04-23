@@ -33,6 +33,37 @@ export function TransactionTable({ transactionPromise }: TransactionTableProps) 
 
   const { data, pageCount } = React.use(transactionPromise);
 
+  // console.log(data)
+
+  // [
+  //   {
+  //     "wallet_id": "57b68558-cbce-4da6-adc9-8af0277ce110",
+  //     "wallet": {
+  //       "balance": 281007.08,
+  //       "id": "57b68558-cbce-4da6-adc9-8af0277ce110",
+  //       "created_at": "2025-04-19T00:33:46.098272",
+  //       "created_by": "00000000-0000-0000-0000-000000000000",
+  //       "updated_at": "2025-04-22T15:16:55.314906",
+  //       "updated_by": "00000000-0000-0000-0000-000000000000",
+  //       "is_deleted": false
+  //     },
+  //     "amount": 12000,
+  //     "transaction_type": "ADMIN_HOLD_PAYMENT",
+  //     "content": "Hệ thống tạm giữ 12,000đ từ đơn hàng #202504221516412020",
+  //     "order_target_id": "1c76d39c-0afe-456f-a734-ca4f2f592903",
+  //     "order_target_code": "202504221516412020",
+  //     "target_user_id": null,
+  //     "target_user_type": null,
+  //     "id": "de269ffb-56dc-4c4a-821f-484a5c187045",
+  //     "created_at": "2025-04-22T15:16:55.314816",
+  //     "created_by": "00000000-0000-0000-0000-000000000000",
+  //     "updated_at": null,
+  //     "updated_by": null,
+  //     "is_deleted": false
+  //   },
+  
+  // ]
+
   const columns = React.useMemo<ColumnDef<TransactionType, unknown>[]>(
     () => fetchTransactionTableColumnDefs(),
     []

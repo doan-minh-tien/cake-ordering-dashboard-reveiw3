@@ -14,6 +14,9 @@ declare module "next-auth" {
       phone:string;
       gender:string;
       wallet_id: string;
+      wallet: {
+        balance: number;
+      };
       entity: {
         id: string;
       }

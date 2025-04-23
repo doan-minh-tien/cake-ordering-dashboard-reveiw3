@@ -15,45 +15,19 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { INotification } from "@/features/notifications/types/notification-type";
 import { useSession } from "next-auth/react";
-import { useEffect as useEffectOnce } from "react";
-import { apiRequest } from "@/lib/api/api-handler/generic";
-import { axiosAuth } from "@/lib/api/api-interceptor/api";
+
 
 export default function NotificationComponent() {
   const [isOpen, setIsOpen] = useState(false);
-  const [balance, setBalance] = useState<number | undefined>(undefined);
-  const [isLoadingBalance, setIsLoadingBalance] = useState(true);
 
   const router = useRouter();
   const popoverRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { data: session } = useSession();
 
-  // Load balance on component mount
-  useEffect(() => {
-    async function getBalance() {
-      if (!session?.user?.wallet_id) return;
+  console.log(session?.user.wallet.balance);
 
-      try {
-        setIsLoadingBalance(true);
-        const response = await apiRequest(() =>
-          axiosAuth.get(
-            `/wallets/${session.user.wallet_id}/transactions?limit=1`
-          )
-        );
 
-        if (response.success && response.data?.data?.[0]?.wallet) {
-          setBalance(response.data.data[0].wallet.balance);
-        }
-      } catch (error) {
-        console.error("Failed to fetch balance:", error);
-      } finally {
-        setIsLoadingBalance(false);
-      }
-    }
-
-    getBalance();
-  }, [session]);
 
   const formatCurrency = (amount: number | undefined): string => {
     if (amount === undefined) return "N/A";
@@ -173,13 +147,10 @@ export default function NotificationComponent() {
   return (
     <div className="flex items-center gap-2">
       <span className="text-sm font-medium">Số dư:</span>
-      {isLoadingBalance ? (
-        <Skeleton className="h-4 w-20" />
-      ) : (
-        <span className="text-sm font-medium text-primary">
-          {formatCurrency(balance)}
-        </span>
-      )}
+      <span className="text-sm font-medium text-primary">
+        {formatCurrency(session?.user.wallet.balance)}
+      </span>
+
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button
