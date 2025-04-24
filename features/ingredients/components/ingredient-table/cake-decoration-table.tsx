@@ -89,6 +89,26 @@ export function CakeDecorationTable({ data }: CakeDecorationTableProps) {
 
   const { data: cakeData, pageCount } = data;
 
+  // Get existing types from data
+  const existingTypes = React.useMemo(() => {
+    return cakeData.map(item => item.type);
+  }, [cakeData]);
+
+  // Check if there are missing types
+  const missingTypes = React.useMemo(() => {
+    // Get all defined types from the typeNameMap directly
+    const typeNameMap: Record<string, string> = {
+      Sprinkles: "Hạt Rắc",
+      Decoration: "Trang Trí",
+      Bling: "Đồ Trang Trí Lấp Lánh",
+      TallSkirt: "Phần Kem Phía Trên",
+      Drip: "Sốt Kem",
+      ShortSkirt: "Phần Kem Phía Dưới",
+    };
+    const allDefinedTypes = Object.keys(typeNameMap);
+    return allDefinedTypes.filter(type => !existingTypes.includes(type));
+  }, [existingTypes]);
+
   const handleDelete = async (id?: string) => {
     startTransition(async () => {
       const result = await deleteCakeDecoration(id!);
@@ -383,18 +403,48 @@ export function CakeDecorationTable({ data }: CakeDecorationTableProps) {
               <Cake className="h-5 w-5 mr-2 text-amber-600" />
               Quản lý trang trí bánh
             </h2>
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-full px-3 bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700 hover:text-amber-800 transition-all flex items-center gap-1"
+              onClick={() => onOpen("createIngredientTypeModal", { existingTypes })}
+            >
+              <PlusCircle className="h-4 w-4" />
+              <span>Thêm loại trang trí mới</span>
+            </Button>
           </div>
           <CardContent>
-            <ExpandDataTable
-              dataTable={dataTable}
-              columns={columns}
-              searchableColumns={[]}
-              filterableColumns={[]}
-              columnLabels={labels}
-              renderAdditionalRows={(row) =>
-                renderExpandedContent(row.original.type, row.original.items)
-              }
-            />
+            {cakeData.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+                <Package className="h-12 w-12 text-amber-200 mb-4" />
+                <h3 className="text-amber-700 font-medium mb-1">
+                  Chưa có loại trang trí nào
+                </h3>
+                <p className="text-amber-600 mb-4">
+                  Bạn cần tạo loại trang trí trước khi thêm các danh mục
+                </p>
+                <Button
+                  variant="default"
+                  size="sm" 
+                  className="bg-amber-600 hover:bg-amber-700 text-white shadow-sm"
+                  onClick={() => onOpen("createIngredientTypeModal", { existingTypes })}
+                >
+                  <PlusCircle className="h-4 w-4 mr-1" />
+                  Tạo loại trang trí
+                </Button>
+              </div>
+            ) : (
+              <ExpandDataTable
+                dataTable={dataTable}
+                columns={columns}
+                searchableColumns={[]}
+                filterableColumns={[]}
+                columnLabels={labels}
+                renderAdditionalRows={(row) =>
+                  renderExpandedContent(row.original.type, row.original.items)
+                }
+              />
+            )}
           </CardContent>
         </Card>
       </div>

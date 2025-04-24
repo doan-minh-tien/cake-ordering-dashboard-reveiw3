@@ -64,7 +64,7 @@ export const createCakeDecoration = async (
   data: any
 ): Promise<Result<void>> => {
   noStore();
-
+  console.log("data", data);
   const result = await apiRequest(() =>
     axiosAuth.post("/decoration_options", data)
   );
@@ -121,3 +121,4 @@ export const initializeDefaultDecorations = async (
     };
   }
 };
+
