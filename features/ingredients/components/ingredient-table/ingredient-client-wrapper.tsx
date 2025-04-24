@@ -96,33 +96,50 @@ export function IngredientsClientWrapper({
           className="space-y-6"
         >
           <TabsList className="flex flex-row gap-2 p-1 bg-transparent dark:bg-transparent border-b border-gray-200 dark:border-gray-800">
-            {TABS.map((tab) => (
-              <TabsTrigger
-                key={tab.value}
-                value={tab.value}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-2.5 rounded-t-md transition-all",
-                  "border-b-2 border-transparent",
-                  "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50",
-                  `data-[state=active]:${tab.color} data-[state=active]:${tab.darkColor}`,
-                  "data-[state=active]:border-b-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900",
-                  "data-[state=active]:font-semibold data-[state=active]:shadow-sm",
-                  tab.activeBorder
-                )}
-              >
-                {tab.icon && (
-                  <tab.icon
-                    className={cn(
-                      "w-5 h-5 transition-colors",
-                      tab.color,
-                      tab.darkColor,
-                      `data-[state=active]:${tab.color} data-[state=active]:${tab.darkColor}`
-                    )}
-                  />
-                )}
-                <span>{tab.label}</span>
-              </TabsTrigger>
-            ))}
+            <div className="flex-1 flex justify-center gap-2">
+              {TABS.map((tab) => (
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className={cn(
+                    "flex items-center gap-2 px-4 py-2.5 rounded-t-md transition-all",
+                    "border-b-2 border-transparent",
+                    "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50",
+                    `data-[state=active]:${tab.color} data-[state=active]:${tab.darkColor}`,
+                    "data-[state=active]:border-b-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900",
+                    "data-[state=active]:font-semibold data-[state=active]:shadow-sm",
+                    tab.activeBorder
+                  )}
+                >
+                  {tab.icon && (
+                    <tab.icon
+                      className={cn(
+                        "w-5 h-5 transition-colors",
+                        tab.color,
+                        tab.darkColor,
+                        `data-[state=active]:${tab.color} data-[state=active]:${tab.darkColor}`
+                      )}
+                    />
+                  )}
+                  <span>{tab.label}</span>
+                </TabsTrigger>
+              ))}
+            </div>
+            <button
+              onClick={() => {
+                /* TODO: Add new ingredient handler */
+              }}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-t-md transition-all",
+                "border-b-2 border-transparent",
+                "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-300",
+                "hover:bg-gray-50 dark:hover:bg-gray-800/50",
+                "font-medium text-sm"
+              )}
+            >
+              <PlusCircle className="w-4 h-4" />
+              <span>Thêm mới thành phần</span>
+            </button>
           </TabsList>
 
           <Card className="border rounded-lg shadow-md overflow-hidden dark:border-gray-800">

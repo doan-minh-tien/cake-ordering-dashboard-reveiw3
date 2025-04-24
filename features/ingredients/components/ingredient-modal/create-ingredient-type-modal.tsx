@@ -5,17 +5,17 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { 
-  PlusCircle, 
-  CakeSlice, 
-  Check, 
-  Tags,  
+import {
+  PlusCircle,
+  CakeSlice,
+  Check,
+  Tags,
   Palette,
   DollarSign,
   FileText,
   ChevronsUpDown,
   ImagePlus,
-  Loader 
+  Loader,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -44,10 +44,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useColorSelection } from "@/hooks/use-color";
 import { cn } from "@/lib/utils";
 import { createCakeDecoration } from "../../actions/cake-decoration-action";
-import { 
+import {
   Popover,
   PopoverContent,
-  PopoverTrigger
+  PopoverTrigger,
 } from "@/components/ui/popover";
 import {
   Command,
@@ -61,12 +61,13 @@ import { uploadCakeImage } from "../../../cakes/actions/cake-image-action";
 
 // Predefined type mapping - used just for display/selection
 const PREDEFINED_TYPES: Record<string, string> = {
+  OuterIcing: "Phủ Kem Ngoài",
   Sprinkles: "Hạt Rắc",
   Decoration: "Trang Trí",
   Bling: "Đồ Trang Trí Lấp Lánh",
-  TallSkirt: "Phần Kem Phía Trên",
-  Drip: "Sốt Kem",
-  ShortSkirt: "Phần Kem Phía Dưới",
+  TallSkirt: "Váy Bánh Cao",
+  Drip: "Sốt Chảy Tràn",
+  ShortSkirt: "Váy Bánh Ngắn",
 };
 
 // Form schema for creating a new ingredient type
@@ -74,11 +75,13 @@ const formSchema = z.object({
   type: z.string().min(2, { message: "Tối thiểu 2 ký tự" }),
   name: z.string().min(2, { message: "Tối thiểu 2 ký tự" }).optional(),
   price: z.coerce.number().min(0, { message: "Giá không hợp lệ" }).optional(),
-  color: z.object({
-    displayName: z.string(),
-    name: z.string(),
-    hex: z.string(),
-  }).optional(),
+  color: z
+    .object({
+      displayName: z.string(),
+      name: z.string(),
+      hex: z.string(),
+    })
+    .optional(),
   description: z.string().optional(),
   is_default: z.boolean().default(false),
   image_id: z.string().optional(),
@@ -88,10 +91,13 @@ const CreateIngredientTypeModal = () => {
   const { isOpen, onClose, type, data } = useModal();
   const isOpenModal = isOpen && type === "createIngredientTypeModal";
   const [isPending, startTransition] = useTransition();
-  const [selectedPredefinedType, setSelectedPredefinedType] = useState<string | null>(null);
+  const [selectedPredefinedType, setSelectedPredefinedType] = useState<
+    string | null
+  >(null);
   const existingTypes = data?.existingTypes || [];
   const { COLOR_OPTIONS, getColorValue } = useColorSelection();
-  const [currentColorPopover, setCurrentColorPopover] = useState<boolean>(false);
+  const [currentColorPopover, setCurrentColorPopover] =
+    useState<boolean>(false);
 
   // Image handling states
   const [imageLoading, setImageLoading] = useState(false);
@@ -106,7 +112,7 @@ const CreateIngredientTypeModal = () => {
       price: 0,
       description: "",
       is_default: false,
-      color: getColorValue("White")
+      color: getColorValue("White"),
     },
   });
 
@@ -118,7 +124,7 @@ const CreateIngredientTypeModal = () => {
       price: 0,
       description: "",
       is_default: false,
-      color: getColorValue("White")
+      color: getColorValue("White"),
     });
     setSelectedPredefinedType(null);
     setUploadedFileUrl(null);
@@ -134,7 +140,7 @@ const CreateIngredientTypeModal = () => {
 
   // Get missing predefined types
   const missingPredefinedTypes = Object.keys(PREDEFINED_TYPES).filter(
-    typeKey => !existingTypes.includes(typeKey)
+    (typeKey) => !existingTypes.includes(typeKey)
   );
 
   // Select a predefined type
@@ -159,7 +165,7 @@ const CreateIngredientTypeModal = () => {
 
       // Call API to upload image
       const result = await uploadCakeImage(base64, file.name, file.type);
-      
+
       if (!result.success) {
         toast.error(result.error || "Failed to upload image");
         return;
@@ -167,7 +173,7 @@ const CreateIngredientTypeModal = () => {
 
       // Save URL from API result
       setUploadedFileUrl(result.data.file_url);
-      
+
       // Update image_id in form
       form.setValue("image_id", result.data.id);
 
@@ -230,7 +236,7 @@ const CreateIngredientTypeModal = () => {
 
   return (
     <Dialog open={isOpenModal} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md rounded-xl overflow-y-auto max-h-[85vh]">
+      <DialogContent className="max-w-md[448px] rounded-xl overflow-y-auto max-h-md[50vh]">
         <DialogHeader className="pb-1">
           <DialogTitle className="text-xl font-bold flex items-center gap-2">
             <CakeSlice className="w-5 h-5 text-amber-600" />
@@ -249,18 +255,20 @@ const CreateIngredientTypeModal = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {missingPredefinedTypes.map((typeKey) => (
-                    <div 
+                    <div
                       key={typeKey}
                       className={cn(
                         "flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors border",
-                        selectedPredefinedType === typeKey 
-                          ? "bg-amber-100 border-amber-300" 
-                          : "hover:bg-amber-50 border-gray-200",
+                        selectedPredefinedType === typeKey
+                          ? "bg-amber-100 border-amber-300"
+                          : "hover:bg-amber-50 border-gray-200"
                       )}
                       onClick={() => handleSelectPredefinedType(typeKey)}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium">{PREDEFINED_TYPES[typeKey]}</span>
+                        <span className="text-xs font-medium">
+                          {PREDEFINED_TYPES[typeKey]}
+                        </span>
                       </div>
                       {selectedPredefinedType === typeKey && (
                         <Check className="h-3.5 w-3.5 text-amber-600" />
@@ -295,7 +303,9 @@ const CreateIngredientTypeModal = () => {
 
             {/* Info Title */}
             <div className="pt-2 border-t">
-              <h3 className="text-sm font-medium">Thông tin danh mục đầu tiên</h3>
+              <h3 className="text-sm font-medium">
+                Thông tin danh mục đầu tiên
+              </h3>
               <p className="text-xs text-muted-foreground mt-1">
                 Tạo một danh mục mẫu cho loại trang trí này
               </p>
@@ -434,7 +444,8 @@ const CreateIngredientTypeModal = () => {
                               <div
                                 className="w-3 h-3 rounded-full flex-shrink-0"
                                 style={{
-                                  backgroundColor: field.value?.hex || "#FFFFFF",
+                                  backgroundColor:
+                                    field.value?.hex || "#FFFFFF",
                                 }}
                               />
                               <span className="truncate text-xs">
@@ -472,7 +483,9 @@ const CreateIngredientTypeModal = () => {
                                       className="w-3 h-3 rounded-full border border-gray-200 flex-shrink-0"
                                       style={{ backgroundColor: color.hex }}
                                     />
-                                    <span className="truncate">{color.displayName}</span>
+                                    <span className="truncate">
+                                      {color.displayName}
+                                    </span>
                                     <Check
                                       className={cn(
                                         "ml-auto h-3 w-3 flex-shrink-0",
@@ -508,7 +521,9 @@ const CreateIngredientTypeModal = () => {
                       />
                     </FormControl>
                     <div className="space-y-0.5 leading-none">
-                      <FormLabel className="text-xs">Đặt làm mặc định</FormLabel>
+                      <FormLabel className="text-xs">
+                        Đặt làm mặc định
+                      </FormLabel>
                     </div>
                   </FormItem>
                 )}
@@ -553,4 +568,4 @@ const CreateIngredientTypeModal = () => {
   );
 };
 
-export default CreateIngredientTypeModal; 
+export default CreateIngredientTypeModal;

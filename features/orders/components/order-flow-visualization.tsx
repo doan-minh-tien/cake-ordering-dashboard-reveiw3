@@ -6,9 +6,8 @@ import { cn } from "@/lib/utils";
 const OrderStatus = {
   WAITING_BAKERY_CONFIRM: 1,
   PROCESSING: 2,
-  READY_FOR_PICKUP: 3,
-  SHIPPING: 4,
-  COMPLETED: 5,
+  SHIPPING: 3,
+  COMPLETED: 4,
   CANCELED: -1,
 };
 
@@ -20,17 +19,27 @@ export default function OrderFlowVisualization({
   order,
 }: OrderFlowVisualizationProps) {
   const currentStatus = order.order_status;
+  // Handle the case where the order status is READY_FOR_PICKUP
+  let mappedStatus = currentStatus;
+  if (currentStatus === "READY_FOR_PICKUP") {
+    mappedStatus = "PROCESSING";
+  }
+
   const currentStep =
-    OrderStatus[currentStatus as keyof typeof OrderStatus] || 0;
+    OrderStatus[mappedStatus as keyof typeof OrderStatus] || 0;
 
   // Determine step labels based on shipping_type
   const getStepLabel = (stepId: string) => {
     if (stepId === "SHIPPING") {
-      return `Đang giao hàng${
-        order.shipping_type ? ` (${order.shipping_type})` : ""
-      }`;
-    } else if (stepId === "READY_FOR_PICKUP") {
-      return "Sẵn sàng giao";
+      // Check shipping type to differentiate between pickup and delivery
+      if (
+        order.shipping_type &&
+        order.shipping_type.toLowerCase().includes("pickup")
+      ) {
+        return "Lấy tại chỗ";
+      } else {
+        return "Giao hàng";
+      }
     } else if (stepId === "WAITING_BAKERY_CONFIRM") {
       return "Chờ xác nhận";
     } else if (stepId === "PROCESSING") {
@@ -47,7 +56,6 @@ export default function OrderFlowVisualization({
       label: getStepLabel("WAITING_BAKERY_CONFIRM"),
     },
     { id: "PROCESSING", label: getStepLabel("PROCESSING") },
-    { id: "READY_FOR_PICKUP", label: getStepLabel("READY_FOR_PICKUP") },
     { id: "SHIPPING", label: getStepLabel("SHIPPING") },
     { id: "COMPLETED", label: getStepLabel("COMPLETED") },
   ];
@@ -92,15 +100,6 @@ export default function OrderFlowVisualization({
           const isCompleted = stepValue < currentStep;
           const isActive = stepValue === currentStep;
           const isPending = stepValue > currentStep;
-
-          // Only show relevant steps based on current status
-          const isHidden =
-            (step.id === "SHIPPING" && currentStatus === "READY_FOR_PICKUP") ||
-            (step.id === "READY_FOR_PICKUP" && currentStatus === "SHIPPING");
-
-          if (isHidden && !isActive && !isCompleted) {
-            return null;
-          }
 
           return (
             <div

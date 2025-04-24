@@ -76,11 +76,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 // Tên hiển thị tiếng Việt cho các loại trang trí
 const getTypeDisplayName = (type: string): string => {
   const typeNameMap: Record<string, string> = {
+    OuterIcing: "Phủ Kem Ngoài",
     Sprinkles: "Hạt Rắc",
     Decoration: "Trang Trí",
     Bling: "Đồ Trang Trí Lấp Lánh",
     TallSkirt: "Váy Bánh Cao",
-    Drip: "Dòng Chảy",
+    Drip: "Sốt Chảy Tràn",
     ShortSkirt: "Váy Bánh Ngắn",
   };
 
@@ -437,14 +438,14 @@ const CollectionCakeDecorationModal = () => {
 
     if (!currentItem) {
       return (
-        <div className="flex justify-center items-center p-4">
+        <div className="flex justify-center items-center p-2">
           <Button
             type="button"
             onClick={addNewItem}
             variant="outline"
-            className="gap-2 rounded-md h-8 text-xs"
+            className="gap-1 rounded-md h-7 text-xs"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-3 h-3" />
             Thêm trang trí mới
           </Button>
         </div>
@@ -463,10 +464,10 @@ const CollectionCakeDecorationModal = () => {
     };
 
     return (
-      <div className="space-y-3">
+      <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="px-2 py-0.5 text-xs">
+          <div className="flex items-center gap-1">
+            <Badge variant="outline" className="px-1.5 py-0.5 text-xs">
               {currentItemIndex + 1} / {decorationItems.length}
             </Badge>
             <h3 className="text-xs font-medium">
@@ -477,102 +478,100 @@ const CollectionCakeDecorationModal = () => {
             <Button
               variant="outline"
               size="icon"
-              className="h-7 w-7"
+              className="h-6 w-6"
               onClick={goToPrevItem}
               disabled={currentItemIndex === 0}
             >
-              <ChevronLeft className="h-3.5 w-3.5" />
+              <ChevronLeft className="h-3 w-3" />
             </Button>
             <Button
               variant="outline"
               size="icon"
-              className="h-7 w-7"
+              className="h-6 w-6"
               onClick={goToNextItem}
               disabled={currentItemIndex === decorationItems.length - 1}
             >
-              <ChevronRight className="h-3.5 w-3.5" />
+              <ChevronRight className="h-3 w-3" />
             </Button>
             <Button
               variant="destructive"
               size="icon"
-              className="h-7 w-7 ml-1"
+              className="h-6 w-6 ml-1"
               onClick={removeCurrentItem}
               disabled={decorationItems.length <= 1}
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              <Trash2 className="h-3 w-3" />
             </Button>
           </div>
         </div>
 
         {/* Image Upload Field */}
-        <div>
-          <FormLabel className="flex items-center gap-2 text-xs mb-1">
-            <ImagePlus className="w-3.5 h-3.5 text-primary" />
-            Hình Ảnh Trang Trí
-          </FormLabel>
-          <div className="flex flex-col gap-2">
-            <div className="relative w-full h-32 border rounded-md border-dashed flex items-center justify-center bg-gray-50/50 group">
-              {imageLoading || fetchingImage ? (
-                <div className="flex items-center justify-center">
-                  <Loader className="h-5 w-5 animate-spin text-primary" />
-                </div>
-              ) : uploadedFileUrl ? (
-                <Image
-                  src={uploadedFileUrl}
-                  alt="Decoration preview"
-                  fill
-                  className="object-contain p-2"
-                />
-              ) : imagePreview ? (
-                <Image
-                  src={imagePreview}
-                  alt="Decoration preview"
-                  fill
-                  className="object-contain p-2"
-                />
-              ) : (
-                <div className="flex flex-col items-center justify-center text-gray-400 text-center px-2">
-                  <ImagePlus className="h-6 w-6 mb-1" />
-                  <p className="text-xs">Upload decoration image</p>
-                </div>
-              )}
-
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={() =>
-                    document
-                      .getElementById(
-                        `decoration-image-upload-${currentItemIndex}`
-                      )
-                      ?.click()
-                  }
-                  disabled={imageLoading || fetchingImage}
-                  className="text-xs h-7"
-                >
-                  {imageLoading ? "Uploading..." : "Change Image"}
-                </Button>
+        <FormLabel className="flex items-center gap-1 text-xs mb-0.5">
+          <ImagePlus className="w-3 h-3 text-primary" />
+          Hình Ảnh Trang Trí
+        </FormLabel>
+        <div className="flex flex-col gap-1.5">
+          <div className="relative w-full h-24 border rounded-md border-dashed flex items-center justify-center bg-gray-50/50 group">
+            {imageLoading || fetchingImage ? (
+              <div className="flex items-center justify-center">
+                <Loader className="h-4 w-4 animate-spin text-primary" />
               </div>
-            </div>
+            ) : uploadedFileUrl ? (
+              <Image
+                src={uploadedFileUrl}
+                alt="Decoration preview"
+                fill
+                className="object-contain p-2"
+              />
+            ) : imagePreview ? (
+              <Image
+                src={imagePreview}
+                alt="Decoration preview"
+                fill
+                className="object-contain p-2"
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center text-gray-400 text-center px-2">
+                <ImagePlus className="h-5 w-5 mb-1" />
+                <p className="text-xs">Upload decoration image</p>
+              </div>
+            )}
 
-            <Input
-              type="file"
-              accept="image/*"
-              id={`decoration-image-upload-${currentItemIndex}`}
-              className="hidden"
-              onChange={handleImageUpload}
-              disabled={imageLoading}
-            />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() =>
+                  document
+                    .getElementById(
+                      `decoration-image-upload-${currentItemIndex}`
+                    )
+                    ?.click()
+                }
+                disabled={imageLoading || fetchingImage}
+                className="text-xs h-6"
+              >
+                {imageLoading ? "Uploading..." : "Change Image"}
+              </Button>
+            </div>
           </div>
+
+          <Input
+            type="file"
+            accept="image/*"
+            id={`decoration-image-upload-${currentItemIndex}`}
+            className="hidden"
+            onChange={handleImageUpload}
+            disabled={imageLoading}
+          />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2">
           {/* Name Field */}
-          <div className="space-y-1">
-            <FormLabel className="flex items-center gap-2 text-xs">
-              <CakeSlice className="w-3.5 h-3.5 text-primary" />
+          <div className="space-y-0.5">
+            <FormLabel className="flex items-center gap-1 text-xs">
+              <CakeSlice className="w-3 h-3 text-primary" />
               Tên trang trí <span className="text-red-500">*</span>
             </FormLabel>
             <Input
@@ -583,7 +582,7 @@ const CollectionCakeDecorationModal = () => {
                 setTouchedFields((prev) => ({ ...prev, name: true }))
               }
               className={cn(
-                "rounded-md h-8 text-xs",
+                "rounded-md h-7 text-xs",
                 isFieldTouched("name") &&
                   !validation.nameValid &&
                   "border-red-500"
@@ -595,9 +594,9 @@ const CollectionCakeDecorationModal = () => {
           </div>
 
           {/* Type Field */}
-          <div className="space-y-1">
-            <FormLabel className="flex items-center gap-2 text-xs">
-              <CakeSlice className="w-3.5 h-3.5 text-primary" />
+          <div className="space-y-0.5">
+            <FormLabel className="flex items-center gap-1 text-xs">
+              <CakeSlice className="w-3 h-3 text-primary" />
               Loại trang trí <span className="text-red-500">*</span>
             </FormLabel>
             <Select
@@ -614,7 +613,7 @@ const CollectionCakeDecorationModal = () => {
             >
               <SelectTrigger
                 className={cn(
-                  "rounded-md h-8 text-xs",
+                  "rounded-md h-7 text-xs",
                   isFieldTouched("type") &&
                     !validation.typeValid &&
                     "border-red-500"
@@ -636,9 +635,9 @@ const CollectionCakeDecorationModal = () => {
           </div>
 
           {/* Price Field */}
-          <div className="space-y-1">
-            <FormLabel className="flex items-center gap-2 text-xs">
-              <DollarSign className="w-3.5 h-3.5 text-primary" />
+          <div className="space-y-0.5">
+            <FormLabel className="flex items-center gap-1 text-xs">
+              <DollarSign className="w-3 h-3 text-primary" />
               Giá <span className="text-red-500">*</span>
             </FormLabel>
             <Input
@@ -652,7 +651,7 @@ const CollectionCakeDecorationModal = () => {
                 setTouchedFields((prev) => ({ ...prev, price: true }))
               }
               className={cn(
-                "rounded-md h-8 text-xs",
+                "rounded-md h-7 text-xs",
                 isFieldTouched("price") &&
                   !validation.priceValid &&
                   "border-red-500"
@@ -664,9 +663,9 @@ const CollectionCakeDecorationModal = () => {
           </div>
 
           {/* Color Field */}
-          <div className="space-y-1">
-            <FormLabel className="flex items-center gap-2 text-xs text-gray-700">
-              <Palette className="w-3.5 h-3.5 text-purple-500" />
+          <div className="space-y-0.5">
+            <FormLabel className="flex items-center gap-1 text-xs text-gray-700">
+              <Palette className="w-3 h-3 text-purple-500" />
               Màu sắc <span className="text-red-500">*</span>
             </FormLabel>
             <Popover
@@ -683,13 +682,13 @@ const CollectionCakeDecorationModal = () => {
                   variant="outline"
                   role="combobox"
                   className={cn(
-                    "w-full justify-between rounded-md h-8 hover:bg-transparent text-xs",
+                    "w-full justify-between rounded-md h-7 hover:bg-transparent text-xs",
                     isFieldTouched("color") &&
                       !validation.colorValid &&
                       "border-red-500"
                   )}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     <div
                       className="w-3 h-3 rounded-full flex-shrink-0"
                       style={{
@@ -703,20 +702,17 @@ const CollectionCakeDecorationModal = () => {
                   <ChevronsUpDown className="ml-1 h-3 w-3 flex-shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent
-                className="p-0 w-[180px] shadow-md"
-                align="center"
-                side="bottom"
-                sideOffset={4}
-              >
-                <Command className="max-h-[150px]">
+              <PopoverContent className="p-0 w-[180px]">
+                <Command>
                   <CommandInput
-                    placeholder="Tìm màu..."
+                    placeholder="Search color..."
                     className="h-7 text-xs"
                   />
-                  <CommandList className="max-h-[100px]">
-                    <CommandEmpty>Không tìm thấy màu.</CommandEmpty>
-                    <CommandGroup className="overflow-y-auto">
+                  <CommandEmpty className="text-xs py-1.5">
+                    No color found.
+                  </CommandEmpty>
+                  <CommandList>
+                    <CommandGroup className="max-h-[160px] overflow-auto">
                       {COLOR_OPTIONS.map((color) => (
                         <CommandItem
                           key={color.name}
@@ -725,17 +721,19 @@ const CollectionCakeDecorationModal = () => {
                             updateCurrentItem("color", color);
                             setCurrentColorPopover(false);
                           }}
-                          className="flex items-center gap-2 cursor-pointer py-1 px-2 text-xs"
+                          className="text-xs py-1.5"
                         >
-                          <div
-                            className="w-3 h-3 rounded-full border border-gray-200 flex-shrink-0"
-                            style={{ backgroundColor: color.hex }}
-                          />
-                          <span className="truncate">{color.displayName}</span>
+                          <div className="flex items-center gap-1.5">
+                            <div
+                              className="h-3 w-3 rounded-full"
+                              style={{ backgroundColor: color.hex }}
+                            />
+                            <span>{color.name}</span>
+                          </div>
                           <Check
                             className={cn(
-                              "ml-auto h-3 w-3 flex-shrink-0",
-                              color.hex === currentItem.color?.hex
+                              "ml-auto h-3 w-3",
+                              currentItem.color?.name === color.name
                                 ? "opacity-100"
                                 : "opacity-0"
                             )}
@@ -755,13 +753,13 @@ const CollectionCakeDecorationModal = () => {
 
         {/* Is Default Checkbox */}
         <div>
-          <div className="flex flex-row items-start space-x-2 space-y-0 py-1">
+          <div className="flex flex-row items-start space-x-1.5 space-y-0 py-0.5">
             <Checkbox
               checked={currentItem.is_default || false}
               onCheckedChange={(checked) =>
                 updateCurrentItem("is_default", !!checked)
               }
-              className="h-3.5 w-3.5"
+              className="h-3 w-3"
             />
             <div className="space-y-0.5 leading-none">
               <FormLabel className="text-xs">Đặt làm mặc định</FormLabel>
@@ -770,16 +768,16 @@ const CollectionCakeDecorationModal = () => {
         </div>
 
         {/* Description Field */}
-        <div className="space-y-1">
-          <FormLabel className="flex items-center gap-2 text-xs">
-            <FileText className="w-3.5 h-3.5 text-primary" />
+        <div className="space-y-0.5">
+          <FormLabel className="flex items-center gap-1 text-xs">
+            <FileText className="w-3 h-3 text-primary" />
             Mô tả
           </FormLabel>
           <textarea
             placeholder="Nhập mô tả"
             value={currentItem.description || ""}
             onChange={(e) => updateCurrentItem("description", e.target.value)}
-            className="w-full rounded-md border p-2 text-xs min-h-[60px]"
+            className="w-full rounded-md border p-1.5 text-xs min-h-[50px]"
           />
         </div>
       </div>
@@ -862,10 +860,10 @@ const CollectionCakeDecorationModal = () => {
 
   return (
     <Dialog open={isOpenModal} onOpenChange={handleClose}>
-      <DialogContent className="max-w-xl max-h-[85vh] rounded-xl overflow-y-auto">
+      <DialogContent className="max-w-md max-h-[85vh] rounded-xl overflow-y-auto">
         <DialogHeader className="pb-1">
-          <DialogTitle className="text-xl font-bold flex items-center gap-2">
-            <CakeSlice className="w-5 h-5" />
+          <DialogTitle className="text-lg font-bold flex items-center gap-2">
+            <CakeSlice className="w-4 h-4" />
             {currentStep === "form"
               ? "Thêm Trang Trí"
               : "Xác nhận Thêm Trang Trí"}
@@ -873,10 +871,10 @@ const CollectionCakeDecorationModal = () => {
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
             {currentStep === "form" ? renderItemForm() : renderSummary()}
 
-            <div className="flex flex-col gap-1.5 pt-2">
+            <div className="flex flex-col gap-1 pt-1">
               {currentStep === "form" && (
                 <>
                   <div className="flex gap-2 w-full">
@@ -884,18 +882,18 @@ const CollectionCakeDecorationModal = () => {
                       type="button"
                       onClick={addNewItem}
                       variant="outline"
-                      className="gap-2 rounded-md flex-1 h-8 text-xs"
+                      className="gap-1 rounded-md flex-1 h-7 text-xs"
                     >
-                      <Plus className="w-3.5 h-3.5" />
+                      <Plus className="w-3 h-3" />
                       Thêm trang trí mới
                     </Button>
                     <Button
                       type="button"
                       onClick={goToSummary}
                       disabled={!currentItemValidated}
-                      className="gap-2 rounded-md flex-1 h-8 text-xs"
+                      className="gap-1 rounded-md flex-1 h-7 text-xs"
                     >
-                      <ListFilter className="w-3.5 h-3.5" />
+                      <ListFilter className="w-3 h-3" />
                       Xem danh sách ({decorationItems.length})
                     </Button>
                   </div>

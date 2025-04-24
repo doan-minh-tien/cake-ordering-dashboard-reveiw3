@@ -113,7 +113,11 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
       case "DELIVERING":
       case "SHIPPING":
         return {
-          label: "Vận chuyển",
+          label:
+            order.shipping_type &&
+            order.shipping_type.toLowerCase().includes("pickup")
+              ? "Lấy tại chỗ"
+              : "Giao hàng",
           bgColor: "bg-purple-100 dark:bg-purple-900/30",
           textColor: "text-purple-700 dark:text-purple-400",
         };
@@ -161,11 +165,17 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
           requiresFile: false,
         };
       case "PROCESSING":
+        const isPickupOrder =
+          order.shipping_type &&
+          order.shipping_type.toLowerCase().includes("pickup");
         return {
-          text: "Chuyển sang sẵn sàng giao",
+          text: isPickupOrder
+            ? "Chuyển sang lấy tại chỗ"
+            : "Chuyển sang giao hàng",
           color: "bg-green-600 hover:bg-green-700",
-          description:
-            "Chuyển đơn hàng sang trạng thái sẵn sàng giao? Cần tải lên hình ảnh bánh hoàn thiện.",
+          description: isPickupOrder
+            ? "Chuyển đơn hàng sang trạng thái lấy tại chỗ? Cần tải lên hình ảnh bánh hoàn thiện."
+            : "Chuyển đơn hàng sang trạng thái giao hàng? Cần tải lên hình ảnh bánh hoàn thiện.",
           confirmText: "Chuyển trạng thái",
           requiresFile: true,
         };
@@ -178,10 +188,17 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
           requiresFile: false,
         };
       case "SHIPPING":
+        const isPickup =
+          order.shipping_type &&
+          order.shipping_type.toLowerCase().includes("pickup");
         return {
-          text: "Đơn hàng đang được vận chuyển",
+          text: isPickup
+            ? "Đơn hàng đang chờ khách lấy tại chỗ"
+            : "Đơn hàng đang được giao",
           color: "bg-teal-600 hover:bg-teal-700",
-          description: "Đơn hàng đang được vận chuyển đến khách hàng.",
+          description: isPickup
+            ? "Đơn hàng đang chờ khách đến lấy tại cửa hàng."
+            : "Đơn hàng đang được giao đến khách hàng.",
           confirmText: "Đã hiểu",
           requiresFile: false,
           disableAction: true,

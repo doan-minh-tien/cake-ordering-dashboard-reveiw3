@@ -63,12 +63,13 @@ const getItemIcon = (type: string) => {
 // Tên hiển thị tiếng Việt cho các loại trang trí
 const getTypeDisplayName = (type: string): string => {
   const typeNameMap: Record<string, string> = {
+    OuterIcing: "Phủ Kem Ngoài",
     Sprinkles: "Hạt Rắc",
     Decoration: "Trang Trí",
     Bling: "Đồ Trang Trí Lấp Lánh",
-    TallSkirt: "Phần Kem Phía Trên",
-    Drip: "Sốt Kem",
-    ShortSkirt: "Phần Kem Phía Dưới",
+    TallSkirt: "Váy Bánh Cao",
+    Drip: "Sốt Chảy Tràn",
+    ShortSkirt: "Váy Bánh Ngắn",
   };
 
   return typeNameMap[type] || type;
@@ -91,7 +92,7 @@ export function CakeDecorationTable({ data }: CakeDecorationTableProps) {
 
   // Get existing types from data
   const existingTypes = React.useMemo(() => {
-    return cakeData.map(item => item.type);
+    return cakeData.map((item) => item.type);
   }, [cakeData]);
 
   // Check if there are missing types
@@ -106,7 +107,7 @@ export function CakeDecorationTable({ data }: CakeDecorationTableProps) {
       ShortSkirt: "Phần Kem Phía Dưới",
     };
     const allDefinedTypes = Object.keys(typeNameMap);
-    return allDefinedTypes.filter(type => !existingTypes.includes(type));
+    return allDefinedTypes.filter((type) => !existingTypes.includes(type));
   }, [existingTypes]);
 
   const handleDelete = async (id?: string) => {
@@ -407,7 +408,9 @@ export function CakeDecorationTable({ data }: CakeDecorationTableProps) {
               variant="outline"
               size="sm"
               className="rounded-full px-3 bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700 hover:text-amber-800 transition-all flex items-center gap-1"
-              onClick={() => onOpen("createIngredientTypeModal", { existingTypes })}
+              onClick={() =>
+                onOpen("createIngredientTypeModal", { existingTypes })
+              }
             >
               <PlusCircle className="h-4 w-4" />
               <span>Thêm loại trang trí mới</span>
@@ -425,9 +428,11 @@ export function CakeDecorationTable({ data }: CakeDecorationTableProps) {
                 </p>
                 <Button
                   variant="default"
-                  size="sm" 
+                  size="sm"
                   className="bg-amber-600 hover:bg-amber-700 text-white shadow-sm"
-                  onClick={() => onOpen("createIngredientTypeModal", { existingTypes })}
+                  onClick={() =>
+                    onOpen("createIngredientTypeModal", { existingTypes })
+                  }
                 >
                   <PlusCircle className="h-4 w-4 mr-1" />
                   Tạo loại trang trí
