@@ -82,6 +82,11 @@ export function CakeMessageOptionTable({ data }: CakeMessageOptionTableProps) {
 
   const { data: cakeData, pageCount } = data;
 
+  // Get existing types from data
+  const existingTypes = React.useMemo(() => {
+    return cakeData.map((item) => item.type);
+  }, [cakeData]);
+
   const toggleRowExpansion = (type: string) => {
     setExpandedRows((prev) => ({
       ...prev,
@@ -316,10 +321,10 @@ export function CakeMessageOptionTable({ data }: CakeMessageOptionTableProps) {
               {items.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
                   <MessageSquare className="h-12 w-12 text-indigo-200 mb-4" />
-                  <h3 className="text-gray-700 font-medium mb-1">
+                  <h3 className="text-indigo-700 font-medium mb-1">
                     Chưa có tin nhắn nào
                   </h3>
-                  <p className="text-gray-500 mb-4">
+                  <p className="text-indigo-600 mb-4">
                     Hãy thêm tin nhắn đầu tiên cho loại này
                   </p>
                   <Button
@@ -359,30 +364,50 @@ export function CakeMessageOptionTable({ data }: CakeMessageOptionTableProps) {
             <h2 className="text-xl font-semibold text-indigo-800">
               Quản lý tin nhắn bánh
             </h2>
-            {/* Button hidden per client request */}
-            {/*
             <Button
               variant="default"
               size="sm"
               className="bg-indigo-600 hover:bg-indigo-700 text-white"
-              // onClick={() => onOpen("newCakeMessageTypeModal")}
+              onClick={() => onOpen("createMessageTypeModal", { existingTypes })}
             >
               <PlusCircle className="h-4 w-4 mr-1" />
               Thêm loại tin nhắn mới
             </Button>
-            */}
           </div>
           <CardContent>
-            <ExpandDataTable
-              dataTable={dataTable}
-              columns={columns}
-              searchableColumns={[]}
-              filterableColumns={[]}
-              columnLabels={labels}
-              renderAdditionalRows={(row) =>
-                renderExpandedContent(row.original.type, row.original.items)
-              }
-            />
+            {cakeData.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+                <MessageSquare className="h-12 w-12 text-indigo-200 mb-4" />
+                <h3 className="text-indigo-700 font-medium mb-1">
+                  Chưa có loại tin nhắn nào
+                </h3>
+                <p className="text-indigo-600 mb-4">
+                  Bạn cần tạo loại tin nhắn trước khi thêm các tin nhắn riêng lẻ
+                </p>
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
+                  onClick={() =>
+                    onOpen("createMessageTypeModal", { existingTypes })
+                  }
+                >
+                  <PlusCircle className="h-4 w-4 mr-1" />
+                  Tạo loại tin nhắn
+                </Button>
+              </div>
+            ) : (
+              <ExpandDataTable
+                dataTable={dataTable}
+                columns={columns}
+                searchableColumns={[]}
+                filterableColumns={[]}
+                columnLabels={labels}
+                renderAdditionalRows={(row) =>
+                  renderExpandedContent(row.original.type, row.original.items)
+                }
+              />
+            )}
           </CardContent>
         </Card>
       </div>
