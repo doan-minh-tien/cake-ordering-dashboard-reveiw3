@@ -20,7 +20,9 @@ export type ModalType =
   | "collectionCakePartModal"
   | "bakeryDetailModal"
   | "createIngredientTypeModal"
-  | "createMessageTypeModal";
+  | "createMessageTypeModal"
+  | "createExtraTypeModal"
+  | "createPartTypeModal";
 
 export interface ModalData {
   // user   -- example

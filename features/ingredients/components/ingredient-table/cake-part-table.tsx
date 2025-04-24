@@ -91,6 +91,11 @@ export function CakePartTable({ data }: CakePartTableProps) {
 
   const { data: cakeData, pageCount } = data;
 
+  // Get existing types from data
+  const existingTypes = React.useMemo(() => {
+    return cakeData.map((item) => item.type);
+  }, [cakeData]);
+
   const toggleRowExpansion = (type: string) => {
     setExpandedRows((prev) => ({
       ...prev,
@@ -369,8 +374,39 @@ export function CakePartTable({ data }: CakePartTableProps) {
               <BoxIcon className="h-5 w-5 mr-2 text-blue-600 dark:text-gray-400" />
               Quản lý phần bánh
             </h2>
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-full px-3 bg-blue-50 dark:bg-gray-800 hover:bg-blue-100 dark:hover:bg-gray-700 border-blue-200 dark:border-gray-700 text-blue-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-white transition-all flex items-center gap-1"
+              onClick={() => onOpen("createPartTypeModal", { existingTypes })}
+            >
+              <PlusCircle className="h-4 w-4" />
+              <span>Thêm loại phần bánh mới</span>
+            </Button>
           </div>
           <CardContent>
+            {cakeData.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+                <BoxIcon className="h-12 w-12 text-blue-200 dark:text-gray-600 mb-4" />
+                <h3 className="text-blue-700 dark:text-gray-300 font-medium mb-1">
+                  Chưa có loại phần bánh nào
+                </h3>
+                <p className="text-blue-600 dark:text-gray-400 mb-4">
+                  Bạn cần tạo loại phần bánh trước khi thêm các phần bánh riêng lẻ
+                </p>
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="bg-blue-600 dark:bg-gray-700 hover:bg-blue-700 dark:hover:bg-gray-600 text-white shadow-sm"
+                  onClick={() =>
+                    onOpen("createPartTypeModal", { existingTypes })
+                  }
+                >
+                  <PlusCircle className="h-4 w-4 mr-1" />
+                  Tạo loại phần bánh
+                </Button>
+              </div>
+            ) : (
             <ExpandDataTable
               dataTable={dataTable}
               columns={columns}
@@ -381,6 +417,7 @@ export function CakePartTable({ data }: CakePartTableProps) {
                 renderExpandedContent(row.original.type, row.original.items)
               }
             />
+            )}
           </CardContent>
         </Card>
       </div>

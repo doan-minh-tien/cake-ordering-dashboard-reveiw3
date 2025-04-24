@@ -87,6 +87,11 @@ export function CakeExtraOptionTable({ data }: CakeExtraOptionTableProps) {
 
   const { data: cakeData, pageCount } = data;
 
+  // Get existing types from data
+  const existingTypes = React.useMemo(() => {
+    return cakeData.map((item) => item.type);
+  }, [cakeData]);
+
   const toggleRowExpansion = (type: string) => {
     setExpandedRows((prev) => ({
       ...prev,
@@ -380,30 +385,50 @@ export function CakeExtraOptionTable({ data }: CakeExtraOptionTableProps) {
             <h2 className="text-xl font-semibold text-indigo-800">
               Quản lý tùy chọn thêm
             </h2>
-            {/* Button hidden per client request */}
-            {/*
             <Button
               variant="default"
               size="sm"
               className="bg-indigo-600 hover:bg-indigo-700 text-white"
-              // onClick={() => onOpen("newCakeExtraOptionTypeModal")}
+              onClick={() => onOpen("createExtraTypeModal", { existingTypes })}
             >
               <PlusCircle className="h-4 w-4 mr-1" />
               Thêm loại tùy chọn thêm mới
             </Button>
-            */}
           </div>
           <CardContent>
-            <ExpandDataTable
-              dataTable={dataTable}
-              columns={columns}
-              searchableColumns={[]}
-              filterableColumns={[]}
-              columnLabels={labels}
-              renderAdditionalRows={(row) =>
-                renderExpandedContent(row.original.type, row.original.items)
-              }
-            />
+            {cakeData.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+                <Package className="h-12 w-12 text-indigo-200 mb-4" />
+                <h3 className="text-indigo-700 font-medium mb-1">
+                  Chưa có loại tùy chọn thêm nào
+                </h3>
+                <p className="text-indigo-600 mb-4">
+                  Bạn cần tạo loại tùy chọn thêm trước khi thêm các tùy chọn riêng lẻ
+                </p>
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
+                  onClick={() =>
+                    onOpen("createExtraTypeModal", { existingTypes })
+                  }
+                >
+                  <PlusCircle className="h-4 w-4 mr-1" />
+                  Tạo loại tùy chọn thêm
+                </Button>
+              </div>
+            ) : (
+              <ExpandDataTable
+                dataTable={dataTable}
+                columns={columns}
+                searchableColumns={[]}
+                filterableColumns={[]}
+                columnLabels={labels}
+                renderAdditionalRows={(row) =>
+                  renderExpandedContent(row.original.type, row.original.items)
+                }
+              />
+            )}
           </CardContent>
         </Card>
       </div>

@@ -137,8 +137,6 @@ export function IngredientsClientWrapper({
                 "font-medium text-sm"
               )}
             >
-              <PlusCircle className="w-4 h-4" />
-              <span>Thêm mới thành phần</span>
             </button>
           </TabsList>
 

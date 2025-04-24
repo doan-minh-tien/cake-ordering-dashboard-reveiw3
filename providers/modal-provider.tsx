@@ -1,6 +1,8 @@
 "use client";
 import CreateMessageTypeModal from "@/features/ingredients/components/ingredient-modal/create-message-type-modal";
 import CreateIngredientTypeModal from "@/features/ingredients/components/ingredient-modal/create-ingredient-type-modal";
+import CreateExtraTypeModal from "@/features/ingredients/components/ingredient-modal/create-extra-type-modal";
+import CreatePartTypeModal from "@/features/ingredients/components/ingredient-modal/create-part-type-modal";
 import CakeDecorationModal from "@/features/ingredients/components/ingredient-modal/cake-decoration-modal";
 import CollectionCakeDecorationModal from "@/features/ingredients/components/ingredient-modal/collection-cake-decoration-modal";
 import CakePartModal from "@/features/ingredients/components/ingredient-modal/cake-part-modal";
@@ -25,6 +27,8 @@ export const ModalProvider = () => {
     <>
       <CreateIngredientTypeModal />
       <CreateMessageTypeModal />
+      <CreateExtraTypeModal />
+      <CreatePartTypeModal />
       <CollectionCakeDecorationModal />
       <CakeDecorationModal />
       <CollectionCakePartModal />
