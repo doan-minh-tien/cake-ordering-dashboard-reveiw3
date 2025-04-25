@@ -41,12 +41,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import {
   beingToNext,
-  beingToNextWithFiles,
   beingToNextWithFileBase64,
 } from "../../actions/order-action";
 import { toast } from "sonner";
@@ -761,7 +759,7 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
                               Hình ảnh bánh hoàn thiện
                             </p>
                             <p className="text-xs text-muted-foreground/70 mt-1">
-                              Nhấp vào "Tải ảnh lên" để chọn hình ảnh
+                              Nhấp vào &quot;Tải ảnh lên&quot; để chọn hình ảnh
                             </p>
                           </div>
                         )}

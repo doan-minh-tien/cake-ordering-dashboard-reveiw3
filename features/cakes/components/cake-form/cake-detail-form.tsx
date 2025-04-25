@@ -29,7 +29,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { updateCake, createCake } from "../../actions/cake-action";
 import { toast } from "sonner";
 import { uploadCakeImage } from "../../actions/cake-image-action";
@@ -164,6 +164,15 @@ const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
     resolver: zodResolver(cakeSchema),
     defaultValues,
   });
+
+  // Add a useEffect to sync available_cake_quantity with quantity_default when creating a new cake
+  useEffect(() => {
+    // Only apply this logic for new cake creation, not for editing
+    if (!initialData) {
+      const quantityDefault = form.watch("quantity_default");
+      form.setValue("available_cake_quantity", quantityDefault);
+    }
+  }, [form.watch("quantity_default"), initialData, form]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -507,6 +516,40 @@ const CakeDetailForm = ({ initialData }: CakeDetailFormProps) => {
                             className="h-9 text-sm focus:ring-1 focus:ring-primary/20"
                           />
                         </FormControl>
+                        <FormMessage className="text-xs" />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="quantity_default"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">
+                          Số lượng mặc định (sẽ reset vào 12h đêm)
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min="0"
+                            step="1"
+                            placeholder="0"
+                            {...field}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value) || 0;
+                              field.onChange(value);
+                              // If creating a new cake, auto-update available_cake_quantity
+                              if (!initialData) {
+                                form.setValue("available_cake_quantity", value);
+                              }
+                            }}
+                            className="h-9 text-sm focus:ring-1 focus:ring-primary/20"
+                          />
+                        </FormControl>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Số lượng sẽ tự động reset về giá trị này vào 12h đêm mỗi ngày
+                        </p>
                         <FormMessage className="text-xs" />
                       </FormItem>
                     )}
