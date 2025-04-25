@@ -38,7 +38,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { IBarkery } from "../../types/barkeries-type";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-
+import { formatCurrency } from "@/lib/utils";
 interface BakeryDetailProps {
   bakery: IBarkery | null;
 }
@@ -75,19 +75,19 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
   };
 
   const getVerificationStatus = () => {
-    if (bakery.confirmed_at) {
+    if (bakery.status) {
       return {
-        status: "Đã xác minh",
+        status: "CONFIRMED",
         icon: <ShieldCheck className="h-4 w-4" />,
       };
     } else if (bakery.front_card_file && bakery.back_card_file) {
       return {
-        status: "Đang xem xét",
+        status: "PENDING",
         icon: <AlertCircle className="h-4 w-4" />,
       };
     } else {
       return {
-        status: "Chưa xác minh",
+        status: "UNVERIFIED",
         icon: <X className="h-4 w-4" />,
       };
     }
@@ -96,10 +96,10 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
   const verificationStatus = getVerificationStatus();
 
   return (
-    <div className="container max-w-6xl mx-auto px-4 py-8">
+    <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Hero Section */}
-      <div className="mb-8">
-        <div className="relative w-full h-64 rounded-2xl overflow-hidden mb-6 shadow-md">
+      <div className="mb-12">
+        <div className="relative w-full h-64 rounded-2xl overflow-hidden mb-20 shadow-lg">
           <Image
             src={
               bakery.shop_image_files[0]?.file_url ||
@@ -128,52 +128,44 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
           <div className="absolute top-4 right-4 flex gap-2">
             <Badge
               variant="outline"
-              className="flex items-center gap-1 py-2 px-3 border-0 !shadow-md !font-medium animate-fadeIn"
-              style={{
-                background:
-                  verificationStatus.status === "Đã xác minh"
-                    ? "linear-gradient(135deg, #10b981 0%, #34d399 100%)"
-                    : verificationStatus.status === "Đang xem xét"
-                    ? "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)"
-                    : "linear-gradient(135deg, #ef4444 0%, #f87171 100%)",
-                color: "white",
-              }}
+              className={`flex items-center gap-1.5 py-1.5 px-3 border-0 shadow-md font-medium animate-fadeIn rounded-full ${
+                verificationStatus.status === "CONFIRMED"
+                  ? "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
+                  : verificationStatus.status === "PENDING"
+                  ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300"
+                  : "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300"
+              }`}
             >
               {verificationStatus.icon}
-              {verificationStatus.status}
+              {verificationStatus.status === "CONFIRMED" ? "Đã xác minh" : verificationStatus.status === "PENDING" ? "Đang xem xét" : "Chưa xác minh"}
             </Badge>
             <Badge
               variant="outline"
-              className="py-2 px-3 border-0 !shadow-md !font-medium animate-fadeIn"
-              style={{
-                background: "linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)",
-                color: "white",
-              }}
+              className="py-1.5 px-3 border-0 shadow-md font-medium animate-fadeIn rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300"
             >
               Tiệm bánh
             </Badge>
           </div>
         </div>
 
-        {/* Bakery Name and Location */}
-        <div className="ml-40 mb-8 flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
+        {/* Bakery Name, Location & Edit Button */}
+        <div className="mt-8 flex justify-between items-center">
+          <div className="ml-40">
+            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70 mb-1">
               {bakery.bakery_name}
             </h1>
-            <div className="flex items-center gap-2 mt-2 text-muted-foreground">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <MapPin className="h-4 w-4 text-primary" />
               <p>{bakery.address}</p>
             </div>
           </div>
-
           <EditButton bakeryId={bakery.id} />
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
           <StatCard
-            icon={<Store className="h-5 w-5" />}
+            icon={<Store className="h-6 w-6" />}
             title="Thông tin cơ bản"
             value={bakery.confirmed_at ? "Đã xác nhận" : "Chưa xác nhận"}
             description={`Ngày tạo: ${formatDate(
@@ -181,27 +173,28 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
             )}`}
           />
           <StatCard
-            icon={<Cake className="h-5 w-5" />}
+            icon={<Cake className="h-6 w-6" />}
             title="Sản phẩm"
             value="0 Sản phẩm"
             description="Chưa có sản phẩm nào"
           />
           <StatCard
-            icon={<DollarSign className="h-5 w-5" />}
+            icon={<DollarSign className="h-6 w-6" />}
             title="Doanh thu"
-            value="0₫"
+            value={`${formatCurrency(bakery.metric?.total_revenue ?? 0)}`}
             description="Chưa có dữ liệu doanh thu"
           />
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column - Main Content */}
-        <div className="lg:col-span-2">
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+
+        {/* Left Column - Main Content (Tabs) */}
+        <div className="md:col-span-8">
           {/* Tab Navigation */}
-          <nav className="mb-6 bg-background rounded-lg overflow-hidden border shadow-sm">
-            <div className="flex">
+          <nav className="mb-8 bg-background rounded-lg overflow-hidden border dark:border-gray-700 shadow-sm">
+            <div className="flex border-b dark:border-gray-700">
               <TabButton
                 active={activeTab === "overview"}
                 onClick={() => setActiveTab("overview")}
@@ -234,40 +227,40 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
           </nav>
 
           {/* Tab Content */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             {activeTab === "overview" && (
-              <Card className="overflow-hidden">
-                <CardHeader className="bg-muted/50 py-4">
-                  <CardTitle className="text-lg flex items-center gap-2">
+              <Card className="overflow-hidden shadow-sm border dark:border-gray-700">
+                <CardHeader className="bg-muted/30 dark:bg-muted/50 py-5 border-b dark:border-gray-700">
+                  <CardTitle className="text-xl flex items-center gap-2.5">
                     <Info className="h-5 w-5 text-primary" />
                     Thông tin chi tiết
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6 space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <CardContent className="p-8 space-y-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Store Information */}
                     <div>
-                      <h3 className="text-base font-medium mb-4 flex items-center gap-2">
-                        <Store className="h-4 w-4 text-primary" />
+                      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <Store className="h-5 w-5 text-primary" />
                         Thông tin cửa hàng
                       </h3>
-                      <ul className="space-y-3 pl-1">
+                      <ul className="space-y-4 pl-1">
                         <InfoItem
-                          icon={<Store className="text-muted-foreground" />}
+                          icon={<Store className="h-5 w-5 text-muted-foreground" />}
                           label="Tên cửa hàng"
                           value={bakery.bakery_name}
                           copyable={false}
                           onCopy={() => copyToClipboard(bakery.bakery_name)}
                         />
                         <InfoItem
-                          icon={<MapPin className="text-muted-foreground" />}
+                          icon={<MapPin className="h-5 w-5 text-muted-foreground" />}
                           label="Địa chỉ"
                           value={bakery.address}
                           copyable={false}
                           onCopy={() => copyToClipboard(bakery.address)}
                         />
                         <InfoItem
-                          icon={<FileText className="text-muted-foreground" />}
+                          icon={<FileText className="h-5 w-5 text-muted-foreground" />}
                           label="Mã số thuế"
                           value={bakery.tax_code}
                           copyable={false}
@@ -278,20 +271,20 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
 
                     {/* Contact Information */}
                     <div>
-                      <h3 className="text-base font-medium mb-4 flex items-center gap-2">
-                        <User className="h-4 w-4 text-primary" />
+                      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <User className="h-5 w-5 text-primary" />
                         Thông tin liên hệ
                       </h3>
-                      <ul className="space-y-3 pl-1">
+                      <ul className="space-y-4 pl-1">
                         <InfoItem
-                          icon={<Phone className="text-muted-foreground" />}
+                          icon={<Phone className="h-5 w-5 text-muted-foreground" />}
                           label="Điện thoại"
                           value={bakery.phone}
                           copyable
                           onCopy={() => copyToClipboard(bakery.phone)}
                         />
                         <InfoItem
-                          icon={<Mail className="text-muted-foreground" />}
+                          icon={<Mail className="h-5 w-5 text-muted-foreground" />}
                           label="Email"
                           value={bakery.email}
                           copyable
@@ -299,7 +292,7 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
                         />
                         <InfoItem
                           icon={
-                            <CreditCard className="text-muted-foreground" />
+                            <CreditCard className="h-5 w-5 text-muted-foreground" />
                           }
                           label="Tài khoản ngân hàng"
                           value={bakery.bank_account || "Chưa cập nhật"}
@@ -316,43 +309,43 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
 
                   {/* New Descriptions Section */}
                   <div>
-                    <h3 className="text-base font-medium mb-4 flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-primary" />
+                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-primary" />
                       Mô tả chi tiết
                     </h3>
 
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                       {/* Bakery Description */}
-                      <div className="bg-muted/30 rounded-lg p-4">
-                        <h4 className="font-medium mb-2 flex items-center gap-2">
-                          <Store className="h-4 w-4 text-primary" />
+                      <div className="bg-muted/30 dark:bg-muted/40 rounded-lg p-5 border dark:border-gray-700/50">
+                        <h4 className="font-semibold mb-2 flex items-center gap-2">
+                          <Store className="h-5 w-5 text-primary" />
                           Mô tả cửa hàng
                         </h4>
-                        <p className="text-muted-foreground">
+                        <p className="text-muted-foreground leading-relaxed">
                           {bakery.bakery_description ||
                             "Chưa có mô tả về cửa hàng"}
                         </p>
                       </div>
 
                       {/* Cake Description */}
-                      <div className="bg-muted/30 rounded-lg p-4">
-                        <h4 className="font-medium mb-2 flex items-center gap-2">
-                          <Cake className="h-4 w-4 text-primary" />
+                      <div className="bg-muted/30 dark:bg-muted/40 rounded-lg p-5 border dark:border-gray-700/50">
+                        <h4 className="font-semibold mb-2 flex items-center gap-2">
+                          <Cake className="h-5 w-5 text-primary" />
                           Mô tả sản phẩm
                         </h4>
-                        <p className="text-muted-foreground">
+                        <p className="text-muted-foreground leading-relaxed">
                           {bakery.cake_description ||
                             "Chưa có mô tả về sản phẩm"}
                         </p>
                       </div>
 
                       {/* Price Description */}
-                      <div className="bg-muted/30 rounded-lg p-4">
-                        <h4 className="font-medium mb-2 flex items-center gap-2">
-                          <DollarSign className="h-4 w-4 text-primary" />
+                      <div className="bg-muted/30 dark:bg-muted/40 rounded-lg p-5 border dark:border-gray-700/50">
+                        <h4 className="font-semibold mb-2 flex items-center gap-2">
+                          <DollarSign className="h-5 w-5 text-primary" />
                           Mô tả giá cả
                         </h4>
-                        <p className="text-muted-foreground">
+                        <p className="text-muted-foreground leading-relaxed">
                           {bakery.price_description ||
                             "Chưa có mô tả về giá cả"}
                         </p>
@@ -366,36 +359,64 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
                   {bakery.metric && (
                     <>
                       <div>
-                        <h3 className="text-base font-medium mb-4 flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-primary" />
+                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                          <FileText className="h-5 w-5 text-primary" />
                           Thống kê
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div className="bg-muted/30 rounded-lg p-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <div className="bg-muted/30 dark:bg-muted/40 rounded-lg p-4 border dark:border-gray-700/50">
                             <p className="text-sm text-muted-foreground mb-1">
                               Tổng đơn hàng
                             </p>
-                            <p className="text-lg font-medium">
+                            <p className="text-xl font-semibold">
                               {bakery.metric.orders_count || "0"}
                             </p>
                           </div>
-                          <div className="bg-muted/30 rounded-lg p-4">
+                          <div className="bg-muted/30 dark:bg-muted/40 rounded-lg p-4 border dark:border-gray-700/50">
                             <p className="text-sm text-muted-foreground mb-1">
-                              Đánh giá trung bình
+                              Khách hàng
                             </p>
-                            <p className="text-lg font-medium">
-                              {bakery.metric.average_rating ||
-                                "Chưa có đánh giá"}
+                            <p className="text-xl font-semibold">
+                              {bakery.metric.customers_count || "0"}
                             </p>
                           </div>
-                          <div className="bg-muted/30 rounded-lg p-4">
+                          <div className="bg-muted/30 dark:bg-muted/40 rounded-lg p-4 border dark:border-gray-700/50">
                             <p className="text-sm text-muted-foreground mb-1">
-                              Tỷ lệ hoàn thành
+                              Giá trị đơn TB
                             </p>
-                            <p className="text-lg font-medium">
-                              {bakery.metric.completion_rate
-                                ? `${bakery.metric.completion_rate}%`
-                                : "Chưa có dữ liệu"}
+                            <p className="text-xl font-semibold">
+                              {bakery.metric?.average_order_value
+                              ? formatCurrency(bakery.metric.average_order_value)
+                              : "N/A"}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+                           <div className="bg-muted/30 dark:bg-muted/40 rounded-lg p-4 border dark:border-gray-700/50">
+                            <p className="text-sm text-muted-foreground mb-1">
+                              Doanh thu (Shop)
+                            </p>
+                            <p className="text-xl font-semibold">
+                              {formatCurrency(bakery.metric?.total_revenue ?? 0)}
+                            </p>
+                          </div>
+                          <div className="bg-muted/30 dark:bg-muted/40 rounded-lg p-4 border dark:border-gray-700/50">
+                            <p className="text-sm text-muted-foreground mb-1">
+                              Doanh thu (Hệ thống)
+                            </p>
+                            <p className="text-xl font-semibold">
+                              {formatCurrency(bakery.metric?.app_revenue ?? 0)}
+                            </p>
+                          </div>
+                           <div className="bg-muted/30 dark:bg-muted/40 rounded-lg p-4 border dark:border-gray-700/50">
+                            <p className="text-sm text-muted-foreground mb-1">
+                              Đánh giá TB
+                            </p>
+                            <p className="text-xl font-semibold">
+                              {(bakery.metric?.rating_average ?? 0) > 0
+                              ? (bakery.metric?.rating_average ?? 0).toFixed(1)
+                              : "N/A"}
                             </p>
                           </div>
                         </div>
@@ -405,18 +426,18 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
                   )}
 
                   <div>
-                    <h3 className="text-base font-medium mb-4 flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-primary" />
+                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-primary" />
                       Thời gian hoạt động
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="bg-muted/50 rounded-lg p-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="bg-muted/50 dark:bg-muted/60 rounded-lg p-4 border dark:border-gray-700/50">
                         <p className="text-sm text-muted-foreground mb-1">
                           Thứ 2 - Thứ 6
                         </p>
                         <p className="text-lg font-medium">07:00 - 21:00</p>
                       </div>
-                      <div className="bg-muted/50 rounded-lg p-4">
+                      <div className="bg-muted/50 dark:bg-muted/60 rounded-lg p-4 border dark:border-gray-700/50">
                         <p className="text-sm text-muted-foreground mb-1">
                           Thứ 7 - Chủ nhật
                         </p>
@@ -429,15 +450,15 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
             )}
 
             {activeTab === "images" && (
-              <Card className="overflow-hidden">
-                <CardHeader className="bg-muted/50 py-4">
-                  <CardTitle className="text-lg flex items-center gap-2">
+              <Card className="overflow-hidden shadow-sm border dark:border-gray-700">
+                <CardHeader className="bg-muted/30 dark:bg-muted/50 py-5 border-b dark:border-gray-700">
+                  <CardTitle className="text-xl flex items-center gap-2.5">
                     <Camera className="h-5 w-5 text-primary" />
                     Hình ảnh cửa hàng
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <div className="space-y-6">
+                <CardContent className="p-8">
+                  <div className="space-y-8">
                     {/* Main display image */}
                     <div className="relative aspect-video w-full overflow-hidden rounded-xl shadow-md">
                       <Image
@@ -453,8 +474,8 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
                     </div>
 
                     {/* Thumbnail grid */}
-                    <div className="grid grid-cols-5 gap-3">
-                      {[bakery.avatar_file, ...bakery.shop_image_files].map(
+                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-4">
+                      {[bakery.avatar_file, ...bakery.shop_image_files].slice(0, 0).map(
                         (image, index) => (
                           <div
                             key={image.id}
@@ -462,8 +483,8 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
                                     ${
                                       activeImage === image.file_url ||
                                       (!activeImage && index === 0)
-                                        ? "ring-2 ring-primary shadow-md"
-                                        : "border border-muted"
+                                        ? "ring-2 ring-primary dark:ring-offset-background dark:ring-offset-2 shadow-md"
+                                        : "border border-muted dark:border-gray-700"
                                     }`}
                             onClick={() => setActiveImage(image.file_url)}
                           >
@@ -483,17 +504,17 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
             )}
 
             {activeTab === "location" && (
-              <Card className="overflow-hidden">
-                <CardHeader className="bg-muted/50 py-4">
-                  <CardTitle className="text-lg flex items-center gap-2">
+              <Card className="overflow-hidden shadow-sm border dark:border-gray-700">
+                <CardHeader className="bg-muted/30 dark:bg-muted/50 py-5 border-b dark:border-gray-700">
+                  <CardTitle className="text-xl flex items-center gap-2.5">
                     <MapPin className="h-5 w-5 text-primary" />
                     Vị trí cửa hàng
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <div className="relative aspect-video w-full overflow-hidden rounded-xl shadow-md bg-muted mb-6">
+                <CardContent className="p-8">
+                  <div className="relative aspect-video w-full overflow-hidden rounded-xl shadow-md bg-muted dark:bg-muted/50 mb-8">
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center p-6 bg-white/90 rounded-lg shadow-md">
+                      <div className="text-center p-6 bg-white/90 dark:bg-background/90 rounded-lg shadow-md backdrop-blur-sm">
                         <MapPin className="h-12 w-12 text-primary mx-auto mb-3" />
                         <p className="text-lg font-medium mb-2">
                           {bakery.address}
@@ -509,7 +530,7 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <CoordinateCard
                       label="Vĩ độ (Latitude)"
                       value={bakery.latitude}
@@ -526,15 +547,15 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
             )}
 
             {activeTab === "history" && (
-              <Card className="overflow-hidden">
-                <CardHeader className="bg-muted/50 py-4">
-                  <CardTitle className="text-lg flex items-center gap-2">
+              <Card className="overflow-hidden shadow-sm border dark:border-gray-700">
+                <CardHeader className="bg-muted/30 dark:bg-muted/50 py-5 border-b dark:border-gray-700">
+                  <CardTitle className="text-xl flex items-center gap-2.5">
                     <Calendar className="h-5 w-5 text-primary" />
                     Lịch sử hoạt động
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <ScrollArea className="h-96 pr-4">
+                <CardContent className="p-8">
+                  <ScrollArea className="h-[400px] pr-4">
                     <ActivityTimeline bakery={bakery} formatDate={formatDate} />
                   </ScrollArea>
                 </CardContent>
@@ -544,46 +565,60 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
         </div>
 
         {/* Right Column - Sidebar */}
-        <div>
-          <Card className="sticky top-6">
-            <CardHeader className="bg-muted/50 py-4">
-              <CardTitle className="text-lg flex items-center gap-2">
+         <div className="md:col-span-4">
+          <Card className="sticky top-6 shadow-sm border dark:border-gray-700">
+            <CardHeader className="bg-muted/30 dark:bg-muted/50 py-5 border-b dark:border-gray-700">
+              <CardTitle className="text-xl flex items-center gap-2.5">
                 <ShieldCheck className="h-5 w-5 text-primary" />
                 Tình trạng xác minh
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <div
-                className={`p-4 rounded-lg mb-4 flex items-center gap-3 shadow-sm ${
-                  verificationStatus.status === "Đã xác minh"
-                    ? "bg-emerald-400 text-emerald-950 dark:bg-emerald-500 dark:text-emerald-50"
-                    : verificationStatus.status === "Đang xem xét"
-                    ? "bg-amber-400 text-amber-950 dark:bg-amber-500 dark:text-amber-50"
-                    : "bg-rose-400 text-rose-950 dark:bg-rose-500 dark:text-rose-50"
+                className={`p-4 rounded-lg mb-6 flex items-center gap-4 shadow-sm border ${
+                  verificationStatus.status === "CONFIRMED"
+                    ? "bg-green-50 border-green-200 dark:bg-green-900/30 dark:border-green-700/50"
+                    : verificationStatus.status === "PENDING"
+                    ? "bg-yellow-50 border-yellow-200 dark:bg-yellow-900/30 dark:border-yellow-700/50"
+                    : "bg-red-50 border-red-200 dark:bg-red-900/30 dark:border-red-700/50"
                 }`}
               >
-                <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center">
-                  {verificationStatus.icon}
+                <div className={`h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                  verificationStatus.status === "CONFIRMED"
+                    ? "bg-green-100 text-green-600 dark:bg-green-800/50 dark:text-green-400"
+                    : verificationStatus.status === "PENDING"
+                    ? "bg-yellow-100 text-yellow-600 dark:bg-yellow-800/50 dark:text-yellow-400"
+                    : "bg-red-100 text-red-600 dark:bg-red-800/50 dark:text-red-400"
+                }`}>
+                  {React.cloneElement(verificationStatus.icon, { className: "h-5 w-5" })}
                 </div>
-                <div>
-                  <p className="font-medium">{verificationStatus.status}</p>
-                  <p className="text-sm">
+                <div className="flex-1 min-w-0">
+                  <p className={`font-semibold ${
+                    verificationStatus.status === "CONFIRMED"
+                      ? "text-green-800 dark:text-green-300"
+                      : verificationStatus.status === "PENDING"
+                      ? "text-yellow-800 dark:text-yellow-300"
+                      : "text-red-800 dark:text-red-300"
+                  }`}>
+                    {verificationStatus.status === "CONFIRMED" ? "Đã xác minh" : verificationStatus.status === "PENDING" ? "Đang xem xét" : "Chưa xác minh"}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
                     {bakery.confirmed_at
                       ? `Xác minh ngày ${formatDate(bakery.confirmed_at)}`
                       : bakery.front_card_file
-                      ? "Đang chờ xác minh từ quản trị viên"
-                      : "Cần cập nhật thông tin xác minh"}
+                        ? "Đang chờ xác minh từ quản trị viên"
+                        : "Cần cập nhật thông tin xác minh"}
                   </p>
                 </div>
               </div>
 
-              <Separator className="my-4" />
+              <Separator className="my-6 dark:bg-gray-700" />
 
               <div className="space-y-4">
-                <h3 className="text-sm font-medium">Yêu cầu xác minh:</h3>
+                <h3 className="text-base font-medium">Yêu cầu xác minh:</h3>
                 <VerificationItem
                   title="Thông tin cơ bản"
-                  description={`Tên:  ${bakery.owner_name}`}
+                  description={`Tên: ${bakery.owner_name}`}
                   completed={true}
                 />
                 <VerificationItem
@@ -605,8 +640,8 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
 
               {!bakery.confirmed_at && (
                 <>
-                  <Separator className="my-4" />
-                  <div className="space-y-3">
+                  <Separator className="my-6 dark:bg-gray-700" />
+                  <div className="space-y-4">
                     <p className="text-sm text-muted-foreground">
                       {bakery.front_card_file
                         ? "Đã gửi yêu cầu xác minh. Vui lòng chờ quản trị viên xét duyệt."
@@ -644,16 +679,16 @@ const StatCard = ({
   value: string;
   description: string;
 }) => (
-  <Card className="overflow-hidden hover:shadow-md transition-all duration-300 border border-muted/30">
+  <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 border border-muted/30 dark:border-gray-700/50 group">
     <CardContent className="p-0">
       <div className="flex items-center">
-        <div className="bg-primary/10 p-4 flex items-center justify-center">
+         <div className="bg-primary/10 dark:bg-primary/20 p-5 flex items-center justify-center transition-colors group-hover:bg-primary/20 dark:group-hover:bg-primary/30">
           <div className="text-primary h-8 w-8">{icon}</div>
         </div>
-        <div className="p-4">
+        <div className="p-4 flex-1">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
           <p className="text-xl font-semibold mt-1">{value}</p>
-          <p className="text-xs text-muted-foreground mt-1">{description}</p>
+          <p className="text-xs text-muted-foreground mt-1 truncate">{description}</p>
         </div>
       </div>
     </CardContent>
@@ -671,17 +706,14 @@ const TabButton = ({
 }) => (
   <button
     onClick={onClick}
-    className={`flex items-center gap-2 py-3 px-4 text-sm font-medium transition-all relative
+    className={`flex-1 flex items-center justify-center gap-2 py-4 px-4 text-sm font-medium transition-all relative border-b-2
       ${
         active
-          ? "text-primary"
-          : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+          ? "text-primary border-primary"
+          : "text-muted-foreground border-transparent hover:text-foreground hover:bg-muted/30 dark:hover:bg-muted/50"
       }`}
   >
     {children}
-    {active && (
-      <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary animate-fadeIn"></span>
-    )}
   </button>
 );
 
@@ -698,23 +730,23 @@ const InfoItem = ({
   copyable: boolean;
   onCopy: () => void;
 }) => (
-  <li className="flex items-start gap-3 text-sm group p-2 rounded-md hover:bg-muted/30 transition-colors">
-    <div className="h-5 w-5 mt-0.5 text-primary/70">{icon}</div>
-    <div className="flex-1">
-      <span className="text-muted-foreground block">{label}</span>
-      <div className="flex items-center gap-1 mt-1">
-        <span className="font-medium">{value}</span>
+  <li className="flex items-start gap-4 text-sm group p-2.5 rounded-md hover:bg-muted/30 dark:hover:bg-muted/50 transition-colors">
+    <div className="h-5 w-5 mt-1 text-primary/80 flex-shrink-0">{icon}</div>
+    <div className="flex-1 min-w-0">
+      <span className="text-muted-foreground block text-xs mb-0.5">{label}</span>
+      <div className="flex items-center gap-1.5 mt-0">
+        <span className="font-medium break-words">{value}</span>
         {copyable && (
-          <TooltipProvider>
+          <TooltipProvider delayDuration={300}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="h-7 w-7 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
                   onClick={onCopy}
                 >
-                  <Copy className="h-3 w-3" />
+                  <Copy className="h-3.5 w-3.5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -737,18 +769,18 @@ const CoordinateCard = ({
   value: string;
   onCopy: () => void;
 }) => (
-  <div className="bg-muted/50 rounded-lg p-4 flex items-center justify-between">
-    <div>
+  <div className="bg-muted/50 dark:bg-muted/60 rounded-lg p-5 flex items-center justify-between gap-4 border dark:border-gray-700/50">
+    <div className="min-w-0">
       <p className="text-sm text-muted-foreground mb-1">{label}</p>
-      <p className="text-base font-medium">{value}</p>
+      <p className="text-base font-medium truncate">{value}</p>
     </div>
-    <TooltipProvider>
+    <TooltipProvider delayDuration={300}>
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8 rounded-full"
+            className="h-9 w-9 rounded-full flex-shrink-0"
             onClick={onCopy}
           >
             <Copy className="h-4 w-4" />
@@ -817,14 +849,14 @@ const TimelineItem = ({
   date: string;
   description: string;
 }) => (
-  <div className="relative">
+  <div className="relative pl-8 py-2 border-l-2 border-muted dark:border-gray-700">
     <div
-      className={`absolute -left-[25px] top-1 h-4 w-4 rounded-full ${color} shadow-md`}
+      className={`absolute -left-[9px] top-3 h-4 w-4 rounded-full ${color} shadow-md border-2 border-background dark:border-gray-800`}
     ></div>
     <div>
       <h4 className="font-medium">{title}</h4>
-      <p className="text-sm text-muted-foreground mt-1">{date}</p>
-      <div className="mt-2 p-3 bg-muted/50 rounded-lg text-sm">
+      <p className="text-sm text-muted-foreground mt-0.5">{date}</p>
+      <div className="mt-2 p-3 bg-muted/50 dark:bg-muted/60 rounded-lg text-sm leading-relaxed border dark:border-gray-700/50">
         {description}
       </div>
     </div>
@@ -840,20 +872,19 @@ const VerificationItem = ({
   description: string;
   completed: boolean;
 }) => (
-  <div className="flex items-start gap-3 p-2 rounded-md hover:bg-muted/20 transition-colors">
+  <div className="flex items-center gap-3 p-2.5 rounded-md hover:bg-muted/20 dark:hover:bg-muted/40 transition-colors">
     <div
-      className={`h-6 w-6 rounded-full flex items-center justify-center shadow-sm transition-colors
-        ${
-          completed
-            ? "bg-emerald-400 text-emerald-950 dark:bg-emerald-500 dark:text-emerald-50"
-            : "bg-muted text-muted-foreground"
-        }`}
+      className={`h-6 w-6 rounded-full flex items-center justify-center shadow-sm transition-colors flex-shrink-0 ${
+        completed
+          ? "bg-green-100 text-green-600 dark:bg-green-800/50 dark:text-green-400"
+          : "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
+      }`}
     >
       {completed ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
     </div>
-    <div>
+    <div className="flex-1 min-w-0">
       <p className="text-sm font-medium">{title}</p>
-      <p className="text-xs text-muted-foreground">{description}</p>
+      <p className="text-xs text-muted-foreground truncate">{description}</p>
     </div>
   </div>
 );

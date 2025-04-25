@@ -37,7 +37,8 @@ export type IBarkery = {
   confirmed_at: string | null;
   banned_at: string | null;
   shop_image_files: IBakeryFile[];
-  metric: any | null;
+  
+  metric: IBakeryMetric;
   reviews: any | null;
   created_at: string;
   created_by: string;
@@ -56,4 +57,21 @@ export type IShopImage = {
   fileName: string;
   fileUrl: string;
   id: string;
+};
+
+export type IBakeryMetric = {
+  bakery_id: string;
+  bakery: null;
+  total_revenue: number;
+  app_revenue: number;
+  orders_count: number;
+  rating_average: number;
+  customers_count: number;
+  average_order_value: number;
+  id: string;
+  created_at: string;
+  created_by: string;
+  updated_at: string;
+  updated_by: string;
+  is_deleted: boolean;
 };
