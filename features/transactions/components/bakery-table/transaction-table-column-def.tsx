@@ -10,7 +10,7 @@ import amountColumn from "./column/amount-column";
 import typeColumn from "./column/type-column";
 import createdAtColumn from "./column/created-at-column";
 import createByColumn from "./column/create-by-column";
-
+import contentColumn from "./column/content-column";
 export function fetchTransactionTableColumnDefs(): ColumnDef<
   TransactionType,
   unknown
@@ -20,6 +20,7 @@ export function fetchTransactionTableColumnDefs(): ColumnDef<
     idColumn,
     amountColumn,
     typeColumn,
+    contentColumn,
     // createdAtColumn,
     createByColumn,
     actionColumn,

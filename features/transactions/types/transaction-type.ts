@@ -9,6 +9,7 @@ export interface TransactionType {
     updated_by: string;
     is_deleted: boolean;
   };
+  content: string;
   amount: number;
   transaction_type: string;
   id: string;
