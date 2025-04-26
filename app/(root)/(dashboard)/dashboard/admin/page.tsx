@@ -36,6 +36,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { getTopBakery } from "@/features/reports/actions/admin-dashoboard-action";
+import { ITopBakeriesType } from "@/features/reports/types/admid-dashboard-type";
 
 // Animated shimmer effect for loading states
 const Shimmer = ({ className }: { className: string }) => (
@@ -79,11 +81,13 @@ const AdminActionCard = ({
 const TopBakeriesChart = ({
   data,
 }: {
-  data: { name: string; revenue: number }[];
-}) => (
-  <Card>
-    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle className="text-base font-normal">
+  data: ITopBakeriesType[];
+}) => {
+  console.log("data", data);
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-base font-normal">
         Top Cửa Hàng Hiệu Quả
       </CardTitle>
       <StoreIcon className="h-4 w-4 text-muted-foreground" />
@@ -97,20 +101,21 @@ const TopBakeriesChart = ({
                 {index + 1}.
               </span>
               <span className="font-medium truncate max-w-[180px]">
-                {bakery.name}
+                {bakery.bakery.bakery_name}
               </span>
             </div>
             <div className="text-right">
               <span className="font-semibold">
-                {formatCurrency(bakery.revenue)}
+                {formatCurrency(bakery.total_revenue)}
               </span>
             </div>
           </div>
         ))}
       </div>
-    </CardContent>
-  </Card>
-);
+      </CardContent>
+    </Card>
+  );
+};
 
 const AdminDashboard = async () => {
   // Verify user is admin
@@ -132,6 +137,7 @@ const AdminDashboard = async () => {
     saleOverviewRevenue,
     saleOverviewOrders,
     saleOverviewCustomers,
+    topBakeries,
   ] = await Promise.all([
     getAdminTotalRevenue(),
     getPendingBakeries(),
@@ -142,6 +148,7 @@ const AdminDashboard = async () => {
     getSaleOverview({ type: "REVENUE", year: currentYear }),
     getSaleOverview({ type: "ORDERS", year: currentYear }),
     getSaleOverview({ type: "CUSTOMERS", year: currentYear }),
+    getTopBakery(),
   ]);
 
   // Debug: Log các giá trị nhận được
@@ -309,7 +316,7 @@ const AdminDashboard = async () => {
           aria-label="Admin Analytics"
         >
           <Suspense fallback={<Shimmer className="h-[380px]" />}>
-            <TopBakeriesChart data={[]} />
+            <TopBakeriesChart data={topBakeries?.data || []} />
           </Suspense>
           <Suspense fallback={<Shimmer className="h-[380px]" />}>
             <Card>
