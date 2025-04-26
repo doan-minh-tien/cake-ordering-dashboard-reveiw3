@@ -11,6 +11,7 @@ import typeColumn from "./column/type-column";
 import createdAtColumn from "./column/created-at-column";
 import createByColumn from "./column/create-by-column";
 import contentColumn from "./column/content-column";
+import targetColumn from "./column/target-column";
 export function fetchTransactionTableColumnDefs(): ColumnDef<
   TransactionType,
   unknown
@@ -23,6 +24,7 @@ export function fetchTransactionTableColumnDefs(): ColumnDef<
     contentColumn,
     // createdAtColumn,
     createByColumn,
+    targetColumn,
     actionColumn,
   ];
 }

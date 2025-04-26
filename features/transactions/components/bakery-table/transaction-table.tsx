@@ -15,18 +15,18 @@ import { toast } from "sonner";
 
 import { generateColumnLabels } from "@/components/data-table/column-label-mapping";
 
-
-import { fetchTransactionTableColumnDefs} from "./transaction-table-column-def";
+import { fetchTransactionTableColumnDefs } from "./transaction-table-column-def";
 import { useFeatureFlagsStore } from "@/hooks/use-feature-flag";
 // import { TasksTableFloatingBar } from "@/components/data-table/custom-table/data-table-floating-bar";
 import { TransactionType } from "../../types/transaction-type";
-import { getTransactions } from "../../actions/transactions-action";  
+import { getTransactions } from "../../actions/transactions-action";
 interface TransactionTableProps {
   transactionPromise: ReturnType<typeof getTransactions>;
 }
 
-export function TransactionTable({ transactionPromise }: TransactionTableProps) {
-
+export function TransactionTable({
+  transactionPromise,
+}: TransactionTableProps) {
   const featureFlags = useFeatureFlagsStore((state) => state.featureFlags);
 
   const enableFloatingBar = featureFlags.includes("floatingBar");
@@ -61,7 +61,7 @@ export function TransactionTable({ transactionPromise }: TransactionTableProps) 
   //     "updated_by": null,
   //     "is_deleted": false
   //   },
-  
+
   // ]
 
   const columns = React.useMemo<ColumnDef<TransactionType, unknown>[]>(
@@ -69,10 +69,6 @@ export function TransactionTable({ transactionPromise }: TransactionTableProps) 
     []
   );
   const labels = generateColumnLabels(columns);
-
-
-console.log(enableFloatingBar)
-  
 
   const searchableColumns: DataTableSearchableColumn<TransactionType>[] = [
     {
