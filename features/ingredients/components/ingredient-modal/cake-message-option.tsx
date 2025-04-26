@@ -58,7 +58,17 @@ import {
 import { cn } from "@/lib/utils";
 import { updateCakeMessage } from "../../actions/cake-message-option-action";
 
-const TYPE_OPTIONS = ["PLAQUE_COLOUR", "PIPING_COLOUR", "TEXT"];
+// Enum definitions
+enum CakeMessageTypeEnum {
+  NONE = "NONE",
+  TEXT = "TEXT",
+  IMAGE = "IMAGE"
+}
+
+enum CakeMessageOptionTypeEnum {
+  PIPING_COLOUR = "PIPING_COLOUR",
+  PLAQUE_COLOUR = "PLAQUE_COLOUR"
+}
 
 // Tên hiển thị tiếng Việt cho các loại tin nhắn
 const getTypeDisplayName = (type: string): string => {
@@ -66,19 +76,21 @@ const getTypeDisplayName = (type: string): string => {
     PLAQUE_COLOUR: "Màu Thông Điệp",
     PIPING_COLOUR: "Màu Viền",
     TEXT: "Nội Dung",
+    NONE: "Không",
+    IMAGE: "Hình Ảnh"
   };
 
   return typeNameMap[type] || type;
 };
 
 const cakeMessageSchema = z.object({
-  name: z.string().min(2, { message: "Tối thiểu 2 ký tự" }),
+  name: z.nativeEnum(CakeMessageOptionTypeEnum),
   color: z.object({
     displayName: z.string(),
     name: z.string(),
     hex: z.string(),
   }),
-  type: z.string().min(1, { message: "Chọn loại trang trí" }),
+  type: z.nativeEnum(CakeMessageTypeEnum),
 });
 
 const CakeMessageOptionModal = () => {
@@ -93,18 +105,18 @@ const CakeMessageOptionModal = () => {
   const form = useForm<z.infer<typeof cakeMessageSchema>>({
     resolver: zodResolver(cakeMessageSchema),
     defaultValues: {
-      name: data?.cakeMessage?.name || "",
+      name: (data?.cakeMessage?.name as CakeMessageOptionTypeEnum) || CakeMessageOptionTypeEnum.PIPING_COLOUR,
       color: getColorValue(data?.cakeMessage?.color),
-      type: data?.cakeMessage?.type || "",
+      type: (data?.cakeMessage?.type as CakeMessageTypeEnum) || CakeMessageTypeEnum.NONE,
     },
   });
 
   useEffect(() => {
     if (data?.cakeMessage) {
       form.reset({
-        name: data.cakeMessage.name || "",
+        name: (data.cakeMessage.name as CakeMessageOptionTypeEnum) || CakeMessageOptionTypeEnum.PIPING_COLOUR,
         color: getColorValue(data.cakeMessage.color),
-        type: data.cakeMessage.type || "",
+        type: (data.cakeMessage.type as CakeMessageTypeEnum) || CakeMessageTypeEnum.NONE,
       });
     }
   }, [data, form]);
@@ -156,13 +168,20 @@ const CakeMessageOptionModal = () => {
                       <CakeSlice className="w-4 h-4 text-primary" />
                       Tên message
                     </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Nhập tên"
-                        {...field}
-                        className="rounded-md h-9"
-                      />
-                    </FormControl>
+                    <Select onValueChange={(value) => field.onChange(value as CakeMessageOptionTypeEnum)} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="rounded-md h-9">
+                          <SelectValue placeholder="Chọn loại" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Object.values(CakeMessageOptionTypeEnum).map((optionType) => (
+                          <SelectItem key={optionType} value={optionType}>
+                            {getTypeDisplayName(optionType)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage className="text-xs" />
                   </FormItem>
                 )}
@@ -258,16 +277,16 @@ const CakeMessageOptionModal = () => {
                       <CakeSlice className="w-4 h-4 text-primary" />
                       Loại message
                     </FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={(value) => field.onChange(value as CakeMessageTypeEnum)} value={field.value}>
                       <FormControl>
                         <SelectTrigger className="rounded-md h-9">
                           <SelectValue placeholder="Chọn loại" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {TYPE_OPTIONS.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {getTypeDisplayName(type)}
+                        {Object.values(CakeMessageTypeEnum).map((messageType) => (
+                          <SelectItem key={messageType} value={messageType}>
+                            {getTypeDisplayName(messageType)}
                           </SelectItem>
                         ))}
                       </SelectContent>

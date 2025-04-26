@@ -50,11 +50,43 @@ import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { createCakeMessage } from "@/features/ingredients/actions/cake-message-option-action";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+// Enum definitions
+enum CakeMessageTypeEnum {
+  NONE = "NONE",
+  TEXT = "TEXT",
+  IMAGE = "IMAGE"
+}
+
+enum CakeMessageOptionTypeEnum {
+  PIPING_COLOUR = "PIPING_COLOUR",
+  PLAQUE_COLOUR = "PLAQUE_COLOUR"
+}
+
+// Tên hiển thị tiếng Việt cho các loại tin nhắn
+const getTypeDisplayName = (type: string): string => {
+  const typeNameMap: Record<string, string> = {
+    PLAQUE_COLOUR: "Màu Thông Điệp",
+    PIPING_COLOUR: "Màu Viền",
+    TEXT: "Nội Dung",
+    NONE: "Không",
+    IMAGE: "Hình Ảnh"
+  };
+
+  return typeNameMap[type] || type;
+};
 
 // Simplified schema to match requested structure: [{type: string, name: string, color: string}]
 const cakeMessageItemSchema = z.object({
-  type: z.string().min(1, { message: "Chọn loại tin nhắn" }),
-  name: z.string().min(2, { message: "Tối thiểu 2 ký tự" }),
+  type: z.nativeEnum(CakeMessageTypeEnum),
+  name: z.nativeEnum(CakeMessageOptionTypeEnum),
   color: z.object({
     displayName: z.string(),
     name: z.string(),
@@ -95,11 +127,9 @@ const CollectionCakeMessageModal = () => {
 
   // Create a new empty message item
   const createEmptyItem = () => {
-    const itemType = data?.ingredientType || "Default";
-
     return {
-      type: itemType,
-      name: "",
+      type: CakeMessageTypeEnum.NONE,
+      name: CakeMessageOptionTypeEnum.PIPING_COLOUR,
       color: getColorValue("Black"),
     };
   };
@@ -124,9 +154,9 @@ const CollectionCakeMessageModal = () => {
     }
 
     // Validate all required fields
-    const nameValid = currentItem.name && currentItem.name.length >= 2;
+    const nameValid = !!currentItem.name;
     const colorValid = !!currentItem.color && !!currentItem.color.name;
-    const typeValid = !!currentItem.type && currentItem.type.length >= 1;
+    const typeValid = !!currentItem.type;
 
     // Get validation results
     const validationResults = {
@@ -148,9 +178,9 @@ const CollectionCakeMessageModal = () => {
     }
 
     const allValid = messageItems.every(item => {
-      const nameValid = item.name && item.name.length >= 2;
+      const nameValid = !!item.name;
       const colorValid = !!item.color && !!item.color.name;
-      const typeValid = !!item.type && item.type.length >= 1;
+      const typeValid = !!item.type;
       
       return nameValid && colorValid && typeValid;
     });
@@ -304,13 +334,11 @@ const CollectionCakeMessageModal = () => {
       );
     }
 
-    const itemType = data?.ingredientType || "Default";
-    
     // Run validation for field-specific error messages
     const validation = {
-      nameValid: currentItem.name && currentItem.name.length >= 2,
+      nameValid: !!currentItem.name,
       colorValid: !!currentItem.color && !!currentItem.color.name,
-      typeValid: !!currentItem.type && currentItem.type.length >= 1
+      typeValid: !!currentItem.type
     };
 
     return (
@@ -360,20 +388,29 @@ const CollectionCakeMessageModal = () => {
           <div className="space-y-1.5">
             <FormLabel className="flex items-center gap-2 text-sm">
               <MessageSquare className="w-4 h-4 text-primary" />
-              Nội dung tin nhắn <span className="text-red-500">*</span>
+              Tên tin nhắn <span className="text-red-500">*</span>
             </FormLabel>
-            <Input
-              placeholder="Nhập nội dung"
-              value={currentItem.name || ""}
-              onChange={(e) => updateCurrentItem("name", e.target.value)}
-              onBlur={() => setTouchedFields(prev => ({ ...prev, name: true }))}
-              className={cn(
+            <Select 
+              value={currentItem.name}
+              onValueChange={(value) => updateCurrentItem("name", value as CakeMessageOptionTypeEnum)}
+              onOpenChange={() => setTouchedFields(prev => ({ ...prev, name: true }))}
+            >
+              <SelectTrigger className={cn(
                 "rounded-md h-9", 
                 isFieldTouched("name") && !validation.nameValid && "border-red-500"
-              )}
-            />
+              )}>
+                <SelectValue placeholder="Chọn tên tin nhắn" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.values(CakeMessageOptionTypeEnum).map((optionType) => (
+                  <SelectItem key={optionType} value={optionType}>
+                    {getTypeDisplayName(optionType)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {isFieldTouched("name") && !validation.nameValid && (
-              <p className="text-xs text-red-500">Tối thiểu 2 ký tự</p>
+              <p className="text-xs text-red-500">Vui lòng chọn tên tin nhắn</p>
             )}
           </div>
 
@@ -383,17 +420,25 @@ const CollectionCakeMessageModal = () => {
               <MessageSquare className="w-4 h-4 text-primary" />
               Loại tin nhắn <span className="text-red-500">*</span>
             </FormLabel>
-            <Input
-              placeholder="Loại tin nhắn"
-              value={currentItem.type || itemType}
-              onChange={(e) => updateCurrentItem("type", e.target.value)}
-              onBlur={() => setTouchedFields(prev => ({ ...prev, type: true }))}
-              className={cn(
+            <Select 
+              value={currentItem.type}
+              onValueChange={(value) => updateCurrentItem("type", value as CakeMessageTypeEnum)}
+              onOpenChange={() => setTouchedFields(prev => ({ ...prev, type: true }))}
+            >
+              <SelectTrigger className={cn(
                 "rounded-md h-9", 
                 isFieldTouched("type") && !validation.typeValid && "border-red-500"
-              )}
-              disabled={true}
-            />
+              )}>
+                <SelectValue placeholder="Chọn loại tin nhắn" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.values(CakeMessageTypeEnum).map((messageType) => (
+                  <SelectItem key={messageType} value={messageType}>
+                    {getTypeDisplayName(messageType)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {isFieldTouched("type") && !validation.typeValid && (
               <p className="text-xs text-red-500">Vui lòng chọn loại tin nhắn</p>
             )}
@@ -501,12 +546,10 @@ const CollectionCakeMessageModal = () => {
           <div className="space-y-2">
             {messageItems.map((item, index) => {
               const isItemValid = 
-                item.name && 
-                item.name.length >= 2 && 
+                !!item.name && 
                 !!item.color && 
                 !!item.color.name && 
-                !!item.type && 
-                item.type.length >= 1;
+                !!item.type;
 
               return (
                 <div
@@ -523,9 +566,9 @@ const CollectionCakeMessageModal = () => {
                       style={{ backgroundColor: item.color?.hex || "#000000" }}
                     />
                     <div>
-                      <div className="font-medium">{item.name || "Chưa có nội dung"}</div>
+                      <div className="font-medium">{getTypeDisplayName(item.name)}</div>
                       <div className="text-xs text-gray-500">
-                        {item.type} - {item.color?.name || "Black"}
+                        {getTypeDisplayName(item.type)} - {item.color?.name || "Black"}
                       </div>
                     </div>
                   </div>

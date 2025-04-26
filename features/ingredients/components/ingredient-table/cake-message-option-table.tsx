@@ -42,6 +42,18 @@ import AlertModal from "@/components/modals/alert-modal";
 import { deleteCakeMessage } from "@/features/ingredients/actions/cake-message-option-action";
 import { toast } from "sonner";
 
+// Enum definitions
+enum CakeMessageTypeEnum {
+  NONE = "NONE",
+  TEXT = "TEXT",
+  IMAGE = "IMAGE"
+}
+
+enum CakeMessageOptionTypeEnum {
+  PIPING_COLOUR = "PIPING_COLOUR",
+  PLAQUE_COLOUR = "PLAQUE_COLOUR"
+}
+
 // Simplified icon mapping
 const getItemIcon = (type: string) => {
   const iconMap = {
@@ -57,9 +69,11 @@ const getItemIcon = (type: string) => {
 // Tên hiển thị tiếng Việt cho các loại tin nhắn
 const getTypeDisplayName = (type: string): string => {
   const typeNameMap: Record<string, string> = {
-    PLAQUE_COLOUR: "Màu Bảng Tin",
+    PLAQUE_COLOUR: "Màu Thông Điệp",
     PIPING_COLOUR: "Màu Viền",
     TEXT: "Nội Dung",
+    NONE: "Không",
+    IMAGE: "Hình Ảnh"
   };
 
   return typeNameMap[type] || type;
@@ -244,7 +258,7 @@ export function CakeMessageOptionTable({ data }: CakeMessageOptionTableProps) {
                               <ItemIcon className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                             </div>
                             <span className="font-medium text-gray-800 dark:text-gray-200">
-                              {item.name}
+                              {getTypeDisplayName(item.name)}
                             </span>
                           </TableCell>
                           <TableCell>
