@@ -25,6 +25,10 @@ import {
   CreditCard,
   Check,
   Pencil,
+  Package,
+  Users,
+  Star,
+  Receipt,
 } from "lucide-react";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
@@ -98,8 +102,9 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
   return (
     <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Hero Section */}
-      <div className="mb-12">
-        <div className="relative w-full h-64 rounded-2xl overflow-hidden mb-20 shadow-lg">
+      <div className="mb-8">
+        {/* Cover Image */}
+        <div className="relative w-full h-56 md:h-64 rounded-2xl overflow-hidden shadow-lg mb-4">
           <Image
             src={
               bakery.shop_image_files[0]?.file_url ||
@@ -109,23 +114,11 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
             fill
             className="object-cover transform hover:scale-105 transition-transform duration-700"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
 
-          {/* Bakery Profile Image */}
-          <div className="absolute -bottom-16 left-8">
-            <div className="relative h-32 w-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
-              <Image
-                src={bakery.avatar_file.file_url || "/api/placeholder/128/128"}
-                alt={`${bakery.bakery_name} logo`}
-                fill
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-            </div>
-          </div>
-
-          {/* Verification Badge */}
+          {/* Verification & Type Badges */}
           <div className="absolute top-4 right-4 flex gap-2">
+            {/* Verification Badge */}
             <Badge
               variant="outline"
               className={`flex items-center gap-1.5 py-1.5 px-3 border-0 shadow-md font-medium animate-fadeIn rounded-full ${
@@ -139,6 +132,7 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
               {verificationStatus.icon}
               {verificationStatus.status === "CONFIRMED" ? "Đã xác minh" : verificationStatus.status === "PENDING" ? "Đang xem xét" : "Chưa xác minh"}
             </Badge>
+            {/* Bakery Type Badge */}
             <Badge
               variant="outline"
               className="py-1.5 px-3 border-0 shadow-md font-medium animate-fadeIn rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300"
@@ -148,43 +142,60 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
           </div>
         </div>
 
-        {/* Bakery Name, Location & Edit Button */}
-        <div className="mt-8 flex justify-between items-center">
-          <div className="ml-40">
-            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70 mb-1">
-              {bakery.bakery_name}
-            </h1>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <MapPin className="h-4 w-4 text-primary" />
-              <p>{bakery.address}</p>
-            </div>
-          </div>
-          <EditButton bakeryId={bakery.id} />
-        </div>
+        {/* Profile Image, Name, Location & Edit Button */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 -mt-16 sm:-mt-20 px-4 sm:px-8">
+           {/* Profile Image */}
+           <div className="flex-shrink-0">
+             <div className="relative h-28 w-28 sm:h-32 sm:w-32 rounded-full overflow-hidden border-4 border-background dark:border-gray-800 shadow-lg">
+               <Image
+                 src={bakery.avatar_file.file_url || "/api/placeholder/128/128"}
+                 alt={`${bakery.bakery_name} logo`}
+                 fill
+                 className="object-cover"
+               />
+             </div>
+           </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-          <StatCard
-            icon={<Store className="h-6 w-6" />}
-            title="Thông tin cơ bản"
-            value={bakery.confirmed_at ? "Đã xác nhận" : "Chưa xác nhận"}
-            description={`Ngày tạo: ${formatDate(
-              bakery.avatar_file.created_at
-            )}`}
-          />
-          <StatCard
-            icon={<Cake className="h-6 w-6" />}
-            title="Sản phẩm"
-            value="0 Sản phẩm"
-            description="Chưa có sản phẩm nào"
-          />
-          <StatCard
-            icon={<DollarSign className="h-6 w-6" />}
-            title="Doanh thu"
-            value={`${formatCurrency(bakery.metric?.total_revenue ?? 0)}`}
-            description="Chưa có dữ liệu doanh thu"
-          />
+           {/* Name, Location */}
+           <div className="flex-1 min-w-0 mt-3 sm:mt-0 sm:pb-2">
+             <h1 className="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80 mb-1 truncate">
+               {bakery.bakery_name}
+             </h1>
+             <div className="flex items-center gap-2 text-muted-foreground text-sm sm:text-base">
+               <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
+               <p className="truncate">{bakery.address}</p>
+             </div>
+           </div>
+
+           {/* Edit Button */}
+           <div className="mt-2 sm:mt-0 sm:pb-2">
+             <EditButton bakeryId={bakery.id} />
+           </div>
         </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <StatCard
+          icon={<Store className="h-6 w-6" />}
+          title="Thông tin cơ bản"
+          value={bakery.confirmed_at ? "Đã xác nhận" : "Chưa xác nhận"}
+          description={`Ngày tạo: ${formatDate(
+            bakery.avatar_file.created_at
+          )}`}
+        />
+        <StatCard
+          icon={<Cake className="h-6 w-6" />}
+          title="Sản phẩm"
+          value="0 Sản phẩm"
+          description="Chưa có sản phẩm nào"
+        />
+        <StatCard
+          icon={<DollarSign className="h-6 w-6" />}
+          title="Doanh thu"
+          value={`${formatCurrency(bakery.metric?.total_revenue ?? 0)}`}
+          description="Chưa có dữ liệu doanh thu"
+        />
       </div>
 
       {/* Main Content Grid */}
@@ -236,7 +247,7 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
                     Thông tin chi tiết
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-8 space-y-8">
+                <CardContent className="p-6 md:p-8 space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Store Information */}
                     <div>
@@ -244,7 +255,7 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
                         <Store className="h-5 w-5 text-primary" />
                         Thông tin cửa hàng
                       </h3>
-                      <ul className="space-y-4 pl-1">
+                      <ul className="space-y-3 pl-1">
                         <InfoItem
                           icon={<Store className="h-5 w-5 text-muted-foreground" />}
                           label="Tên cửa hàng"
@@ -275,7 +286,7 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
                         <User className="h-5 w-5 text-primary" />
                         Thông tin liên hệ
                       </h3>
-                      <ul className="space-y-4 pl-1">
+                      <ul className="space-y-3 pl-1">
                         <InfoItem
                           icon={<Phone className="h-5 w-5 text-muted-foreground" />}
                           label="Điện thoại"
@@ -307,55 +318,60 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
 
                   <Separator />
 
-                  {/* New Descriptions Section */}
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-primary" />
-                      Mô tả chi tiết
-                    </h3>
-
-                    <div className="space-y-6">
+                  {/* New Descriptions Section - Refactored into a single Card */}
+                  <Card className="overflow-hidden shadow-sm border dark:border-gray-700/60 bg-muted/20 dark:bg-muted/30">
+                    <CardHeader className="pb-4 pt-5">
+                      <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                        <FileText className="h-5 w-5 text-primary" />
+                        Mô tả chi tiết
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-6 pt-0 space-y-6">
                       {/* Bakery Description */}
-                      <div className="bg-muted/30 dark:bg-muted/40 rounded-lg p-5 border dark:border-gray-700/50">
-                        <h4 className="font-semibold mb-2 flex items-center gap-2">
-                          <Store className="h-5 w-5 text-primary" />
+                      <div>
+                        <h4 className="font-semibold mb-2 flex items-center gap-2 text-sm text-muted-foreground">
+                          <Store className="h-4 w-4 text-primary/80" />
                           Mô tả cửa hàng
                         </h4>
-                        <p className="text-muted-foreground leading-relaxed">
+                        <p className="text-foreground/90 dark:text-foreground/80 leading-relaxed text-sm pl-6">
                           {bakery.bakery_description ||
                             "Chưa có mô tả về cửa hàng"}
                         </p>
                       </div>
 
+                      <Separator className="my-4 dark:bg-gray-600/50" />
+
                       {/* Cake Description */}
-                      <div className="bg-muted/30 dark:bg-muted/40 rounded-lg p-5 border dark:border-gray-700/50">
-                        <h4 className="font-semibold mb-2 flex items-center gap-2">
-                          <Cake className="h-5 w-5 text-primary" />
+                       <div>
+                        <h4 className="font-semibold mb-2 flex items-center gap-2 text-sm text-muted-foreground">
+                          <Cake className="h-4 w-4 text-primary/80" />
                           Mô tả sản phẩm
                         </h4>
-                        <p className="text-muted-foreground leading-relaxed">
+                        <p className="text-foreground/90 dark:text-foreground/80 leading-relaxed text-sm pl-6">
                           {bakery.cake_description ||
                             "Chưa có mô tả về sản phẩm"}
                         </p>
                       </div>
 
+                      <Separator className="my-4 dark:bg-gray-600/50" />
+
                       {/* Price Description */}
-                      <div className="bg-muted/30 dark:bg-muted/40 rounded-lg p-5 border dark:border-gray-700/50">
-                        <h4 className="font-semibold mb-2 flex items-center gap-2">
-                          <DollarSign className="h-5 w-5 text-primary" />
+                       <div>
+                        <h4 className="font-semibold mb-2 flex items-center gap-2 text-sm text-muted-foreground">
+                          <DollarSign className="h-4 w-4 text-primary/80" />
                           Mô tả giá cả
                         </h4>
-                        <p className="text-muted-foreground leading-relaxed">
+                         <p className="text-foreground/90 dark:text-foreground/80 leading-relaxed text-sm pl-6">
                           {bakery.price_description ||
                             "Chưa có mô tả về giá cả"}
                         </p>
                       </div>
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
 
                   <Separator />
 
-                  {/* Metrics Information */}
+                  {/* Metrics Information - Redesigned */}
                   {bakery.metric && (
                     <>
                       <div>
@@ -363,65 +379,44 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
                           <FileText className="h-5 w-5 text-primary" />
                           Thống kê
                         </h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                          <div className="bg-muted/30 dark:bg-muted/40 rounded-lg p-4 border dark:border-gray-700/50">
-                            <p className="text-sm text-muted-foreground mb-1">
-                              Tổng đơn hàng
-                            </p>
-                            <p className="text-xl font-semibold">
-                              {bakery.metric.orders_count || "0"}
-                            </p>
-                          </div>
-                          <div className="bg-muted/30 dark:bg-muted/40 rounded-lg p-4 border dark:border-gray-700/50">
-                            <p className="text-sm text-muted-foreground mb-1">
-                              Khách hàng
-                            </p>
-                            <p className="text-xl font-semibold">
-                              {bakery.metric.customers_count || "0"}
-                            </p>
-                          </div>
-                          <div className="bg-muted/30 dark:bg-muted/40 rounded-lg p-4 border dark:border-gray-700/50">
-                            <p className="text-sm text-muted-foreground mb-1">
-                              Giá trị đơn TB
-                            </p>
-                            <p className="text-xl font-semibold">
-                              {bakery.metric?.average_order_value
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                          <MetricDisplay
+                            icon={<Package className="h-5 w-5" />}
+                            title="Tổng đơn hàng"
+                            value={bakery.metric.orders_count?.toString() || "0"}
+                          />
+                          <MetricDisplay
+                            icon={<Users className="h-5 w-5" />}
+                            title="Khách hàng"
+                            value={bakery.metric.customers_count?.toString() || "0"}
+                          />
+                          <MetricDisplay
+                            icon={<Receipt className="h-5 w-5" />}
+                            title="Giá trị đơn TB"
+                            value={bakery.metric?.average_order_value
                               ? formatCurrency(bakery.metric.average_order_value)
                               : "N/A"}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
-                           <div className="bg-muted/30 dark:bg-muted/40 rounded-lg p-4 border dark:border-gray-700/50">
-                            <p className="text-sm text-muted-foreground mb-1">
-                              Doanh thu (Shop)
-                            </p>
-                            <p className="text-xl font-semibold">
-                              {formatCurrency(bakery.metric?.total_revenue ?? 0)}
-                            </p>
-                          </div>
-                          <div className="bg-muted/30 dark:bg-muted/40 rounded-lg p-4 border dark:border-gray-700/50">
-                            <p className="text-sm text-muted-foreground mb-1">
-                              Doanh thu (Hệ thống)
-                            </p>
-                            <p className="text-xl font-semibold">
-                              {formatCurrency(bakery.metric?.app_revenue ?? 0)}
-                            </p>
-                          </div>
-                           <div className="bg-muted/30 dark:bg-muted/40 rounded-lg p-4 border dark:border-gray-700/50">
-                            <p className="text-sm text-muted-foreground mb-1">
-                              Đánh giá TB
-                            </p>
-                            <p className="text-xl font-semibold">
-                              {(bakery.metric?.rating_average ?? 0) > 0
+                          />
+                          <MetricDisplay
+                            icon={<DollarSign className="h-5 w-5" />}
+                            title="Doanh thu (Shop)"
+                            value={formatCurrency(bakery.metric?.total_revenue ?? 0)}
+                          />
+                          <MetricDisplay
+                            icon={<DollarSign className="h-5 w-5" />}
+                            title="Doanh thu (Hệ thống)"
+                            value={formatCurrency(bakery.metric?.app_revenue ?? 0)}
+                          />
+                          <MetricDisplay
+                            icon={<Star className="h-5 w-5" />}
+                            title="Đánh giá TB"
+                            value={(bakery.metric?.rating_average ?? 0) > 0
                               ? (bakery.metric?.rating_average ?? 0).toFixed(1)
                               : "N/A"}
-                            </p>
-                          </div>
+                          />
                         </div>
                       </div>
-                      <Separator />
+                      <Separator className="mt-8" />
                     </>
                   )}
 
@@ -457,7 +452,7 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
                     Hình ảnh cửa hàng
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-8">
+                <CardContent className="p-6 md:p-8">
                   <div className="space-y-8">
                     {/* Main display image */}
                     <div className="relative aspect-video w-full overflow-hidden rounded-xl shadow-md">
@@ -511,7 +506,7 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
                     Vị trí cửa hàng
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-8">
+                <CardContent className="p-6 md:p-8">
                   <div className="relative aspect-video w-full overflow-hidden rounded-xl shadow-md bg-muted dark:bg-muted/50 mb-8">
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center p-6 bg-white/90 dark:bg-background/90 rounded-lg shadow-md backdrop-blur-sm">
@@ -554,7 +549,7 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
                     Lịch sử hoạt động
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-8">
+                <CardContent className="p-6 md:p-8">
                   <ScrollArea className="h-[400px] pr-4">
                     <ActivityTimeline bakery={bakery} formatDate={formatDate} />
                   </ScrollArea>
@@ -614,8 +609,8 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
 
               <Separator className="my-6 dark:bg-gray-700" />
 
-              <div className="space-y-4">
-                <h3 className="text-base font-medium">Yêu cầu xác minh:</h3>
+              <div className="space-y-3">
+                <h3 className="text-base font-medium mb-2">Yêu cầu xác minh:</h3>
                 <VerificationItem
                   title="Thông tin cơ bản"
                   description={`Tên: ${bakery.owner_name}`}
@@ -679,17 +674,17 @@ const StatCard = ({
   value: string;
   description: string;
 }) => (
-  <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 border border-muted/30 dark:border-gray-700/50 group">
-    <CardContent className="p-0">
-      <div className="flex items-center">
-         <div className="bg-primary/10 dark:bg-primary/20 p-5 flex items-center justify-center transition-colors group-hover:bg-primary/20 dark:group-hover:bg-primary/30">
-          <div className="text-primary h-8 w-8">{icon}</div>
+  <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 border border-muted/30 dark:border-gray-700/50 hover:border-primary/30 dark:hover:border-primary/70">
+    <CardContent className="p-5 text-center">
+      <div className="mb-3 inline-flex items-center justify-center p-3 rounded-full bg-primary/10 dark:bg-primary/20">
+        <div className="text-primary h-6 w-6">
+          {React.cloneElement(icon as React.ReactElement, { className: "h-full w-full" })}
         </div>
-        <div className="p-4 flex-1">
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="text-xl font-semibold mt-1">{value}</p>
-          <p className="text-xs text-muted-foreground mt-1 truncate">{description}</p>
-        </div>
+      </div>
+      <div>
+        <p className="text-sm font-medium text-muted-foreground mb-1">{title}</p>
+        <p className="text-2xl font-semibold mb-1.5">{value}</p>
+        <p className="text-xs text-muted-foreground truncate">{description}</p>
       </div>
     </CardContent>
   </Card>
@@ -730,7 +725,7 @@ const InfoItem = ({
   copyable: boolean;
   onCopy: () => void;
 }) => (
-  <li className="flex items-start gap-4 text-sm group p-2.5 rounded-md hover:bg-muted/30 dark:hover:bg-muted/50 transition-colors">
+  <li className="flex items-start gap-4 text-sm group p-3 rounded-md hover:bg-muted/30 dark:hover:bg-muted/50 transition-colors">
     <div className="h-5 w-5 mt-1 text-primary/80 flex-shrink-0">{icon}</div>
     <div className="flex-1 min-w-0">
       <span className="text-muted-foreground block text-xs mb-0.5">{label}</span>
@@ -872,7 +867,7 @@ const VerificationItem = ({
   description: string;
   completed: boolean;
 }) => (
-  <div className="flex items-center gap-3 p-2.5 rounded-md hover:bg-muted/20 dark:hover:bg-muted/40 transition-colors">
+  <div className="flex items-center gap-3 p-3 rounded-md hover:bg-muted/20 dark:hover:bg-muted/40 transition-colors">
     <div
       className={`h-6 w-6 rounded-full flex items-center justify-center shadow-sm transition-colors flex-shrink-0 ${
         completed
@@ -911,5 +906,26 @@ const EditButton = ({ bakeryId }: { bakeryId: string }) => {
 
   return null;
 };
+
+// New MetricDisplay Component
+const MetricDisplay = ({
+  icon,
+  title,
+  value,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  value: string;
+}) => (
+  <div className="flex items-center gap-4 rounded-lg p-4 border bg-muted/40 dark:bg-muted/50 dark:border-gray-700/60 hover:bg-muted/60 dark:hover:bg-muted/70 transition-colors shadow-sm">
+    <div className="flex-shrink-0 text-primary p-2 bg-primary/10 dark:bg-primary/20 rounded-md">
+      {React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5" })}
+    </div>
+    <div className="flex-1 min-w-0">
+      <p className="text-sm text-muted-foreground truncate mb-0.5">{title}</p>
+      <p className="text-lg font-semibold truncate">{value}</p>
+    </div>
+  </div>
+);
 
 export default BakeryDetail;
