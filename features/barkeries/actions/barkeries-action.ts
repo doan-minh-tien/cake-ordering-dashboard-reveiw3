@@ -10,7 +10,7 @@ import {
   Result,
 } from "@/lib/api/api-handler/generic";
 import { SearchParams } from "@/types/table";
-import { IBarkery } from "../types/barkeries-type";
+import { IBarkery, IFile } from "../types/barkeries-type";
 import { axiosAuth } from "@/lib/api/api-interceptor/api";
 
 export const getBakeries = async (
@@ -46,7 +46,9 @@ export async function approveBakery(params: string): Promise<Result<void>> {
 
   console.log(params);
   const result = await apiRequest(() =>
-    axiosAuth.get(`/bakeries/${params}/approve`)
+    axiosAuth.put(`/bakeries/${params}/approve`, {
+      is_approve: true
+    })
   );
   if (!result.success) {
     return { success: false, error: result.error };
@@ -148,4 +150,17 @@ export async function updateBakeryProfile(
   revalidatePath(`/dashboard/bakeries/${bakeryId}`);
 
   return { success: true, data: result.data };
+}
+
+export async function getBakeryFiles(
+  params: string
+): Promise<ApiSingleResponse<IFile>> {
+  noStore();
+
+  const result = await fetchSingleData<IFile>(`/files/${params}`);
+  if (!result.success) {
+    console.error("Failed to fetch bakery files:", result.error);
+    return { data: null };
+  }
+  return result.data;
 }

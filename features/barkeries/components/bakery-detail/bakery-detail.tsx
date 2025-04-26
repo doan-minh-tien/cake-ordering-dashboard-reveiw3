@@ -79,22 +79,22 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
   };
 
   const getVerificationStatus = () => {
-    if (bakery.status) {
+    if (bakery.status === "CONFIRMED") {
       return {
         status: "CONFIRMED",
         icon: <ShieldCheck className="h-4 w-4" />,
       };
-    } else if (bakery.front_card_file && bakery.back_card_file) {
+    }
+    if (bakery.status === "PENDING") {
       return {
         status: "PENDING",
         icon: <AlertCircle className="h-4 w-4" />,
       };
-    } else {
-      return {
-        status: "UNVERIFIED",
-        icon: <X className="h-4 w-4" />,
-      };
     }
+    return {
+      status: "UNVERIFIED",
+      icon: <X className="h-4 w-4" />,
+    };
   };
 
   const verificationStatus = getVerificationStatus();
@@ -597,13 +597,7 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
                   }`}>
                     {verificationStatus.status === "CONFIRMED" ? "Đã xác minh" : verificationStatus.status === "PENDING" ? "Đang xem xét" : "Chưa xác minh"}
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    {bakery.confirmed_at
-                      ? `Xác minh ngày ${formatDate(bakery.confirmed_at)}`
-                      : bakery.front_card_file
-                        ? "Đang chờ xác minh từ quản trị viên"
-                        : "Cần cập nhật thông tin xác minh"}
-                  </p>
+             
                 </div>
               </div>
 
