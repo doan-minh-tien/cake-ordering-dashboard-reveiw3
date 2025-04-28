@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine } from 'recharts'
 import { useTheme } from "next-themes"
@@ -8,29 +8,163 @@ import { formatCurrency } from '@/lib/utils'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TrendingUpIcon } from "lucide-react"
 import { cn } from '@/lib/utils'
+import { format as formatDate, differenceInDays, differenceInMonths, isValid, parseISO } from 'date-fns'
+import { vi } from 'date-fns/locale'
 
 // Define the types of sales data
 export type SalesOverviewType = 'REVENUE' | 'ORDERS' | 'CUSTOMERS';
 
-interface SalesDataItem {
+// Data item structures that match the API response
+interface DailyDataItem {
+  date: string;
+  value: number;
+}
+
+interface MonthlyDataItem {
   month: string;
+  value: number;
+}
+
+// Union type for both formats
+type TimeSeriesDataItem = DailyDataItem | MonthlyDataItem;
+
+// Display data structure for the chart
+interface ChartDataItem {
+  label: string;
   value: number;
   target?: number;
 }
 
-interface SalesOverviewChartProps {
-  data: {
-    REVENUE?: SalesDataItem[];
-    ORDERS?: SalesDataItem[];
-    CUSTOMERS?: SalesDataItem[];
-  };
-  year: number;
+interface DateRange {
+  dateFrom?: string;
+  dateTo?: string;
 }
 
-const SalesOverviewChart = ({ data, year }: SalesOverviewChartProps) => {
+interface SalesOverviewChartProps {
+  data: {
+    REVENUE?: TimeSeriesDataItem[];
+    ORDERS?: TimeSeriesDataItem[];
+    CUSTOMERS?: TimeSeriesDataItem[];
+  };
+  dateRange?: DateRange;
+}
+
+// Type guard functions to determine what type of data we're dealing with
+function isDailyData(item: TimeSeriesDataItem): item is DailyDataItem {
+  return 'date' in item;
+}
+
+function isMonthlyData(item: TimeSeriesDataItem): item is MonthlyDataItem {
+  return 'month' in item;
+}
+
+const SalesOverviewChart = ({ data, dateRange }: SalesOverviewChartProps) => {
   const [selectedType, setSelectedType] = useState<SalesOverviewType>('REVENUE');
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
+
+  // Determine data format and process it for display
+  const { dataFormat, formattedData } = useMemo(() => {
+    // Default to unknown format
+    let format = 'unknown';
+    
+    // Get the current data set
+    const currentTypeData = data[selectedType] || [];
+    
+    // Determine data format based on first item
+    if (currentTypeData.length > 0) {
+      const firstItem = currentTypeData[0];
+      if (isDailyData(firstItem)) {
+        format = 'daily';
+      } else if (isMonthlyData(firstItem)) {
+        format = 'monthly';
+      }
+    }
+
+    // Format data for display
+    const processedData: Record<SalesOverviewType, ChartDataItem[]> = {
+      REVENUE: [],
+      ORDERS: [],
+      CUSTOMERS: []
+    };
+    
+    // Process each data type (REVENUE, ORDERS, CUSTOMERS)
+    Object.keys(data).forEach((key) => {
+      const dataType = key as SalesOverviewType;
+      const typeData = data[dataType] || [];
+      
+      if (typeData.length === 0) {
+        processedData[dataType] = [];
+        return;
+      }
+
+      // Process data based on its format
+      if (isDailyData(typeData[0])) {
+        // Format daily data
+        processedData[dataType] = typeData.map(item => {
+          const dailyItem = item as DailyDataItem;
+          return {
+            label: formatDate(new Date(dailyItem.date), 'dd/MM'),
+            value: dailyItem.value,
+            target: dailyItem.value * 1.2 // Example target
+          };
+        });
+      } else if (isMonthlyData(typeData[0])) {
+        // Format monthly data
+        processedData[dataType] = typeData.map(item => {
+          const monthlyItem = item as MonthlyDataItem;
+          // Create a date from the month (YYYY-MM format)
+          const [year, month] = monthlyItem.month.split('-');
+          return {
+            label: `${month}/${year.substring(2)}`, // Format as MM/YY
+            value: monthlyItem.value,
+            target: monthlyItem.value * 1.2 // Example target
+          };
+        });
+      }
+      
+      // Sort data by date
+      processedData[dataType].sort((a, b) => a.label.localeCompare(b.label));
+    });
+    
+    return { dataFormat: format, formattedData: processedData };
+  }, [data, selectedType]);
+  
+  // Get date range for display
+  const getDateRangeDisplay = () => {
+    if (!dateRange?.dateFrom && !dateRange?.dateTo) {
+      const currentYear = new Date().getFullYear();
+      return `${currentYear}`;
+    }
+    
+    let displayText = '';
+    
+    if (dateRange.dateFrom) {
+      try {
+        const fromDate = new Date(dateRange.dateFrom);
+        displayText += formatDate(fromDate, 'dd/MM/yyyy');
+      } catch (e) {
+        displayText += dateRange.dateFrom;
+      }
+    } else {
+      displayText += 'Đầu kỳ';
+    }
+    
+    displayText += ' - ';
+    
+    if (dateRange.dateTo) {
+      try {
+        const toDate = new Date(dateRange.dateTo);
+        displayText += formatDate(toDate, 'dd/MM/yyyy');
+      } catch (e) {
+        displayText += dateRange.dateTo;
+      }
+    } else {
+      displayText += 'Hiện tại';
+    }
+    
+    return displayText;
+  };
   
   // Color settings for each data type
   const colorSettings = {
@@ -60,8 +194,8 @@ const SalesOverviewChart = ({ data, year }: SalesOverviewChartProps) => {
     }
   };
 
-  // Get the current data based on selected type - ensure it's an array
-  const currentData = Array.isArray(data[selectedType]) ? data[selectedType] : [];
+  // Get the current data based on selected type
+  const currentData = formattedData[selectedType] || [];
   
   // Calculate totals safely
   const totalValue = currentData.reduce((sum, item) => {
@@ -79,6 +213,18 @@ const SalesOverviewChart = ({ data, year }: SalesOverviewChartProps) => {
   const handleTabChange = (value: string) => {
     setSelectedType(value as SalesOverviewType);
   };
+
+  // Get the title text for the time period
+  const getTimePeriodsTitle = () => {
+    switch (dataFormat) {
+      case 'daily':
+        return 'theo ngày';
+      case 'monthly':
+        return 'theo tháng';
+      default:
+        return '';
+    }
+  };
   
   return (
     <Card className="col-span-1 md:col-span-2 overflow-hidden border border-border/50 shadow-md hover:shadow-lg transition-all duration-300">
@@ -87,10 +233,10 @@ const SalesOverviewChart = ({ data, year }: SalesOverviewChartProps) => {
           <div>
             <CardTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
               <TrendingUpIcon className="h-5 w-5 text-primary" />
-              Biểu Đồ Hoạt Động {year}
+              Biểu Đồ Hoạt Động {getDateRangeDisplay()}
             </CardTitle>
             <CardDescription className="text-muted-foreground text-sm mt-1">
-              So sánh chỉ tiêu và thực tế theo tháng
+              So sánh chỉ tiêu và thực tế {getTimePeriodsTitle()}
             </CardDescription>
           </div>
           
@@ -172,10 +318,11 @@ const SalesOverviewChart = ({ data, year }: SalesOverviewChartProps) => {
                 vertical={false} 
               />
               <XAxis 
-                dataKey="month" 
+                dataKey="label" 
                 tick={{ fill: isDark ? 'rgba(255,255,255,0.9)' : 'var(--foreground)', fontSize: 12 }}
                 tickLine={{ stroke: isDark ? 'rgba(255,255,255,0.3)' : 'var(--border)' }}
                 axisLine={{ stroke: isDark ? 'rgba(255,255,255,0.3)' : 'var(--border)' }}
+                interval={dataFormat === 'daily' && currentData.length > 20 ? Math.floor(currentData.length / 10) : 0}
               />
               <YAxis
                 tick={{ fill: isDark ? 'rgba(255,255,255,0.9)' : 'var(--foreground)', fontSize: 12 }}

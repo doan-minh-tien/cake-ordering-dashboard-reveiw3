@@ -17,6 +17,7 @@ import { formatCurrency } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth";
 import { UserRole } from "@/lib/enums/user-role-enum";
 import { auth } from "@/lib/next-auth/auth";
+import { startOfMonth, format } from "date-fns";
 
 // Import components
 import DashboardHeader from "./components/dashboard-header";
@@ -34,7 +35,14 @@ const Shimmer = ({ className }: { className: string }) => (
   </div>
 );
 
-const Dashboard = async () => {
+interface DashboardProps {
+  searchParams?: {
+    dateFrom?: string;
+    dateTo?: string;
+  };
+}
+
+const Dashboard = async ({ searchParams }: DashboardProps) => {
   // Get current user and session to debug
   const user = await getCurrentUser();
   const session = await auth();
@@ -56,9 +64,23 @@ const Dashboard = async () => {
   // Sử dụng kiểm tra linh hoạt nhất
   const isAdmin = user?.role?.toUpperCase() === "ADMIN";
 
-  const currentYear = new Date().getFullYear();
+  // Get date range parameters from URL or set defaults
+  const today = new Date();
+  let dateFrom = searchParams?.dateFrom;
+  let dateTo = searchParams?.dateTo;
+  
+  // Set default date range to current month if not provided
+  if (!dateFrom) {
+    dateFrom = format(startOfMonth(today), 'yyyy-MM-dd');
+  }
+  
+  if (!dateTo) {
+    dateTo = format(today, 'yyyy-MM-dd');
+  }
+  
+  console.log("Date range:", { dateFrom, dateTo });
 
-  // Fetch data from API
+  // Fetch data from API with date range parameters
   const [
     overview,
     categoryDistribution,
@@ -67,13 +89,18 @@ const Dashboard = async () => {
     saleOverviewOrders,
     saleOverviewCustomers,
   ] = await Promise.all([
-    getOverview(),
-    getCategoryDistribution(),
-    getProductPerformance(),
-    getSaleOverview({ type: "REVENUE", year: currentYear }),
-    getSaleOverview({ type: "ORDERS", year: currentYear }),
-    getSaleOverview({ type: "CUSTOMERS", year: currentYear }),
+    getOverview({ dateFrom, dateTo }),
+    getCategoryDistribution({ dateFrom, dateTo }),
+    getProductPerformance({ dateFrom, dateTo }),
+    getSaleOverview({ type: "REVENUE", dateFrom, dateTo }),
+    getSaleOverview({ type: "ORDERS", dateFrom, dateTo }),
+    getSaleOverview({ type: "CUSTOMERS", dateFrom, dateTo }),
   ]);
+  
+  // Log responses to debug the data structure
+  console.log("Sales Overview Revenue data format:", 
+    saleOverviewRevenue?.data?.length > 0 ? 
+    saleOverviewRevenue.data[0] : "No data");
 
   // Fetch admin-specific data if user is admin
   let adminData = {
@@ -91,49 +118,6 @@ const Dashboard = async () => {
       bakeryGrowth: 10,
     };
   }
-
-  // Chuyển đổi mảng số sang định dạng phù hợp với biểu đồ
-  const months = [
-    "Tháng 1",
-    "Tháng 2",
-    "Tháng 3",
-    "Tháng 4",
-    "Tháng 5",
-    "Tháng 6",
-    "Tháng 7",
-    "Tháng 8",
-    "Tháng 9",
-    "Tháng 10",
-    "Tháng 11",
-    "Tháng 12",
-  ];
-
-  const convertArrayToChartData = (
-    dataArray: number[],
-    shouldRound = false
-  ) => {
-    if (!Array.isArray(dataArray)) return [];
-
-    return dataArray.map((value, index) => {
-      const processedValue = shouldRound ? Math.round(value || 0) : value || 0;
-      const target = shouldRound
-        ? Math.round((value || 0) * 1.2)
-        : (value || 0) * 1.2;
-
-      return {
-        month: months[index],
-        value: processedValue,
-        target: target,
-      };
-    });
-  };
-
-  // Combine all sales data types
-  const combinedSalesData = {
-    REVENUE: convertArrayToChartData(saleOverviewRevenue?.data || [], false),
-    ORDERS: convertArrayToChartData(saleOverviewOrders?.data || [], true),
-    CUSTOMERS: convertArrayToChartData(saleOverviewCustomers?.data || [], true),
-  };
 
   // Format the data for charts with robust null checks
   const productData =
@@ -177,6 +161,13 @@ const Dashboard = async () => {
         ]
       : categoryData;
 
+  // Prepare sales data for chart
+  const salesData = {
+    REVENUE: saleOverviewRevenue?.data || [],
+    ORDERS: saleOverviewOrders?.data || [],
+    CUSTOMERS: saleOverviewCustomers?.data || [],
+  };
+
   // Icon colors for stats
   const iconColors = {
     revenue: "text-emerald-500 dark:text-emerald-400",
@@ -190,7 +181,7 @@ const Dashboard = async () => {
   return (
     <div className="min-h-screen p-6 pt-4 bg-gradient-to-br from-background via-background to-background/95 dark:from-background dark:to-background/90">
       <div className="mx-auto max-w-7xl space-y-8">
-        <DashboardHeader />
+        <DashboardHeader dateFrom={dateFrom} dateTo={dateTo} />
 
         {/* Stats Overview */}
         <section
@@ -290,7 +281,10 @@ const Dashboard = async () => {
         {/* Sales Overview Chart */}
         <section className="mt-8" aria-label="Sales overview chart">
           <Suspense fallback={<Shimmer className="h-[450px]" />}>
-            <SalesOverviewChart data={combinedSalesData} year={currentYear} />
+            <SalesOverviewChart 
+              data={salesData} 
+              dateRange={{ dateFrom, dateTo }} 
+            />
           </Suspense>
         </section>
 
