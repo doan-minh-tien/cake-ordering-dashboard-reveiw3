@@ -12,7 +12,7 @@ import { format as formatDate, differenceInDays, differenceInMonths, isValid, pa
 import { vi } from 'date-fns/locale'
 
 // Define the types of sales data
-export type SalesOverviewType = 'REVENUE' | 'ORDERS' | 'CUSTOMERS';
+export type SalesOverviewType = 'REVENUE' | 'ORDERS' | 'CUSTOMERS' | 'BAKERIES';
 
 // Data item structures that match the API response
 interface DailyDataItem {
@@ -45,6 +45,7 @@ interface SalesOverviewChartProps {
     REVENUE?: TimeSeriesDataItem[];
     ORDERS?: TimeSeriesDataItem[];
     CUSTOMERS?: TimeSeriesDataItem[];
+    BAKERIES?: TimeSeriesDataItem[];
   };
   dateRange?: DateRange;
 }
@@ -85,10 +86,11 @@ const SalesOverviewChart = ({ data, dateRange }: SalesOverviewChartProps) => {
     const processedData: Record<SalesOverviewType, ChartDataItem[]> = {
       REVENUE: [],
       ORDERS: [],
-      CUSTOMERS: []
+      CUSTOMERS: [],
+      BAKERIES: []
     };
     
-    // Process each data type (REVENUE, ORDERS, CUSTOMERS)
+    // Process each data type
     Object.keys(data).forEach((key) => {
       const dataType = key as SalesOverviewType;
       const typeData = data[dataType] || [];
@@ -184,6 +186,14 @@ const SalesOverviewChart = ({ data, dateRange }: SalesOverviewChartProps) => {
       valueFormatter: (value: number) => Math.round(value).toLocaleString('vi-VN'),
       background: isDark ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.05)'
     },
+    BAKERIES: {
+      main: isDark ? '#60a5fa' : '#3b82f6', // blue-400/500
+      target: isDark ? '#fbbf24' : '#f59e0b', // amber-400/500
+      title: 'Cửa Hàng',
+      tabClass: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+      valueFormatter: (value: number) => Math.round(value).toLocaleString('vi-VN'),
+      background: isDark ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.05)'
+    },
     CUSTOMERS: {
       main: isDark ? '#a78bfa' : '#8b5cf6', // violet-400/500
       target: isDark ? '#fbbf24' : '#f59e0b', // amber-400/500
@@ -194,6 +204,9 @@ const SalesOverviewChart = ({ data, dateRange }: SalesOverviewChartProps) => {
     }
   };
 
+  // Determine if we're in admin or bakery mode
+  const isAdminMode = "BAKERIES" in data;
+  
   // Get the current data based on selected type
   const currentData = formattedData[selectedType] || [];
   
@@ -226,6 +239,57 @@ const SalesOverviewChart = ({ data, dateRange }: SalesOverviewChartProps) => {
     }
   };
   
+  // Render the appropriate tabs based on whether we're in admin or bakery mode
+  const renderTabs = () => {
+    if (isAdminMode) {
+      return (
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger 
+            value="REVENUE" 
+            className={selectedType === 'REVENUE' ? colorSettings.REVENUE.tabClass : ''}
+          >
+            Doanh Thu
+          </TabsTrigger>
+          <TabsTrigger 
+            value="BAKERIES" 
+            className={selectedType === 'BAKERIES' ? colorSettings.BAKERIES.tabClass : ''}
+          >
+            Cửa Hàng
+          </TabsTrigger>
+          <TabsTrigger 
+            value="CUSTOMERS" 
+            className={selectedType === 'CUSTOMERS' ? colorSettings.CUSTOMERS.tabClass : ''}
+          >
+            Khách Hàng
+          </TabsTrigger>
+        </TabsList>
+      );
+    } else {
+      return (
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger 
+            value="REVENUE" 
+            className={selectedType === 'REVENUE' ? colorSettings.REVENUE.tabClass : ''}
+          >
+            Doanh Thu
+          </TabsTrigger>
+          <TabsTrigger 
+            value="ORDERS" 
+            className={selectedType === 'ORDERS' ? colorSettings.ORDERS.tabClass : ''}
+          >
+            Đơn Hàng
+          </TabsTrigger>
+          <TabsTrigger 
+            value="CUSTOMERS" 
+            className={selectedType === 'CUSTOMERS' ? colorSettings.CUSTOMERS.tabClass : ''}
+          >
+            Khách Hàng
+          </TabsTrigger>
+        </TabsList>
+      );
+    }
+  };
+  
   return (
     <Card className="col-span-1 md:col-span-2 overflow-hidden border border-border/50 shadow-md hover:shadow-lg transition-all duration-300">
       <CardHeader className="bg-card/50 pb-2">
@@ -241,26 +305,7 @@ const SalesOverviewChart = ({ data, dateRange }: SalesOverviewChartProps) => {
           </div>
           
           <Tabs value={selectedType} onValueChange={handleTabChange} className="w-full max-w-[400px]">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger 
-                value="REVENUE" 
-                className={selectedType === 'REVENUE' ? colorSettings.REVENUE.tabClass : ''}
-              >
-                Doanh Thu
-              </TabsTrigger>
-              <TabsTrigger 
-                value="ORDERS" 
-                className={selectedType === 'ORDERS' ? colorSettings.ORDERS.tabClass : ''}
-              >
-                Đơn Hàng
-              </TabsTrigger>
-              <TabsTrigger 
-                value="CUSTOMERS" 
-                className={selectedType === 'CUSTOMERS' ? colorSettings.CUSTOMERS.tabClass : ''}
-              >
-                Khách Hàng
-              </TabsTrigger>
-            </TabsList>
+            {renderTabs()}
           </Tabs>
         </div>
       </CardHeader>
@@ -350,7 +395,7 @@ const SalesOverviewChart = ({ data, dateRange }: SalesOverviewChartProps) => {
                 }}
                 formatter={(value: number) => [
                   <span key="value">{colorSettings[selectedType].valueFormatter(value)}</span>, 
-                  <span key="label">{selectedType === 'REVENUE' ? 'Doanh Thu' : selectedType === 'ORDERS' ? 'Đơn Hàng' : 'Khách Hàng'}</span>
+                  <span key="label">{colorSettings[selectedType].title}</span>
                 ]}
                 cursor={{ 
                   stroke: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)', 

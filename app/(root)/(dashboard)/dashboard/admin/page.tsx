@@ -1,13 +1,14 @@
 import {
   getCategoryDistribution,
   getProductPerformance,
-  getSaleOverview,
 } from "@/features/reports/actions/report-action";
 import {
   getAdminTotalRevenue,
   getPendingBakeries,
   getTotalCustomers,
   getTotalBakeries,
+  getSaleOverview,
+  getOverview,
 } from "@/features/reports/actions/admin-report-action";
 import { Suspense } from "react";
 import {
@@ -24,6 +25,7 @@ import { formatCurrency } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth";
 import { UserRole } from "@/lib/enums/user-role-enum";
 import { redirect } from "next/navigation";
+import { startOfMonth, format } from "date-fns";
 
 // Import components
 import AdminHeader from "./_components/AdminHeader";
@@ -117,88 +119,68 @@ const TopBakeriesChart = ({
   );
 };
 
-const AdminDashboard = async () => {
+interface AdminDashboardProps {
+  searchParams?: {
+    dateFrom?: string;
+    dateTo?: string;
+  };
+}
+
+const AdminDashboard = async ({ searchParams }: AdminDashboardProps) => {
   // Verify user is admin
   const user = await getCurrentUser();
   if (!user || user.role !== UserRole.ADMIN) {
     redirect("/dashboard");
   }
 
-  const currentYear = new Date().getFullYear();
+  // Get date range parameters from URL or set defaults
+  const today = new Date();
+  let dateFrom = searchParams?.dateFrom;
+  let dateTo = searchParams?.dateTo;
+  
+  // Set default date range to current month if not provided
+  if (!dateFrom) {
+    dateFrom = format(startOfMonth(today), 'yyyy-MM-dd');
+  }
+  
+  if (!dateTo) {
+    dateTo = format(today, 'yyyy-MM-dd');
+  }
+  
+  console.log("Admin Dashboard Date range:", { dateFrom, dateTo });
 
   // Fetch data from API with the new admin report actions
   const [
-    totalRevenue,
+    overviewData,
     pendingBakeries,
-    totalCustomers,
-    totalBakeries,
     categoryDistribution,
     productPerformance,
     saleOverviewRevenue,
-    saleOverviewOrders,
+    saleOverviewBakeries,
     saleOverviewCustomers,
     topBakeries,
   ] = await Promise.all([
-    getAdminTotalRevenue(),
+    getOverview({ dateFrom, dateTo }),
     getPendingBakeries(),
-    getTotalCustomers(),
-    getTotalBakeries(),
-    getCategoryDistribution(),
-    getProductPerformance(),
-    getSaleOverview({ type: "REVENUE", year: currentYear }),
-    getSaleOverview({ type: "ORDERS", year: currentYear }),
-    getSaleOverview({ type: "CUSTOMERS", year: currentYear }),
+    getCategoryDistribution({ dateFrom, dateTo }),
+    getProductPerformance({ dateFrom, dateTo }),
+    getSaleOverview({ type: "REVENUE", dateFrom, dateTo }),
+    getSaleOverview({ type: "BAKERIES", dateFrom, dateTo }),
+    getSaleOverview({ type: "CUSTOMERS", dateFrom, dateTo }),
     getTopBakery(),
   ]);
 
   // Debug: Log các giá trị nhận được
   console.log("Debug Admin Dashboard Data:");
-  console.log("totalRevenue:", totalRevenue);
+  console.log("overviewData:", overviewData);
   console.log("pendingBakeries:", pendingBakeries);
-  console.log("totalCustomers:", totalCustomers);
-  console.log("totalBakeries:", totalBakeries);
+  console.log("Sales data format:", saleOverviewRevenue?.data?.[0]);
 
-  // Chuyển đổi mảng số sang định dạng phù hợp với biểu đồ
-  const months = [
-    "Tháng 1",
-    "Tháng 2",
-    "Tháng 3",
-    "Tháng 4",
-    "Tháng 5",
-    "Tháng 6",
-    "Tháng 7",
-    "Tháng 8",
-    "Tháng 9",
-    "Tháng 10",
-    "Tháng 11",
-    "Tháng 12",
-  ];
-
-  const convertArrayToChartData = (
-    dataArray: number[],
-    shouldRound = false
-  ) => {
-    if (!Array.isArray(dataArray)) return [];
-
-    return dataArray.map((value, index) => {
-      const processedValue = shouldRound ? Math.round(value || 0) : value || 0;
-      const target = shouldRound
-        ? Math.round((value || 0) * 1.2)
-        : (value || 0) * 1.2;
-
-      return {
-        month: months[index],
-        value: processedValue,
-        target: target,
-      };
-    });
-  };
-
-  // Combine all sales data types
-  const combinedSalesData = {
-    REVENUE: convertArrayToChartData(saleOverviewRevenue?.data || [], false),
-    ORDERS: convertArrayToChartData(saleOverviewOrders?.data || [], true),
-    CUSTOMERS: convertArrayToChartData(saleOverviewCustomers?.data || [], true),
+  // Prepare sales data for chart
+  const salesData = {
+    REVENUE: saleOverviewRevenue?.data || [],
+    BAKERIES: saleOverviewBakeries?.data || [],
+    CUSTOMERS: saleOverviewCustomers?.data || [],
   };
 
   // Icon colors for stats
@@ -214,7 +196,7 @@ const AdminDashboard = async () => {
   return (
     <div className="min-h-screen p-6 pt-4 bg-gradient-to-br from-background via-background to-background/95 dark:from-background dark:to-background/90">
       <div className="mx-auto max-w-7xl space-y-8">
-        <AdminHeader />
+        <AdminHeader dateFrom={dateFrom} dateTo={dateTo} />
 
         {/* Stats Overview */}
         <section
@@ -225,9 +207,9 @@ const AdminDashboard = async () => {
           <Suspense fallback={<Shimmer className="h-32" />}>
             <StatCard
               title="Tổng Doanh Thu"
-              value={formatCurrency(totalRevenue?.amount || 0)}
-              change={totalRevenue?.change || 0}
-              period={totalRevenue?.comparisonPeriod || "tháng trước"}
+              value={formatCurrency(overviewData?.data?.totalRevenues || 0)}
+              change={0}
+              period="tháng trước"
               icon={
                 <DollarSignIcon className={`h-5 w-5 ${iconColors.revenue}`} />
               }
@@ -239,8 +221,8 @@ const AdminDashboard = async () => {
             <StatCard
               title="Chờ Duyệt"
               value={(pendingBakeries?.amount || 0).toString()}
-              change={pendingBakeries?.change || 0}
-              period={pendingBakeries?.comparisonPeriod || "tháng trước"}
+              change={0}
+              period="tháng trước"
               icon={<ClockIcon className={`h-5 w-5 ${iconColors.pending}`} />}
             />
           </Suspense>
@@ -249,9 +231,9 @@ const AdminDashboard = async () => {
           <Suspense fallback={<Shimmer className="h-32" />}>
             <StatCard
               title="Khách Hàng"
-              value={(totalCustomers?.amount || 0).toString()}
-              change={totalCustomers?.change || 0}
-              period={totalCustomers?.comparisonPeriod || "tháng trước"}
+              value={(overviewData?.data?.totalCustomers || 0).toString()}
+              change={0}
+              period="tháng trước"
               icon={<UsersIcon className={`h-5 w-5 ${iconColors.customers}`} />}
             />
           </Suspense>
@@ -260,9 +242,9 @@ const AdminDashboard = async () => {
           <Suspense fallback={<Shimmer className="h-32" />}>
             <StatCard
               title="Cửa Hàng"
-              value={(totalBakeries?.amount || 0).toString()}
-              change={totalBakeries?.change || 0}
-              period={totalBakeries?.comparisonPeriod || "tháng trước"}
+              value={(overviewData?.data?.totalBakeries || 0).toString()}
+              change={0}
+              period="tháng trước"
               icon={<StoreIcon className={`h-5 w-5 ${iconColors.store}`} />}
             />
           </Suspense>
@@ -280,7 +262,7 @@ const AdminDashboard = async () => {
             <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <AdminActionCard
                 title="Duyệt Cửa Hàng"
-                count={pendingBakeries?.amount || 0}
+                count={overviewData?.data?.totalReports || 0}
                 icon={<StoreIcon className="h-4 w-4" />}
                 href="/dashboard/bakeries"
                 color="text-indigo-500 dark:text-indigo-400"
@@ -306,7 +288,10 @@ const AdminDashboard = async () => {
         {/* Sales Overview Chart */}
         <section className="mt-8" aria-label="Sales overview chart">
           <Suspense fallback={<Shimmer className="h-[450px]" />}>
-            <SalesOverviewChart data={combinedSalesData} year={currentYear} />
+            <SalesOverviewChart 
+              data={salesData}
+              dateRange={{ dateFrom, dateTo }}
+            />
           </Suspense>
         </section>
 
