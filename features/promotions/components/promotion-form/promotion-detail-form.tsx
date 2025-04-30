@@ -30,7 +30,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
   createPromotion,
@@ -47,6 +47,7 @@ import {
   FileText,
   Info,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 interface PromotionDetailFormProps {
   initialData: IPromotion | null;
@@ -60,16 +61,18 @@ const promotionSchema = z.object({
   quantity: z.coerce.number().min(0),
   usage_count: z.coerce.number().min(0),
   description: z.string().min(1, "Promotion description is required"),
-  voucher_type: z.string().min(1, "Promotion description is required"),
+  voucher_type: z.string().min(1, "Voucher type is required"),
 });
 
 type promotionFormValue = z.infer<typeof promotionSchema>;
 
-const voucherType = ["PRIVATE", "GLOBAL"];
+const voucherType = ["PRIVATE", "GLOBAL", "SYSTEM"];
 
 const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
   const [isPending, startTransition] = useTransition();
   const [loading, setLoading] = useState(false);
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === "ADMIN";
 
   const title = initialData ? "Edit Promotion Details" : "Add New Promotion";
   const description = initialData
@@ -80,6 +83,7 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
     ? "cập nhật thành công."
     : "tạo thành công .";
 
+  // Set default values, with initial usage_count of 0
   const defaultValues = initialData
     ? initialData
     : {
@@ -90,7 +94,7 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
         quantity: 0,
         usage_count: 0,
         description: "",
-        voucher_type: "",
+        voucher_type: isAdmin ? "SYSTEM" : "PRIVATE",
       };
 
   const form = useForm<promotionFormValue>({
@@ -98,33 +102,51 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
     defaultValues,
   });
 
+  // Update voucher_type when user role changes
+  useEffect(() => {
+    if (!initialData && isAdmin) {
+      form.setValue("voucher_type", "SYSTEM");
+    }
+  }, [isAdmin, initialData, form]);
+
   const onSubmit = async (data: promotionFormValue) => {
     startTransition(async () => {
       setLoading(true);
       if (initialData) {
         await updatePromotion(data, initialData.id);
       } else {
-        await createPromotion(data);
+        // Always send usage_count as 0 for new promotions
+        await createPromotion({
+          ...data,
+          usage_count: 0,
+        });
       }
       setLoading(false);
       toast.success(toastMessage);
     });
   };
 
+  // Filter voucher types based on user role
+  const availableVoucherTypes = isAdmin
+    ? ["SYSTEM"]
+    : voucherType.filter((type) => type !== "SYSTEM");
+
   return (
     <div className="w-full">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-800">{title}</h1>
-        <p className="text-slate-600">{description}</p>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+          {title}
+        </h1>
+        <p className="text-slate-600 dark:text-slate-400">{description}</p>
       </div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Card 1: Discount Information */}
-            <Card className="shadow-sm">
-              <CardHeader className="bg-slate-50 border-b">
-                <CardTitle className="text-lg font-medium flex items-center gap-2">
+            <Card className="shadow-sm border dark:border-slate-700 dark:bg-slate-900">
+              <CardHeader className=" dark:bg-slate-800 border-b dark:border-slate-700">
+                <CardTitle className="text-lg font-medium flex items-center gap-2  dark:text-slate-100">
                   <Percent className="h-5 w-5 text-primary" />
                   Discount Information
                 </CardTitle>
@@ -135,13 +157,15 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
                   name="discount_percentage"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Discount Percentage (%)</FormLabel>
+                      <FormLabel className="text-slate-700 dark:text-slate-300">
+                        Discount Percentage (%)
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           placeholder="Enter discount percentage"
                           {...field}
-                          className="focus:ring-2 focus:ring-primary"
+                          className="focus:ring-2 focus:ring-primary dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
                         />
                       </FormControl>
                       <FormMessage className="text-red-500" />
@@ -154,13 +178,15 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
                   name="min_order_amount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Min Order Amount</FormLabel>
+                      <FormLabel className="text-slate-700 dark:text-slate-300">
+                        Min Order Amount
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           placeholder="Enter min order amount"
                           {...field}
-                          className="focus:ring-2 focus:ring-primary"
+                          className="focus:ring-2 focus:ring-primary dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
                         />
                       </FormControl>
                       <FormMessage className="text-red-500" />
@@ -173,13 +199,15 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
                   name="max_discount_amount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Max Discount Amount</FormLabel>
+                      <FormLabel className="text-slate-700 dark:text-slate-300">
+                        Max Discount Amount
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           placeholder="Enter max discount amount"
                           {...field}
-                          className="focus:ring-2 focus:ring-primary"
+                          className="focus:ring-2 focus:ring-primary dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
                         />
                       </FormControl>
                       <FormMessage className="text-red-500" />
@@ -190,9 +218,9 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
             </Card>
 
             {/* Card 2: Usage Details */}
-            <Card className="shadow-sm">
-              <CardHeader className="bg-slate-50 border-b">
-                <CardTitle className="text-lg font-medium flex items-center gap-2">
+            <Card className="shadow-sm border dark:border-slate-700 dark:bg-slate-900">
+              <CardHeader className=" dark:bg-slate-800 border-b dark:border-slate-700">
+                <CardTitle className="text-lg font-medium flex items-center gap-2 dark:text-slate-100">
                   <Clock className="h-5 w-5 text-primary" />
                   Usage Details
                 </CardTitle>
@@ -203,12 +231,14 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
                   name="expiration_date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Expiration Date</FormLabel>
+                      <FormLabel className="text-slate-700 dark:text-slate-300">
+                        Expiration Date
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="datetime-local"
                           {...field}
-                          className="focus:ring-2 focus:ring-primary"
+                          className="focus:ring-2 focus:ring-primary dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
                         />
                       </FormControl>
                       <FormMessage className="text-red-500" />
@@ -221,13 +251,15 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
                   name="quantity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Quantity</FormLabel>
+                      <FormLabel className="text-slate-700 dark:text-slate-300">
+                        Quantity
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           placeholder="Enter quantity"
                           {...field}
-                          className="focus:ring-2 focus:ring-primary"
+                          className="focus:ring-2 focus:ring-primary dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
                         />
                       </FormControl>
                       <FormMessage className="text-red-500" />
@@ -235,32 +267,37 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="usage_count"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Usage Count</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="Enter usage count"
-                          {...field}
-                          className="focus:ring-2 focus:ring-primary"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-red-500" />
-                    </FormItem>
-                  )}
-                />
+                {/* Only show usage_count when editing */}
+                {initialData && (
+                  <FormField
+                    control={form.control}
+                    name="usage_count"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-700 dark:text-slate-300">
+                          Usage Count
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="Enter usage count"
+                            {...field}
+                            className="focus:ring-2 focus:ring-primary dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
+                          />
+                        </FormControl>
+                        <FormMessage className="text-red-500" />
+                      </FormItem>
+                    )}
+                  />
+                )}
               </CardContent>
             </Card>
           </div>
 
           {/* Card 3: Voucher Details - Full Width */}
-          <Card className="shadow-sm">
-            <CardHeader className="bg-slate-50 border-b">
-              <CardTitle className="text-lg font-medium flex items-center gap-2">
+          <Card className="shadow-sm border dark:border-slate-700 dark:bg-slate-900">
+            <CardHeader className=" dark:bg-slate-800 border-b dark:border-slate-700">
+              <CardTitle className="text-lg font-medium flex items-center gap-2  dark:text-slate-100">
                 <Tag className="h-5 w-5 text-primary" />
                 Voucher Details
               </CardTitle>
@@ -272,18 +309,25 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
                   name="voucher_type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Voucher Type</FormLabel>
+                      <FormLabel className="text-slate-700 dark:text-slate-300">
+                        Voucher Type
+                      </FormLabel>
                       <FormControl>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
+                          disabled={isAdmin} // Disable for all admin cases
                         >
-                          <SelectTrigger className="focus:ring-2 focus:ring-primary">
+                          <SelectTrigger className="focus:ring-2 focus:ring-primary dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100">
                             <SelectValue placeholder="Select voucher type" />
                           </SelectTrigger>
-                          <SelectContent>
-                            {voucherType.map((type) => (
-                              <SelectItem key={type} value={type}>
+                          <SelectContent className="dark:bg-slate-800 dark:border-slate-700">
+                            {availableVoucherTypes.map((type) => (
+                              <SelectItem
+                                key={type}
+                                value={type}
+                                className="dark:text-slate-100 dark:hover:bg-slate-700"
+                              >
                                 {type}
                               </SelectItem>
                             ))}
@@ -301,12 +345,14 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel className="text-slate-700 dark:text-slate-300">
+                      Description
+                    </FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Enter description"
                         {...field}
-                        className="min-h-28 focus:ring-2 focus:ring-primary"
+                        className="min-h-28 focus:ring-2 focus:ring-primary dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
                       />
                     </FormControl>
                     <FormMessage className="text-red-500" />
@@ -317,10 +363,10 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
           </Card>
 
           {/* Submit Button Card */}
-          <Card className="shadow-sm border-t-4 border-t-primary">
+          <Card className="shadow-sm border dark:border-slate-700 dark:bg-slate-900 border-t-4 border-t-primary">
             <CardContent className="p-4 flex justify-end items-center">
               <div className="flex-1">
-                <p className="text-sm text-slate-500 flex items-center gap-1">
+                <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1">
                   <Info className="h-4 w-4" />
                   {initialData
                     ? "Update promotion details"

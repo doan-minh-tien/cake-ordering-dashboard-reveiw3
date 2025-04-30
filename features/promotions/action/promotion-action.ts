@@ -20,8 +20,17 @@ export const getPromotions = async (
   noStore();
 
   const session = await auth();
+  // console.log(session?.user);
+  // check if user is admin
+  // fetch promotion with out query of bakeryId  => /admins/vouchers
+  // if user is not admin, fetch promotion with query of bakeryId => /vouchers?bakeryId=1
+
+  const isAdmin = session?.user.role === "ADMIN";
+  const query = isAdmin ? "" : `?bakeryId=${session?.user.entity.id}`;
+  const url = isAdmin ? "/admins/vouchers" : `/vouchers${query}`;
+
   const result = await fetchListData<IPromotion>(
-    `/vouchers?bakeryId=${session?.user.entity.id}`,
+    url,
     searchParams
   );
 
@@ -82,3 +91,18 @@ export async function createPromotion(data: any): Promise<Result<void>> {
 
   return { success: true, data: undefined };
 }   
+
+
+export async function deletePromotion(params: string): Promise<Result<void>> {
+  noStore();
+  const result = await apiRequest(() =>
+    axiosAuth.delete(`/vouchers/${params}`)
+  );
+  if (!result.success) {
+    return { success: false, error: result.error };
+  }
+
+  revalidatePath("/dashboard/promotions");
+
+  return { success: true, data: undefined };  
+}

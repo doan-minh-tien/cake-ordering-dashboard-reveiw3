@@ -141,8 +141,8 @@ const ActionMenu = ({ row }: ActionMenuProps) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Xác nhận xóa bánh</AlertDialogTitle>
             <AlertDialogDescription>
-              Bạn có chắc chắn muốn xóa bánh "
-              <span className="font-medium">{cakeName}</span>"?
+              Bạn có chắc chắn muốn xóa bánh &quot;
+              <span className="font-medium">{cakeName}</span>&quot;?
               <br />
               Hành động này không thể hoàn tác và sẽ xóa vĩnh viễn bánh khỏi hệ
               thống.
