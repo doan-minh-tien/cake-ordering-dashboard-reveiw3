@@ -54,6 +54,24 @@ export const orderStatusColumn = {
             bgColor: "bg-purple-100 dark:bg-purple-900/30",
             textColor: "text-purple-700 dark:text-purple-400",
           };
+        case "SHIPPING_COMPLETED":
+          return {
+            label: "Giao hàng hoàn tất",
+            bgColor: "bg-emerald-100 dark:bg-emerald-900/30",
+            textColor: "text-emerald-700 dark:text-emerald-400",
+          };
+        case "REPORT_PENDING":
+          return {
+            label: "Khiếu nại đang xử lý",
+            bgColor: "bg-yellow-100 dark:bg-yellow-900/30",
+            textColor: "text-yellow-700 dark:text-yellow-400",
+          };
+        case "FAULTY":
+          return {
+            label: "Đơn hàng lỗi",
+            bgColor: "bg-red-100 dark:bg-red-900/30",
+            textColor: "text-red-700 dark:text-red-400",
+          };
         case "READY_FOR_PICKUP":
           return {
             label: "Sẵn sàng giao",

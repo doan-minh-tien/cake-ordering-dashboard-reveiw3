@@ -223,7 +223,13 @@ const ActionMenu = ({ row }: ActionMenuProps) => {
       case "READY_FOR_PICKUP":
         return "Chuyển sang vận chuyển";
       case "SHIPPING":
-        return "Đơn hàng đang vận chuyển";
+        return "Xác nhận giao hàng thành công";
+      case "SHIPPING_COMPLETED":
+        return "Đơn hàng đang trong thời gian chờ";
+      case "REPORT_PENDING":
+        return "Đơn hàng đang được xử lý khiếu nại";
+      case "FAULTY":
+        return "Đơn hàng bị lỗi";
       default:
         return "Chuyển trạng thái tiếp theo";
     }
@@ -231,12 +237,14 @@ const ActionMenu = ({ row }: ActionMenuProps) => {
 
   // Render status-specific action button based on status
   const renderStatusActions = () => {
-    // Don't show next status button for PENDING, COMPLETED, CANCELED or SHIPPING orders
+    // Don't show next status button for these statuses
     if (
       orderStatus === "PENDING" ||
       orderStatus === "COMPLETED" ||
       orderStatus === "CANCELED" ||
-      orderStatus === "SHIPPING"
+      orderStatus === "SHIPPING_COMPLETED" ||
+      orderStatus === "REPORT_PENDING" ||
+      orderStatus === "FAULTY"
     ) {
       return null;
     }
@@ -317,7 +325,7 @@ const ActionMenu = ({ row }: ActionMenuProps) => {
                       Hình ảnh bánh hoàn thiện
                     </p>
                     <p className="text-xs text-muted-foreground/70 mt-1">
-                      Nhấp vào "Tải ảnh lên" để chọn hình ảnh
+                      Nhấp vào &quot;Tải ảnh lên&quot; để chọn hình ảnh
                     </p>
                   </div>
                 )}
@@ -353,6 +361,62 @@ const ActionMenu = ({ row }: ActionMenuProps) => {
       );
     }
 
+    // For SHIPPING status, add confirmation dialog
+    if (orderStatus === "SHIPPING") {
+      return (
+        <Dialog open={isActionDialogOpen} onOpenChange={setIsActionDialogOpen}>
+          <DialogTrigger asChild>
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.preventDefault();
+                setIsActionDialogOpen(true);
+              }}
+              className="cursor-pointer text-emerald-600 focus:text-emerald-600"
+            >
+              <ArrowRight className="mr-2 h-4 w-4" />
+              <span>{getActionButtonText(orderStatus)}</span>
+            </DropdownMenuItem>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Xác nhận giao hàng thành công</DialogTitle>
+              <DialogDescription>
+                {row.original.shipping_type &&
+                row.original.shipping_type.toLowerCase().includes("pickup")
+                  ? "Xác nhận khách hàng đã nhận bánh tại cửa hàng? Sau khi xác nhận, đơn hàng sẽ vào thời gian chờ 1 giờ trước khi hoàn tất."
+                  : "Xác nhận đơn hàng đã được giao thành công? Sau khi xác nhận, đơn hàng sẽ vào thời gian chờ 1 giờ trước khi hoàn tất."}
+              </DialogDescription>
+            </DialogHeader>
+
+            <DialogFooter className="mt-4">
+              <Button
+                variant="outline"
+                onClick={() => setIsActionDialogOpen(false)}
+                disabled={isLoading}
+                className="hover:bg-muted/50 transition-colors"
+              >
+                Hủy
+              </Button>
+              <Button
+                onClick={handleMoveToNextStatus}
+                disabled={isLoading}
+                className="bg-emerald-600 hover:bg-emerald-700 transition-all hover:opacity-90 text-white"
+              >
+                {isLoading ? (
+                  <div className="flex items-center gap-1.5">
+                    <Loader className="h-3 w-3 animate-spin" />
+                    <span>Đang xử lý...</span>
+                  </div>
+                ) : (
+                  "Xác nhận giao hàng"
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      );
+    }
+
     // For other statuses, use the simple dropdown item
     return (
       <DropdownMenuItem
@@ -373,6 +437,9 @@ const ActionMenu = ({ row }: ActionMenuProps) => {
       orderStatus !== "PENDING" &&
       orderStatus !== "COMPLETED" &&
       orderStatus !== "CANCELED" &&
+      orderStatus !== "SHIPPING_COMPLETED" &&
+      orderStatus !== "REPORT_PENDING" &&
+      orderStatus !== "FAULTY" &&
       orderStatus === "WAITING_BAKERY_CONFIRM"
     );
   };

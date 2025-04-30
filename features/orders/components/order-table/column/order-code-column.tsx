@@ -43,12 +43,7 @@ export const orderCodeColumn = {
         .join(", ");
     }
 
-    console.log(`Order ${orderCode}:`);
-    console.log(
-      `- Has details: ${hasOrderDetails}, Count: ${orderDetailsLength}`
-    );
-    console.log(`- Details info: ${orderDetailsInfo}`);
-    console.log(`- Is custom order: ${customOrderFound}`);
+
 
     // This is what we will use for displaying
     const isCustomOrder = customOrderFound;
@@ -58,14 +53,14 @@ export const orderCodeColumn = {
         {isCustomOrder ? (
           <>
             <Palette className="w-5 h-5 text-pink-600 dark:text-pink-400" />
-            <span className="font-medium text-sm bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300 px-2 py-1 rounded-md">
+            <span className="font-medium text-sm  text-pink-800  dark:text-pink-300 px-2 py-1 rounded-md">
               {orderCode} (Custom)
             </span>
           </>
         ) : (
           <>
             <ShoppingCart className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            <span className="font-medium text-sm bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-1 rounded-md">
+            <span className="font-medium text-sm  text-blue-800  dark:text-blue-300 px-2 py-1 rounded-md">
               {orderCode}
             </span>
           </>

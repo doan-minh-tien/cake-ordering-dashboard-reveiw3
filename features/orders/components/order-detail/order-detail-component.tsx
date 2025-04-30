@@ -119,6 +119,24 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
           bgColor: "bg-purple-100 dark:bg-purple-900/30",
           textColor: "text-purple-700 dark:text-purple-400",
         };
+      case "SHIPPING_COMPLETED":
+        return {
+          label: "Giao hàng hoàn tất",
+          bgColor: "bg-emerald-100 dark:bg-emerald-900/30",
+          textColor: "text-emerald-700 dark:text-emerald-400",
+        };
+      case "REPORT_PENDING":
+        return {
+          label: "Khiếu nại đang xử lý",
+          bgColor: "bg-yellow-100 dark:bg-yellow-900/30",
+          textColor: "text-yellow-700 dark:text-yellow-400",
+        };
+      case "FAULTY":
+        return {
+          label: "Đơn hàng lỗi",
+          bgColor: "bg-red-100 dark:bg-red-900/30",
+          textColor: "text-red-700 dark:text-red-400",
+        };
       case "READY_FOR_PICKUP":
         return {
           label: "Sẵn sàng giao",
@@ -191,12 +209,38 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
           order.shipping_type.toLowerCase().includes("pickup");
         return {
           text: isPickup
-            ? "Đơn hàng đang chờ khách lấy tại chỗ"
-            : "Đơn hàng đang được giao",
-          color: "bg-teal-600 hover:bg-teal-700",
+            ? "Xác nhận khách đã nhận hàng"
+            : "Xác nhận giao hàng thành công",
+          color: "bg-emerald-600 hover:bg-emerald-700",
           description: isPickup
-            ? "Đơn hàng đang chờ khách đến lấy tại cửa hàng."
-            : "Đơn hàng đang được giao đến khách hàng.",
+            ? "Xác nhận khách hàng đã nhận bánh tại cửa hàng? Sau khi xác nhận, đơn hàng sẽ vào thời gian chờ 1 giờ trước khi hoàn tất."
+            : "Xác nhận đơn hàng đã được giao thành công? Sau khi xác nhận, đơn hàng sẽ vào thời gian chờ 1 giờ trước khi hoàn tất.",
+          confirmText: "Xác nhận giao hàng",
+          requiresFile: false,
+        };
+      case "SHIPPING_COMPLETED":
+        return {
+          text: "Đơn hàng đang trong thời gian chờ",
+          color: "bg-amber-600 hover:bg-amber-700",
+          description: "Đơn hàng đang trong thời gian chờ 1 giờ để khách hàng kiểm tra. Nếu không có vấn đề gì, đơn hàng sẽ tự động chuyển sang trạng thái hoàn thành.",
+          confirmText: "Đã hiểu",
+          requiresFile: false,
+          disableAction: true,
+        };
+      case "REPORT_PENDING":
+        return {
+          text: "Đơn hàng đang được xử lý khiếu nại",
+          color: "bg-yellow-600 hover:bg-yellow-700",
+          description: "Đơn hàng đang trong quá trình xử lý khiếu nại từ khách hàng.",
+          confirmText: "Đã hiểu",
+          requiresFile: false,
+          disableAction: true,
+        };
+      case "FAULTY":
+        return {
+          text: "Đơn hàng bị lỗi",
+          color: "bg-red-600 hover:bg-red-700",
+          description: "Đơn hàng đã được xác nhận lỗi sau khi xử lý khiếu nại.",
           confirmText: "Đã hiểu",
           requiresFile: false,
           disableAction: true,
@@ -351,7 +395,10 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
     order.order_status !== "PENDING" &&
     order.order_status !== "COMPLETED" &&
     order.order_status !== "CANCELED" &&
-    order.order_status !== "SHIPPING";
+    order.order_status !== "SHIPPING" &&
+    // New statuses that don't need action buttons from bakery side
+    order.order_status !== "REPORT_PENDING" &&
+    order.order_status !== "FAULTY";
 
   const statusInfo = getStatusInfo(order.order_status);
   const actionConfig = getActionButtonConfig(order.order_status);
@@ -362,7 +409,7 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
         onClick={() => router.back()}
         variant="ghost"
         size="default"
-        className="mb-5 flex items-center text-blue-600 hover:text-blue-800 hover:bg-blue-50 font-medium"
+        className="mb-5 flex items-center text-primary hover:text-primary/80 hover:bg-primary/10 font-medium"
       >
         <ArrowLeft className="h-5 w-5 mr-2" />
         <span className="text-base">Quay lại</span>
@@ -376,34 +423,34 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 p-4 bg-blue-50 border border-blue-100 rounded-lg">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-full bg-blue-100 text-blue-600">
+          <div className="p-2 rounded-full bg-primary/10 text-primary">
             <Tag size={18} />
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Mã đơn hàng</p>
-            <p className="font-semibold text-blue-700">{order.order_code}</p>
+            <p className="font-semibold text-primary">{order.order_code}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-full bg-blue-100 text-blue-600">
+          <div className="p-2 rounded-full bg-primary/10 text-primary">
             <Clock size={18} />
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Ngày tạo đơn</p>
-            <p className="font-semibold text-blue-700">
+            <p className="font-semibold text-primary">
               {order.paid_at ? formatDate(order.paid_at) : "Không xác định"}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-full bg-blue-100 text-blue-600">
+          <div className="p-2 rounded-full bg-primary/10 text-primary">
             <CreditCard size={18} />
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Trạng thái đơn hàng</p>
-            <p className="font-semibold text-blue-700">
+            <p className="font-semibold text-primary">
               {order.order_status
                 ? getStatusInfo(order.order_status).label
                 : "Không xác định"}
@@ -426,11 +473,11 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
             {order.order_details.map((detail, index) => (
               <div
                 key={detail.id}
-                className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 bg-white border rounded-lg shadow-sm"
+                className="flex flex-col md:flex-row justify-between items-start md:items-center p-4  border rounded-lg shadow-sm"
               >
                 <div className="flex-1 space-y-2">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-gray-700">
+                    <span className="font-medium text-gray-700 dark:text-gray-300">
                       Bánh #{index + 1}
                     </span>
                     {detail.cake_note && (
@@ -440,12 +487,12 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
                     )}
                   </div>
                   {detail.cake_note && (
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
                       <span className="font-medium">Ghi chú:</span>{" "}
                       {detail.cake_note}
                     </p>
                   )}
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 ">
                     <span className="font-medium">Số lượng:</span>{" "}
                     {detail.quantity}
                   </p>
@@ -459,13 +506,13 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
             ))}
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between items-center bg-gray-50">
-          <div className="text-sm text-gray-600">
+        <CardFooter className="flex justify-between items-center ">
+          <div className="text-sm text-gray-600 dark:text-gray-300">
             Tổng số sản phẩm:{" "}
             {order.order_details.reduce((acc, curr) => acc + curr.quantity, 0)}
           </div>
           <div>
-            <p className="text-sm text-gray-600">Tổng tiền sản phẩm:</p>
+            <p className="text-sm text-gray-600 dark:text-gray-300">Tổng tiền sản phẩm:</p>
             <p className="font-semibold text-lg text-green-600">
               {formatCurrency(order.total_product_price)}
             </p>

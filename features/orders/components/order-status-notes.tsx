@@ -16,8 +16,8 @@ export default function OrderStatusNotes({ order }: OrderStatusNotesProps) {
         return {
           title: "Đơn hàng chờ thanh toán",
           note: "Đơn hàng mới được tạo, chờ khách hàng thanh toán.",
-          bgColor: "bg-amber-50 dark:bg-amber-900/20",
-          borderColor: "border-amber-200 dark:border-amber-800/30",
+          bgColor: "bg-amber-50 dark:bg-amber-950/20",
+          borderColor: "border-amber-200 dark:border-amber-800/40",
           titleColor: "text-amber-900 dark:text-amber-300",
           noteColor: "text-amber-700 dark:text-amber-400",
           accentColor: "text-amber-600 dark:text-amber-300",
@@ -26,8 +26,8 @@ export default function OrderStatusNotes({ order }: OrderStatusNotesProps) {
         return {
           title: "Chờ xác nhận từ bakery",
           note: "Khách đã đặt và thanh toán. Đợi bakery xác nhận có thể làm bánh.",
-          bgColor: "bg-violet-50 dark:bg-violet-900/20",
-          borderColor: "border-violet-200 dark:border-violet-800/30",
+          bgColor: "bg-violet-50 dark:bg-violet-950/20",
+          borderColor: "border-violet-200 dark:border-violet-800/40",
           titleColor: "text-violet-900 dark:text-violet-300",
           noteColor: "text-violet-700 dark:text-violet-400",
           accentColor: "text-violet-600 dark:text-violet-300",
@@ -36,8 +36,8 @@ export default function OrderStatusNotes({ order }: OrderStatusNotesProps) {
         return {
           title: "Đang xử lý",
           note: "Bakery đang xử lý đơn hàng. Khách hàng đã được thông báo.",
-          bgColor: "bg-indigo-50 dark:bg-indigo-900/20",
-          borderColor: "border-indigo-200 dark:border-indigo-800/30",
+          bgColor: "bg-indigo-50 dark:bg-indigo-950/20",
+          borderColor: "border-indigo-200 dark:border-indigo-800/40",
           titleColor: "text-indigo-900 dark:text-indigo-300",
           noteColor: "text-indigo-700 dark:text-indigo-400",
           accentColor: "text-indigo-600 dark:text-indigo-300",
@@ -46,8 +46,8 @@ export default function OrderStatusNotes({ order }: OrderStatusNotesProps) {
         return {
           title: "Sẵn sàng giao hàng",
           note: "Bánh đã làm xong, chờ giao cho khách. Shipper sẽ nhận đơn này.",
-          bgColor: "bg-purple-50 dark:bg-purple-900/20",
-          borderColor: "border-purple-200 dark:border-purple-800/30",
+          bgColor: "bg-purple-50 dark:bg-purple-950/20",
+          borderColor: "border-purple-200 dark:border-purple-800/40",
           titleColor: "text-purple-900 dark:text-purple-300",
           noteColor: "text-purple-700 dark:text-purple-400",
           accentColor: "text-purple-600 dark:text-purple-300",
@@ -56,18 +56,48 @@ export default function OrderStatusNotes({ order }: OrderStatusNotesProps) {
         return {
           title: "Đang vận chuyển",
           note: "Đơn hàng đang được vận chuyển đến khách. Khách đã nhận thông báo.",
-          bgColor: "bg-teal-50 dark:bg-teal-900/20",
-          borderColor: "border-teal-200 dark:border-teal-800/30",
+          bgColor: "bg-teal-50 dark:bg-teal-950/20",
+          borderColor: "border-teal-200 dark:border-teal-800/40",
           titleColor: "text-teal-900 dark:text-teal-300",
           noteColor: "text-teal-700 dark:text-teal-400",
           accentColor: "text-teal-600 dark:text-teal-300",
+        };
+      case "SHIPPING_COMPLETED":
+        return {
+          title: "Giao hàng hoàn tất",
+          note: "Đơn hàng đã được giao đến khách hàng. Đang trong thời gian chờ 1 giờ để kiểm tra.",
+          bgColor: "bg-emerald-50 dark:bg-emerald-950/20",
+          borderColor: "border-emerald-200 dark:border-emerald-800/40",
+          titleColor: "text-emerald-900 dark:text-emerald-300",
+          noteColor: "text-emerald-700 dark:text-emerald-400",
+          accentColor: "text-emerald-600 dark:text-emerald-300",
+        };
+      case "REPORT_PENDING":
+        return {
+          title: "Khiếu nại đang xử lý",
+          note: "Khách hàng đã báo cáo vấn đề với đơn hàng này. Đơn hàng đang được xem xét.",
+          bgColor: "bg-yellow-50 dark:bg-yellow-950/20",
+          borderColor: "border-yellow-200 dark:border-yellow-800/40",
+          titleColor: "text-yellow-900 dark:text-yellow-300",
+          noteColor: "text-yellow-700 dark:text-yellow-400",
+          accentColor: "text-yellow-600 dark:text-yellow-300",
+        };
+      case "FAULTY":
+        return {
+          title: "Đơn hàng bị lỗi",
+          note: "Đơn hàng đã được xác nhận có vấn đề sau khi xử lý khiếu nại từ khách hàng.",
+          bgColor: "bg-red-50 dark:bg-red-950/20",
+          borderColor: "border-red-200 dark:border-red-800/40",
+          titleColor: "text-red-900 dark:text-red-300",
+          noteColor: "text-red-700 dark:text-red-400",
+          accentColor: "text-red-600 dark:text-red-300",
         };
       case "COMPLETED":
         return {
           title: "Đơn hàng hoàn thành",
           note: "Khách hàng đã nhận bánh và xác nhận hoàn thành đơn hàng.",
-          bgColor: "bg-green-50 dark:bg-green-900/20",
-          borderColor: "border-green-200 dark:border-green-800/30",
+          bgColor: "bg-green-50 dark:bg-green-950/20",
+          borderColor: "border-green-200 dark:border-green-800/40",
           titleColor: "text-green-900 dark:text-green-300",
           noteColor: "text-green-700 dark:text-green-400",
           accentColor: "text-green-600 dark:text-green-300",
@@ -78,8 +108,8 @@ export default function OrderStatusNotes({ order }: OrderStatusNotesProps) {
           note: order.canceled_reason
             ? `Lý do hủy: ${order.canceled_reason}`
             : "Đơn hàng đã bị hủy.",
-          bgColor: "bg-red-50 dark:bg-red-900/20",
-          borderColor: "border-red-200 dark:border-red-800/30",
+          bgColor: "bg-red-50 dark:bg-red-950/20",
+          borderColor: "border-red-200 dark:border-red-800/40",
           titleColor: "text-red-900 dark:text-red-300",
           noteColor: "text-red-700 dark:text-red-400",
           accentColor: "text-red-600 dark:text-red-300",
@@ -88,8 +118,8 @@ export default function OrderStatusNotes({ order }: OrderStatusNotesProps) {
         return {
           title: "Trạng thái không xác định",
           note: "Không có thông tin về trạng thái đơn hàng.",
-          bgColor: "bg-gray-50 dark:bg-gray-800/40",
-          borderColor: "border-gray-200 dark:border-gray-700/50",
+          bgColor: "bg-gray-50 dark:bg-slate-900/50",
+          borderColor: "border-gray-200 dark:border-slate-800",
           titleColor: "text-gray-900 dark:text-gray-300",
           noteColor: "text-gray-700 dark:text-gray-400",
           accentColor: "text-gray-600 dark:text-gray-300",
@@ -110,6 +140,12 @@ export default function OrderStatusNotes({ order }: OrderStatusNotesProps) {
         return "Đảm bảo bánh được đóng gói cẩn thận và an toàn cho việc vận chuyển.";
       case "SHIPPING":
         return "Theo dõi quá trình giao hàng và liên hệ khách nếu gặp vấn đề.";
+      case "SHIPPING_COMPLETED":
+        return "Sau khi giao hàng, hệ thống sẽ tự động chuyển trạng thái sau 1 giờ nếu không có vấn đề.";
+      case "REPORT_PENDING":
+        return "Đơn hàng đang được xem xét bởi nhân viên chăm sóc khách hàng. Chờ kết quả xử lý.";
+      case "FAULTY":
+        return "Đơn hàng này cần được xử lý bồi thường hoặc làm lại theo chính sách của cửa hàng.";
       default:
         return null;
     }
