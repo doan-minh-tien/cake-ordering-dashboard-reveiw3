@@ -39,7 +39,7 @@ const StatCard = ({
         <div className="text-2xl font-bold tracking-tight text-foreground">
           {value}
         </div>
-        <div className="mt-2 flex items-center rounded-full px-2 py-1 text-xs font-medium max-w-fit" 
+        {/* <div className="mt-2 flex items-center rounded-full px-2 py-1 text-xs font-medium max-w-fit" 
              style={{ 
                backgroundColor: isPositive ? 'rgba(34, 197, 94, 0.1)' : 
                                isNeutral ? 'rgba(234, 179, 8, 0.1)' : 
@@ -58,7 +58,7 @@ const StatCard = ({
             </span>
             <span className="ml-1 text-muted-foreground/90">từ {period}</span>
           </span>
-        </div>
+        </div> */}
       </CardContent>
     </Card>
   )

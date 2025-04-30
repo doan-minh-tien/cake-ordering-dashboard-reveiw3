@@ -262,7 +262,7 @@ const AdminDashboard = async ({ searchParams }: AdminDashboardProps) => {
             <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <AdminActionCard
                 title="Duyệt Cửa Hàng"
-                count={overviewData?.data?.totalReports || 0}
+                count={0}
                 icon={<StoreIcon className="h-4 w-4" />}
                 href="/dashboard/bakeries"
                 color="text-indigo-500 dark:text-indigo-400"
