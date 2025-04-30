@@ -64,7 +64,7 @@ export async function banBakery(params: string): Promise<Result<void>> {
 
   console.log(params);
   const result = await apiRequest(() =>
-    axiosAuth.get(`/bakeries/${params}/ban_action`)
+    axiosAuth.put(`/bakeries/${params}/ban_action`)
   );
   if (!result.success) {
     return { success: false, error: result.error };
