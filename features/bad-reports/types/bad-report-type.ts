@@ -6,13 +6,24 @@ export interface IBadReport {
   content: string;
   type: string;
   status: string;
-  report_files: string[];
+  report_files: string[] | IReportFile[];
   customer_id: string;
   customer: ICustomerType;
   order_id: string | null;
   order: any | null;
   bakery_id: string;
   bakery: IBakeryType;
+  id: string;
+  created_at: string;
+  created_by: string;
+  updated_at: string | null;
+  updated_by: string | null;
+  is_deleted: boolean;
+}
+
+export interface IReportFile {
+  file_name: string;
+  file_url: string;
   id: string;
   created_at: string;
   created_by: string;
