@@ -190,10 +190,11 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
             : "Chuyển sang giao hàng",
           color: "bg-green-600 hover:bg-green-700",
           description: isPickupOrder
-            ? "Chuyển đơn hàng sang trạng thái lấy tại chỗ? Cần tải lên hình ảnh bánh hoàn thiện."
-            : "Chuyển đơn hàng sang trạng thái giao hàng? Cần tải lên hình ảnh bánh hoàn thiện.",
+            ? "Chuyển đơn hàng sang trạng thái lấy tại chỗ? Bạn có thể tải lên hình ảnh bánh hoàn thiện (không bắt buộc)."
+            : "Chuyển đơn hàng sang trạng thái giao hàng? Bạn có thể tải lên hình ảnh bánh hoàn thiện (không bắt buộc).",
           confirmText: "Chuyển trạng thái",
           requiresFile: true,
+          fileOptional: true,
         };
       case "READY_FOR_PICKUP":
         return {
@@ -305,67 +306,67 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
       let result;
       // If processing status and files are required, use beingToNextWithFileBase64
       if (order.order_status === "PROCESSING") {
-        if (uploadedFiles.length === 0) {
-          toast.error("Vui lòng tải lên hình ảnh bánh hoàn thiện");
-          setIsLoading(false);
-          return;
-        }
-
-        // Validate file before sending to server
-        const file = uploadedFiles[0];
-        if (!file || file.size === 0) {
-          toast.error("Tệp không hợp lệ hoặc rỗng");
-          setIsLoading(false);
-          return;
-        }
-
-        // Check file size (10MB limit is common)
-        const maxSize = 10 * 1024 * 1024; // 10MB
-        if (file.size > maxSize) {
-          toast.error(
-            `Tệp quá lớn. Kích thước tối đa là ${maxSize / (1024 * 1024)}MB`
-          );
-          setIsLoading(false);
-          return;
-        }
-
-        // Console log file properties
-        console.log("File properties:", {
-          name: file.name,
-          type: file.type,
-          size: file.size,
-          lastModified: file.lastModified,
-        });
-
-        try {
-          toast.info("Đang tải lên hình ảnh...");
-
-          // Convert file to base64
-          const fileBase64 = await convertFileToBase64(file);
-
-          // Use the new server action with base64 data instead of File object
-          result = await beingToNextWithFileBase64(
-            order.id,
-            fileBase64,
-            file.name,
-            file.type
-          );
-
-          console.log("Result from file upload:", result);
-
-          if (!result.success) {
-            console.error("Server action failed:", result.error);
-            toast.error("Lỗi tải lên: " + (result.error || "Không xác định"));
+        // Check if a file has been uploaded
+        if (uploadedFiles.length > 0) {
+          // Validate file before sending to server
+          const file = uploadedFiles[0];
+          if (!file || file.size === 0) {
+            toast.error("Tệp không hợp lệ hoặc rỗng");
             setIsLoading(false);
             return;
           }
-        } catch (uploadError: any) {
-          console.error("Error in file upload:", uploadError);
-          toast.error(
-            "Lỗi tải lên: " + (uploadError?.message || "Không xác định")
-          );
-          setIsLoading(false);
-          return;
+
+          // Check file size (10MB limit is common)
+          const maxSize = 10 * 1024 * 1024; // 10MB
+          if (file.size > maxSize) {
+            toast.error(
+              `Tệp quá lớn. Kích thước tối đa là ${maxSize / (1024 * 1024)}MB`
+            );
+            setIsLoading(false);
+            return;
+          }
+
+          // Console log file properties
+          console.log("File properties:", {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            lastModified: file.lastModified,
+          });
+
+          try {
+            toast.info("Đang tải lên hình ảnh...");
+
+            // Convert file to base64
+            const fileBase64 = await convertFileToBase64(file);
+
+            // Use the new server action with base64 data instead of File object
+            result = await beingToNextWithFileBase64(
+              order.id,
+              fileBase64,
+              file.name,
+              file.type
+            );
+
+            console.log("Result from file upload:", result);
+
+            if (!result.success) {
+              console.error("Server action failed:", result.error);
+              toast.error("Lỗi tải lên: " + (result.error || "Không xác định"));
+              setIsLoading(false);
+              return;
+            }
+          } catch (uploadError: any) {
+            console.error("Error in file upload:", uploadError);
+            toast.error(
+              "Lỗi tải lên: " + (uploadError?.message || "Không xác định")
+            );
+            setIsLoading(false);
+            return;
+          }
+        } else {
+          // No file uploaded, use the regular action
+          result = await beingToNext(order.id);
         }
       } else {
         // For non-PROCESSING statuses, use the regular beingToNext action
@@ -758,7 +759,7 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
                           htmlFor="cake-image"
                           className="text-md font-medium"
                         >
-                          Hình ảnh bánh hoàn thiện
+                          Hình ảnh bánh hoàn thiện {actionConfig.fileOptional && "(không bắt buộc)"}
                         </Label>
 
                         <div className="flex items-center gap-2">
@@ -828,6 +829,7 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
                       disabled={
                         isLoading ||
                         (actionConfig.requiresFile &&
+                          !actionConfig.fileOptional &&
                           uploadedFiles.length === 0)
                       }
                       className={`${actionConfig.color} transition-all hover:opacity-90`}
