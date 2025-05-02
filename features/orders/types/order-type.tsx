@@ -25,7 +25,7 @@ export interface IOrder {
   paid_at: string;
   created_at: string;
   order_details: IOrderDetail[];
-  order_supports: string;
+  order_supports: IOrderSupport[];
   customer_id: string;
   customer: ICustomerType;
   bakery_id: string;
@@ -61,3 +61,23 @@ export interface IOrderDetail {
   custom_cake: null;
   id: string;
 }
+
+
+export interface IOrderSupport {
+  content: string;
+  file_id: string;
+  file: null;
+  bakery_id: string;
+  bakery: null;
+  customer_id: string;
+  customer: null;
+  order_id: string;
+  order: null;
+  id: string;
+  created_at: string;
+  created_by: string;
+  updated_at: null;
+  updated_by: null;
+}
+
+

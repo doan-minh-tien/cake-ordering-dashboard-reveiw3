@@ -6,6 +6,8 @@ import {
   ApiListResponse,
   fetchListData,
   Result,
+  ApiSingleResponse,
+  fetchSingleData,
 } from "@/lib/api/api-handler/generic";
 import { SearchParams } from "@/types/table";
 import { ICakeExtraOptionType } from "../types/cake-extra-option-type";
@@ -110,4 +112,22 @@ export const deleteCakeExtraOption = async (
 
   revalidatePath("/dashboard/ingredients");
   return { success: true, data: result.data };
+};
+
+export const getExtraOptionById = async (id: string): Promise<ApiSingleResponse<any>> => {
+  noStore();
+  
+  try {
+    const result = await fetchSingleData<any>(`/extra_options/${id}`);
+    
+    if (!result.success) {
+      console.error(`Failed to fetch extra option with ID ${id}:`, result.error);
+      return { data: null, error: result.error };
+    }
+    
+    return result.data;
+  } catch (error) {
+    console.error(`Error fetching extra option with ID ${id}:`, error);
+    return { data: null, error: String(error) };
+  }
 };

@@ -58,8 +58,9 @@ export const updateBadReportStatus = async (
 
   try {
     const result = await apiRequest(() =>
-      axiosAuth.get(`/reports/${reportId}/action`, {
-        params: { isApprove },
+      axiosAuth.put(`/reports/${reportId}/action`, {
+        is_approved: isApprove,
+        reject_reason: isApprove ? undefined : "string",
       })
     );
 

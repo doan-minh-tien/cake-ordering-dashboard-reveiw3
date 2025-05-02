@@ -6,6 +6,8 @@ import {
   apiRequest,
   fetchListData,
   Result,
+  ApiSingleResponse,
+  fetchSingleData,
 } from "@/lib/api/api-handler/generic";
 import { SearchParams } from "@/types/table";
 import { ICakeDecorationType } from "../types/cake-decoration-type";
@@ -119,6 +121,24 @@ export const initializeDefaultDecorations = async (
       success: false,
       error: "Failed to initialize default decorations",
     };
+  }
+};
+
+export const getDecorationOptionById = async (id: string): Promise<ApiSingleResponse<any>> => {
+  noStore();
+  
+  try {
+    const result = await fetchSingleData<any>(`/decoration_options/${id}`);
+    
+    if (!result.success) {
+      console.error(`Failed to fetch decoration option with ID ${id}:`, result.error);
+      return { data: null, error: result.error };
+    }
+    
+    return result.data;
+  } catch (error) {
+    console.error(`Error fetching decoration option with ID ${id}:`, error);
+    return { data: null, error: String(error) };
   }
 };
 

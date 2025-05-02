@@ -10,6 +10,8 @@ import {
   apiRequest,
   fetchListData,
   Result,
+  ApiSingleResponse,
+  fetchSingleData,
 } from "@/lib/api/api-handler/generic";
 import { SearchParams } from "@/types/table";
 import { ICakePartType } from "../types/cake-part-type";
@@ -107,5 +109,23 @@ export const initializeDefaultCakeParts = async (
   } catch (error) {
     console.error("Failed to initialize default cake parts:", error);
     return { success: false, error: "Failed to initialize default cake parts" };
+  }
+};
+
+export const getPartOptionById = async (id: string): Promise<ApiSingleResponse<any>> => {
+  noStore();
+  
+  try {
+    const result = await fetchSingleData<any>(`/part_options/${id}`);
+    
+    if (!result.success) {
+      console.error(`Failed to fetch part option with ID ${id}:`, result.error);
+      return { data: null, error: result.error };
+    }
+    
+    return result.data;
+  } catch (error) {
+    console.error(`Error fetching part option with ID ${id}:`, error);
+    return { data: null, error: String(error) };
   }
 };

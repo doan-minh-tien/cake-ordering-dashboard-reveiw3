@@ -54,6 +54,7 @@ const BadReportDetail = ({ report }: BadReportDetailProps) => {
   const [isApprove, setIsApprove] = useState(false);
   const [showResolveAlert, setShowResolveAlert] = useState(false);
   const [isPending, setIsPending] = useState(false);
+  const [loadingAction, setLoadingAction] = useState<string | null>(null);
 
   if (!report) {
     return (
@@ -184,6 +185,7 @@ const BadReportDetail = ({ report }: BadReportDetailProps) => {
       toast.error("Đã có lỗi xảy ra khi cập nhật trạng thái");
     } finally {
       setIsPending(false);
+      setLoadingAction(null);
       setShowStatusAlert(false);
     }
   };
@@ -325,54 +327,42 @@ const BadReportDetail = ({ report }: BadReportDetailProps) => {
                   </p>
 
                   {report.status === "PENDING" && (
-                    <div className="grid grid-cols-1 gap-3">
+                    <div className="grid grid-cols-2 gap-3">
                       <Button
-                        className="w-full group relative overflow-hidden"
+                        className="w-full"
                         variant="default"
+                        size="sm"
                         onClick={() => {
                           setIsApprove(true);
                           setShowStatusAlert(true);
+                          setLoadingAction("approve");
                         }}
                         disabled={isPending}
                       >
-                        <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-primary-light via-primary to-primary-dark opacity-0 group-hover:opacity-100 transition-opacity"></span>
-                        <span className="relative z-10 flex items-center justify-center gap-2">
-                          {isPending ? (
-                            <>
-                              <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                              <span>Đang xử lý...</span>
-                            </>
-                          ) : (
-                            <>
-                              <Clock className="h-4 w-4" />
-                              <span>Bắt đầu xử lý</span>
-                            </>
-                          )}
-                        </span>
+                        {loadingAction === "approve" && isPending ? (
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />
+                        ) : (
+                          <Clock className="mr-2 h-4 w-4" />
+                        )}
+                        {loadingAction === "approve" && isPending ? "Đang xử lý" : "Bắt đầu xử lý"}
                       </Button>
                       <Button
-                        className="w-full group relative overflow-hidden"
+                        className="w-full"
                         variant="destructive"
+                        size="sm"
                         onClick={() => {
                           setIsApprove(false);
                           setShowStatusAlert(true);
+                          setLoadingAction("reject");
                         }}
                         disabled={isPending}
                       >
-                        <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-red-500 via-red-600 to-red-500 opacity-0 group-hover:opacity-100 transition-opacity"></span>
-                        <span className="relative z-10 flex items-center justify-center gap-2">
-                          {isPending ? (
-                            <>
-                              <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                              <span>Đang xử lý...</span>
-                            </>
-                          ) : (
-                            <>
-                              <X className="h-4 w-4" />
-                              <span>Từ chối báo cáo</span>
-                            </>
-                          )}
-                        </span>
+                        {loadingAction === "reject" && isPending ? (
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />
+                        ) : (
+                          <X className="mr-2 h-4 w-4" />
+                        )}
+                        {loadingAction === "reject" && isPending ? "Đang xử lý" : "Từ chối"}
                       </Button>
                     </div>
                   )}
@@ -838,7 +828,9 @@ const BadReportDetail = ({ report }: BadReportDetailProps) => {
             : "Bạn có chắc chắn muốn từ chối báo cáo này?"
         }
         actionLabel={
-          isPending ? "Đang xử lý..." : isApprove ? "Bắt đầu xử lý" : "Từ chối"
+          isPending ? 
+            (isApprove ? "Đang xử lý..." : "Đang từ chối...") 
+            : (isApprove ? "Bắt đầu xử lý" : "Từ chối")
         }
         variant={isApprove ? "default" : "destructive"}
       />

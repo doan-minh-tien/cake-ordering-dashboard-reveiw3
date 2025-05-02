@@ -11,6 +11,8 @@ import {
   fetchListData,
   Result,
   apiRequest,
+  ApiSingleResponse,
+  fetchSingleData,
 } from "@/lib/api/api-handler/generic";
 import { SearchParams } from "@/types/table";
 import { ICakeMessageOptionType } from "../types/cake-message-option-type";
@@ -113,4 +115,22 @@ export const deleteCakeMessage = async (id: string): Promise<Result<void>> => {
 
   revalidatePath("/dashboard/ingredients");
   return { success: true, data: result.data };
+};
+
+export const getMessageOptionById = async (id: string): Promise<ApiSingleResponse<any>> => {
+  noStore();
+  
+  try {
+    const result = await fetchSingleData<any>(`/message_options/${id}`);
+    
+    if (!result.success) {
+      console.error(`Failed to fetch message option with ID ${id}:`, result.error);
+      return { data: null, error: result.error };
+    }
+    
+    return result.data;
+  } catch (error) {
+    console.error(`Error fetching message option with ID ${id}:`, error);
+    return { data: null, error: String(error) };
+  }
 };
