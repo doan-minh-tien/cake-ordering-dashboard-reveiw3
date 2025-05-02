@@ -4,6 +4,18 @@ import { Row, type Column } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { CaretSortIcon } from "@radix-ui/react-icons";
 
+// Mapping for transaction types to concise Vietnamese text
+const transactionTypeToVietnamese: Record<string, string> = {
+  "ADMIN_HOLD_PAYMENT": "Admin tạm giữ tiền",
+  "ADMIN_TRANSFER_TO_BAKERY": "Admin chuyển tiền cho bakery",
+  "ADMIN_REFUND_TO_CUSTOMER": "Admin hoàn tiền khách",
+  "BAKERY_RECEIVE_PAYMENT": "Bakery nhận tiền",
+  "BAKERY_WITHDRAWAL": "Bakery rút tiền",
+  "CUSTOMER_PAYMENT": "Khách thanh toán",
+  "CUSTOMER_REFUND": "Khách nhận hoàn tiền",
+  "CUSTOMER_WITHDRAWAL": "Khách rút tiền",
+};
+
 export const typeColumn = {
   accessorKey: "transaction_type",
   header: ({ column }: { column: Column<any, unknown> }) => (
@@ -17,12 +29,13 @@ export const typeColumn = {
     </Button>
   ),
   cell: ({ row }: { row: Row<TransactionType> }) => {
-    const type = row.getValue("transaction_type");
-    const formattedType = type ? type : "Không có loại";
+    const type = row.getValue("transaction_type") as string;
+    const vietnameseType = type ? (transactionTypeToVietnamese[type] || type) : "Không có loại";
+    
     return (
       <div className="flex space-x-2">
         <span className="max-w-[500px] truncate font-medium">
-          {formattedType as string}
+          {vietnameseType}
         </span>
       </div>
     );
