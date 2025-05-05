@@ -29,7 +29,7 @@ const UserProfileDropdown = () => {
 
   const handleClick = useCallback(() => {
     router.push("/profile");
-  }, []);
+  }, [router]);
 
   // fix bug need close dropdown befoce open modal -> bug pointer-none (fix done)
   useEffect(() => {

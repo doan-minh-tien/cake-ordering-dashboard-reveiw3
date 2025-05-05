@@ -1,4 +1,9 @@
 /**
+ * Kiểu dữ liệu cho các khoảng thời gian báo cáo
+ */
+export type ReportPeriod = "day" | "week" | "month" | "year" | "all" | "custom";
+
+/**
  * Kiểu dữ liệu cho dữ liệu trong payload của API
  */
 export type AdminOverviewType = {

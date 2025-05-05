@@ -1,13 +1,23 @@
 "use client";
-import React from "react";
+import React, { useMemo } from "react";
 import { BarChart3Icon, CalendarIcon, ChevronDownIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useTheme } from "next-themes";
 import NotificationList from "./NotificationList";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { format as formatDate, subMonths, startOfMonth, endOfMonth, isSameMonth } from "date-fns";
+import {
+  format as formatDate,
+  subMonths,
+  startOfMonth,
+  endOfMonth,
+  isSameMonth,
+} from "date-fns";
 import { vi } from "date-fns/locale";
 import { useRouter } from "next/navigation";
 import { DateRange } from "react-day-picker";
@@ -25,33 +35,38 @@ interface AdminHeaderProps {
 }
 
 const AdminHeader = ({ dateFrom, dateTo }: AdminHeaderProps) => {
-  const today = new Date();
+  const today = useMemo(() => new Date(), []);
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
   const router = useRouter();
-  
+
   // Create dateRange state from dateFrom and dateTo props
-  const [dateRange, setDateRange] = React.useState<DateRange | undefined>(() => {
-    if (dateFrom && dateTo) {
+  const [dateRange, setDateRange] = React.useState<DateRange | undefined>(
+    () => {
+      if (dateFrom && dateTo) {
+        return {
+          from: new Date(dateFrom),
+          to: new Date(dateTo),
+        };
+      }
+      // Default to current month if no date range is provided
       return {
-        from: new Date(dateFrom),
-        to: new Date(dateTo)
+        from: startOfMonth(today),
+        to: today,
       };
     }
-    // Default to current month if no date range is provided
-    return {
-      from: startOfMonth(today),
-      to: today
-    };
-  });
+  );
 
   // Apply default date range on first render
   React.useEffect(() => {
     // Only redirect if no date params are in URL
     if (!dateFrom && !dateTo) {
       const defaultParams = new URLSearchParams();
-      defaultParams.set('dateFrom', formatDate(startOfMonth(today), 'yyyy-MM-dd'));
-      defaultParams.set('dateTo', formatDate(today, 'yyyy-MM-dd'));
+      defaultParams.set(
+        "dateFrom",
+        formatDate(startOfMonth(today), "yyyy-MM-dd")
+      );
+      defaultParams.set("dateTo", formatDate(today, "yyyy-MM-dd"));
       router.push(`?${defaultParams.toString()}`, { scroll: false });
     }
   }, [dateFrom, dateTo, router, today]);
@@ -59,15 +74,15 @@ const AdminHeader = ({ dateFrom, dateTo }: AdminHeaderProps) => {
   // Handle date range change
   const handleDateRangeChange = (range: DateRange | undefined) => {
     setDateRange(range);
-    
+
     if (range?.from) {
       const newParams = new URLSearchParams();
-      newParams.set('dateFrom', formatDate(range.from, 'yyyy-MM-dd'));
-      
+      newParams.set("dateFrom", formatDate(range.from, "yyyy-MM-dd"));
+
       if (range.to) {
-        newParams.set('dateTo', formatDate(range.to, 'yyyy-MM-dd'));
+        newParams.set("dateTo", formatDate(range.to, "yyyy-MM-dd"));
       }
-      
+
       router.push(`?${newParams.toString()}`);
     }
   };
@@ -75,57 +90,63 @@ const AdminHeader = ({ dateFrom, dateTo }: AdminHeaderProps) => {
   // Preset options for date ranges
   const handlePresetChange = (value: string) => {
     const today = new Date();
-    
+
     let from: Date;
     let to: Date = today;
-    
+
     switch (value) {
-      case 'last30Days':
+      case "last30Days":
         from = subMonths(today, 1);
         break;
-      case 'last3Months':
+      case "last3Months":
         from = subMonths(today, 3);
         break;
-      case 'last6Months':
+      case "last6Months":
         from = subMonths(today, 6);
         break;
-      case 'thisMonth':
+      case "thisMonth":
         from = startOfMonth(today);
         to = today;
         break;
-      case 'lastMonth':
+      case "lastMonth":
         to = endOfMonth(subMonths(today, 1));
         from = startOfMonth(to);
         break;
       default:
         return;
     }
-    
+
     setDateRange({ from, to });
-    
+
     const newParams = new URLSearchParams();
-    newParams.set('dateFrom', formatDate(from, 'yyyy-MM-dd'));
-    newParams.set('dateTo', formatDate(to, 'yyyy-MM-dd'));
-    
+    newParams.set("dateFrom", formatDate(from, "yyyy-MM-dd"));
+    newParams.set("dateTo", formatDate(to, "yyyy-MM-dd"));
+
     router.push(`?${newParams.toString()}`);
   };
 
   // Format date range for display
   const formatDateRange = () => {
     if (!dateRange?.from) {
-      return 'Chọn thời gian';
+      return "Chọn thời gian";
     }
-    
+
     if (!dateRange.to) {
-      return formatDate(dateRange.from, 'dd/MM/yyyy');
+      return formatDate(dateRange.from, "dd/MM/yyyy");
     }
-    
+
     // If same month, show as dd - dd/MM/yyyy
     if (isSameMonth(dateRange.from, dateRange.to)) {
-      return `${formatDate(dateRange.from, 'dd')} - ${formatDate(dateRange.to, 'dd/MM/yyyy')}`;
+      return `${formatDate(dateRange.from, "dd")} - ${formatDate(
+        dateRange.to,
+        "dd/MM/yyyy"
+      )}`;
     }
-    
-    return `${formatDate(dateRange.from, 'dd/MM/yyyy')} - ${formatDate(dateRange.to, 'dd/MM/yyyy')}`;
+
+    return `${formatDate(dateRange.from, "dd/MM/yyyy")} - ${formatDate(
+      dateRange.to,
+      "dd/MM/yyyy"
+    )}`;
   };
 
   // Clear date filters
@@ -133,13 +154,13 @@ const AdminHeader = ({ dateFrom, dateTo }: AdminHeaderProps) => {
     // Set to current month when clearing
     const from = startOfMonth(today);
     const to = today;
-    
+
     setDateRange({ from, to });
-    
+
     const defaultParams = new URLSearchParams();
-    defaultParams.set('dateFrom', formatDate(from, 'yyyy-MM-dd'));
-    defaultParams.set('dateTo', formatDate(to, 'yyyy-MM-dd'));
-    
+    defaultParams.set("dateFrom", formatDate(from, "yyyy-MM-dd"));
+    defaultParams.set("dateTo", formatDate(to, "yyyy-MM-dd"));
+
     router.push(`?${defaultParams.toString()}`);
   };
 
@@ -162,7 +183,7 @@ const AdminHeader = ({ dateFrom, dateTo }: AdminHeaderProps) => {
       </div>
       <div className="flex flex-row items-center space-x-2">
         <NotificationList />
-        
+
         {/* Date Range Selector */}
         <div className="flex items-center gap-2">
           <Select onValueChange={handlePresetChange} defaultValue="thisMonth">
@@ -177,10 +198,14 @@ const AdminHeader = ({ dateFrom, dateTo }: AdminHeaderProps) => {
               <SelectItem value="last6Months">6 tháng qua</SelectItem>
             </SelectContent>
           </Select>
-          
+
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="h-9 px-4 flex items-center gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 px-4 flex items-center gap-1.5"
+              >
                 <CalendarIcon className="h-3.5 w-3.5" />
                 <span>{formatDateRange()}</span>
                 <ChevronDownIcon className="h-3.5 w-3.5 ml-1" />
@@ -200,8 +225,8 @@ const AdminHeader = ({ dateFrom, dateTo }: AdminHeaderProps) => {
           </Popover>
 
           {/* Clear Filter */}
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
             onClick={clearDateFilter}
             className="h-9 px-2"

@@ -16,7 +16,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { INotification } from "@/features/notifications/types/notification-type";
 import { useSession } from "next-auth/react";
 
-
 export default function NotificationComponent() {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -26,8 +25,6 @@ export default function NotificationComponent() {
   const { data: session } = useSession();
 
   console.log(session?.user.wallet.balance);
-
-
 
   const formatCurrency = (amount: number | undefined): string => {
     if (amount === undefined) return "N/A";
@@ -80,7 +77,7 @@ export default function NotificationComponent() {
     return () => {
       observer.disconnect();
     };
-  }, [onIntersect, hasNextPage, loadMoreRef.current, isOpen]);
+  }, [onIntersect, hasNextPage, isOpen]);
 
   // Handle click outside to close popover
   useEffect(() => {
