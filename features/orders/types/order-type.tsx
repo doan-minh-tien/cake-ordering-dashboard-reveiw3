@@ -31,6 +31,9 @@ export interface IOrder {
   bakery_id: string;
   voucher_id: string;
   customer_voucher_id: string;
+  transaction: null;
+  voucher: null;
+  bakery: IBakeryType;
 }
 
 export interface ICustomerType {
@@ -62,7 +65,6 @@ export interface IOrderDetail {
   id: string;
 }
 
-
 export interface IOrderSupport {
   content: string;
   file_id: string;
@@ -80,4 +82,55 @@ export interface IOrderSupport {
   updated_by: null;
 }
 
+export interface IBakeryType {
+  bakery_name: string;
+  cake_description: string;
+  price_description: string;
+  bakery_description: string;
+  email: string;
+  password: string;
+  phone: string;
+  address: string;
+  latitude: string;
+  longitude: string;
+  bank_account: string;
+  owner_name: string;
+  avatar_file_id: string;
+  avatar_file: string;
+  identity_card_number: string;
+  front_card_file_id: string;
+  front_card_file: string;
+  back_card_file_id: string;
+  back_card_file: string;
+  food_safety_certificate_file_id: string;
+  food_safety_certificate_file: string;
+  business_license_file_id: string;
+  business_license_file: string;
+  tax_code: string;
+  status: string;
+  confirmed_at: string;
+  banned_at: string;
+  open_time: string;
+  close_time: string;
+  shop_image_files: IShopImageFile[];
+  metric: null;
+  reviews: null;
+  distance_to_user: null;
+  id: string;
+  created_at: string;
+  created_by: string;
+  updated_at: string;
+  updated_by: string;
+  is_deleted: boolean;
+}
 
+export interface IShopImageFile {
+  file_name: string;
+  file_url: string;
+  id: string;
+  created_at: string;
+  created_by: string;
+  updated_at: string;
+  updated_by: string;
+  is_deleted: boolean;
+}

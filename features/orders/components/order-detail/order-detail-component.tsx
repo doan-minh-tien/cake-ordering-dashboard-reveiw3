@@ -4,7 +4,10 @@ import React, { useState, useRef, useEffect } from "react";
 import { IOrder } from "../../types/order-type";
 import { formatCurrency, cn } from "@/lib/utils";
 import { ICake } from "@/features/cakes/types/cake";
-import { ICustomCake, IPartSelection } from "@/features/cakes/types/custome-cake";
+import {
+  ICustomCake,
+  IPartSelection,
+} from "@/features/cakes/types/custome-cake";
 import {
   MapPin,
   Clock,
@@ -140,14 +143,18 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [orderItemDetails, setOrderItemDetails] = useState<{[key: string]: CakeDetail | null}>({});
-  const [supportImages, setSupportImages] = useState<{[key: string]: string}>({});
+  const [orderItemDetails, setOrderItemDetails] = useState<{
+    [key: string]: CakeDetail | null;
+  }>({});
+  const [supportImages, setSupportImages] = useState<{ [key: string]: string }>(
+    {}
+  );
   const [isLoadingDetails, setIsLoadingDetails] = useState(true);
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
       if (!order) return;
-      
+
       setIsLoadingDetails(true);
 
       // Fetch details for each order item
@@ -172,39 +179,71 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
             // Khởi tạo các maps cho option details
             const partOptionDetails: Record<string, PartOptionDetail> = {};
             const extraOptionDetails: Record<string, ExtraOptionDetail> = {};
-            const decorationOptionDetails: Record<string, DecorationOptionDetail> = {};
-            
+            const decorationOptionDetails: Record<
+              string,
+              DecorationOptionDetail
+            > = {};
+
             // Lấy thông tin chi tiết cho các part options
-            if (result.data.part_selections && result.data.part_selections.length > 0) {
-              const partOptionIds = [...new Set(result.data.part_selections.map(p => p.part_option_id))];
-              await Promise.all(partOptionIds.map(async (id) => {
-                const partResult = await getPartOptionById(id);
-                if (partResult.data) {
-                  partOptionDetails[id] = partResult.data;
-                }
-              }));
+            if (
+              result.data.part_selections &&
+              result.data.part_selections.length > 0
+            ) {
+              const partOptionIds = [
+                ...new Set(
+                  result.data.part_selections.map((p) => p.part_option_id)
+                ),
+              ];
+              await Promise.all(
+                partOptionIds.map(async (id) => {
+                  const partResult = await getPartOptionById(id);
+                  if (partResult.data) {
+                    partOptionDetails[id] = partResult.data;
+                  }
+                })
+              );
             }
-            
+
             // Lấy thông tin chi tiết cho các extra options
-            if (result.data.extra_selections && result.data.extra_selections.length > 0) {
-              const extraOptionIds = [...new Set(result.data.extra_selections.map(e => e.extra_option_id))];
-              await Promise.all(extraOptionIds.map(async (id) => {
-                const extraResult = await getExtraOptionById(id);
-                if (extraResult.data) {
-                  extraOptionDetails[id] = extraResult.data;
-                }
-              }));
+            if (
+              result.data.extra_selections &&
+              result.data.extra_selections.length > 0
+            ) {
+              const extraOptionIds = [
+                ...new Set(
+                  result.data.extra_selections.map((e) => e.extra_option_id)
+                ),
+              ];
+              await Promise.all(
+                extraOptionIds.map(async (id) => {
+                  const extraResult = await getExtraOptionById(id);
+                  if (extraResult.data) {
+                    extraOptionDetails[id] = extraResult.data;
+                  }
+                })
+              );
             }
-            
+
             // Lấy thông tin chi tiết cho các decoration options
-            if (result.data.decoration_selections && result.data.decoration_selections.length > 0) {
-              const decorationOptionIds = [...new Set(result.data.decoration_selections.map(d => d.decoration_option_id))];
-              await Promise.all(decorationOptionIds.map(async (id) => {
-                const decorationResult = await getDecorationOptionById(id);
-                if (decorationResult.data) {
-                  decorationOptionDetails[id] = decorationResult.data;
-                }
-              }));
+            if (
+              result.data.decoration_selections &&
+              result.data.decoration_selections.length > 0
+            ) {
+              const decorationOptionIds = [
+                ...new Set(
+                  result.data.decoration_selections.map(
+                    (d) => d.decoration_option_id
+                  )
+                ),
+              ];
+              await Promise.all(
+                decorationOptionIds.map(async (id) => {
+                  const decorationResult = await getDecorationOptionById(id);
+                  if (decorationResult.data) {
+                    decorationOptionDetails[id] = decorationResult.data;
+                  }
+                })
+              );
             }
 
             const customCakeDetail: CakeDetail = {
@@ -228,16 +267,21 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
       });
 
       const details = await Promise.all(detailsPromises);
-      const detailsMap = details.reduce<{[key: string]: CakeDetail | null}>((acc, curr) => ({ ...acc, ...curr }), {});
+      const detailsMap = details.reduce<{ [key: string]: CakeDetail | null }>(
+        (acc, curr) => ({ ...acc, ...curr }),
+        {}
+      );
       setOrderItemDetails(detailsMap);
 
       // Fetch support images if any
       if (order.order_supports && order.order_supports.length > 0) {
         const imagePromises = order.order_supports
-          .filter(support => support.file_id)
+          .filter((support) => support.file_id)
           .map(async (support) => {
             const result = await getCakeImageById(support.file_id);
-            return result.success ? { [support.id]: result.data.file_url } : null;
+            return result.success
+              ? { [support.id]: result.data.file_url }
+              : null;
           });
 
         const images = await Promise.all(imagePromises);
@@ -246,7 +290,7 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
           .reduce((acc, curr) => ({ ...acc, ...curr }), {});
         setSupportImages(imagesMap);
       }
-      
+
       setIsLoadingDetails(false);
     };
 
@@ -271,10 +315,14 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
         textColor: "text-gray-700 dark:text-gray-300",
       };
 
+    // Check if this is a pickup order
+    const isPickupOrder = order?.shipping_type?.toUpperCase() === "PICKUP";
+
     switch (status.toUpperCase()) {
       case "PENDING":
+      case "WAITING_BAKERY_CONFIRM":
         return {
-          label: "Chờ thanh toán",
+          label: "Chờ xác nhận",
           bgColor: "bg-amber-100 dark:bg-amber-900/30",
           textColor: "text-amber-700 dark:text-amber-400",
         };
@@ -283,6 +331,14 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
           label: "Đang xử lý",
           bgColor: "bg-blue-100 dark:bg-blue-900/30",
           textColor: "text-blue-700 dark:text-blue-400",
+        };
+      case "PICKUP":
+      case "READY_FOR_PICKUP":
+      case isPickupOrder && "SHIPPING" ? "SHIPPING" : "":
+        return {
+          label: "Lấy tại chỗ",
+          bgColor: "bg-indigo-100 dark:bg-indigo-900/30",
+          textColor: "text-indigo-700 dark:text-indigo-400",
         };
       case "COMPLETED":
       case "HOÀN THÀNH":
@@ -300,16 +356,27 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
         };
       case "DELIVERING":
       case "SHIPPING":
+        if (isPickupOrder) {
+          return {
+            label: "Lấy tại chỗ",
+            bgColor: "bg-indigo-100 dark:bg-indigo-900/30",
+            textColor: "text-indigo-700 dark:text-indigo-400",
+          };
+        }
         return {
-          label:
-            order.shipping_type &&
-            order.shipping_type.toLowerCase().includes("pickup")
-              ? "Lấy tại chỗ"
-              : "Giao hàng",
+          label: "Giao hàng",
           bgColor: "bg-purple-100 dark:bg-purple-900/30",
           textColor: "text-purple-700 dark:text-purple-400",
         };
       case "SHIPPING_COMPLETED":
+        // Skip this status for pickup orders - will go directly to COMPLETED
+        if (isPickupOrder) {
+          return {
+            label: "Hoàn thành",
+            bgColor: "bg-green-100 dark:bg-green-900/30",
+            textColor: "text-green-700 dark:text-green-400",
+          };
+        }
         return {
           label: "Giao hàng hoàn tất",
           bgColor: "bg-emerald-100 dark:bg-emerald-900/30",
@@ -326,18 +393,6 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
           label: "Đơn hàng lỗi",
           bgColor: "bg-red-100 dark:bg-red-900/30",
           textColor: "text-red-700 dark:text-red-400",
-        };
-      case "READY_FOR_PICKUP":
-        return {
-          label: "Sẵn sàng giao",
-          bgColor: "bg-indigo-100 dark:bg-indigo-900/30",
-          textColor: "text-indigo-700 dark:text-indigo-400",
-        };
-      case "WAITING_BAKERY_CONFIRM":
-        return {
-          label: "Đợi xác nhận",
-          bgColor: "bg-slate-100 dark:bg-slate-800/60",
-          textColor: "text-slate-700 dark:text-slate-300",
         };
       default:
         // For any other value, just use the value directly
@@ -361,6 +416,61 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
 
   // Function to get action button text and color based on status
   const getActionButtonConfig = (status: string) => {
+    const isPickupOrder = order.shipping_type?.toUpperCase() === "PICKUP";
+
+    // Special handling for pickup orders
+    if (isPickupOrder) {
+      switch (status) {
+        case "WAITING_BAKERY_CONFIRM":
+          return {
+            text: "Xác nhận đơn hàng",
+            color: "bg-blue-600 hover:bg-blue-700",
+            description: "Bạn có chắc chắn muốn xác nhận đơn hàng này không?",
+            confirmText: "Xác nhận",
+            requiresFile: false,
+          };
+        case "PROCESSING":
+          return {
+            text: "Bánh đã sẵn sàng để lấy",
+            color: "bg-indigo-600 hover:bg-indigo-700",
+            description:
+              "Chuyển đơn hàng sang trạng thái lấy tại chỗ? Bạn có thể tải lên hình ảnh bánh hoàn thiện (không bắt buộc).",
+            confirmText: "Xác nhận sẵn sàng",
+            requiresFile: true,
+            fileOptional: true,
+          };
+        case "PICKUP":
+        case "READY_FOR_PICKUP":
+        case "SHIPPING": // Also handle SHIPPING status for pickup orders
+          return {
+            text: "Hoàn thành đơn hàng",
+            color: "bg-green-600 hover:bg-green-700",
+            description:
+              "Xác nhận khách hàng đã nhận bánh và hoàn thành đơn hàng?",
+            confirmText: "Xác nhận hoàn thành",
+            requiresFile: false,
+          };
+        case "SHIPPING_COMPLETED":
+          return {
+            text: "Hoàn thành đơn hàng",
+            color: "bg-green-600 hover:bg-green-700",
+            description: "Xác nhận đơn hàng đã hoàn thành?",
+            confirmText: "Xác nhận hoàn thành",
+            requiresFile: false,
+          };
+        default:
+          return {
+            text: "Chuyển trạng thái tiếp theo",
+            color: "bg-green-600 hover:bg-green-700",
+            description:
+              "Bạn có chắc chắn muốn chuyển đơn hàng sang trạng thái tiếp theo?",
+            confirmText: "Tiếp tục",
+            requiresFile: false,
+          };
+      }
+    }
+
+    // Original handling for non-pickup orders
     switch (status) {
       case "WAITING_BAKERY_CONFIRM":
         return {
@@ -371,17 +481,11 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
           requiresFile: false,
         };
       case "PROCESSING":
-        const isPickupOrder =
-          order.shipping_type &&
-          order.shipping_type.toLowerCase().includes("pickup");
         return {
-          text: isPickupOrder
-            ? "Chuyển sang lấy tại chỗ"
-            : "Chuyển sang giao hàng",
+          text: "Chuyển sang giao hàng",
           color: "bg-green-600 hover:bg-green-700",
-          description: isPickupOrder
-            ? "Chuyển đơn hàng sang trạng thái lấy tại chỗ? Bạn có thể tải lên hình ảnh bánh hoàn thiện (không bắt buộc)."
-            : "Chuyển đơn hàng sang trạng thái giao hàng? Bạn có thể tải lên hình ảnh bánh hoàn thiện (không bắt buộc).",
+          description:
+            "Chuyển đơn hàng sang trạng thái giao hàng? Bạn có thể tải lên hình ảnh bánh hoàn thiện (không bắt buộc).",
           confirmText: "Chuyển trạng thái",
           requiresFile: true,
           fileOptional: true,
@@ -395,17 +499,11 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
           requiresFile: false,
         };
       case "SHIPPING":
-        const isPickup =
-          order.shipping_type &&
-          order.shipping_type.toLowerCase().includes("pickup");
         return {
-          text: isPickup
-            ? "Xác nhận khách đã nhận hàng"
-            : "Xác nhận giao hàng thành công",
+          text: "Xác nhận giao hàng thành công",
           color: "bg-emerald-600 hover:bg-emerald-700",
-          description: isPickup
-            ? "Xác nhận khách hàng đã nhận bánh tại cửa hàng? Sau khi xác nhận, đơn hàng sẽ vào thời gian chờ 1 giờ trước khi hoàn tất."
-            : "Xác nhận đơn hàng đã được giao thành công? Sau khi xác nhận, đơn hàng sẽ vào thời gian chờ 1 giờ trước khi hoàn tất.",
+          description:
+            "Xác nhận đơn hàng đã được giao thành công? Sau khi xác nhận, đơn hàng sẽ vào thời gian chờ 1 giờ trước khi hoàn tất.",
           confirmText: "Xác nhận giao hàng",
           requiresFile: false,
         };
@@ -413,7 +511,8 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
         return {
           text: "Đơn hàng đang trong thời gian chờ",
           color: "bg-amber-600 hover:bg-amber-700",
-          description: "Đơn hàng đang trong thời gian chờ 1 giờ để khách hàng kiểm tra. Nếu không có vấn đề gì, đơn hàng sẽ tự động chuyển sang trạng thái hoàn thành.",
+          description:
+            "Đơn hàng đang trong thời gian chờ 1 giờ để khách hàng kiểm tra. Nếu không có vấn đề gì, đơn hàng sẽ tự động chuyển sang trạng thái hoàn thành.",
           confirmText: "Đã hiểu",
           requiresFile: false,
           disableAction: true,
@@ -422,7 +521,8 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
         return {
           text: "Đơn hàng đang được xử lý khiếu nại",
           color: "bg-yellow-600 hover:bg-yellow-700",
-          description: "Đơn hàng đang trong quá trình xử lý khiếu nại từ khách hàng.",
+          description:
+            "Đơn hàng đang trong quá trình xử lý khiếu nại từ khách hàng.",
           confirmText: "Đã hiểu",
           requiresFile: false,
           disableAction: true,
@@ -586,7 +686,10 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
     order.order_status !== "PENDING" &&
     order.order_status !== "COMPLETED" &&
     order.order_status !== "CANCELED" &&
-    order.order_status !== "SHIPPING" &&
+    !(
+      order.shipping_type?.toUpperCase() !== "PICKUP" &&
+      order.order_status === "SHIPPING"
+    ) &&
     // New statuses that don't need action buttons from bakery side
     order.order_status !== "REPORT_PENDING" &&
     order.order_status !== "FAULTY";
@@ -597,34 +700,39 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
   // Skeleton component for cake details
   const CakeDetailSkeleton = () => (
     <div className="space-y-6">
-      {Array.from({ length: order?.order_details.length || 2 }).map((_, index) => (
-        <div key={index} className="group relative flex flex-col space-y-4 rounded-lg border p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Skeleton className="h-10 w-10 rounded-full" />
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-3 w-24" />
+      {Array.from({ length: order?.order_details.length || 2 }).map(
+        (_, index) => (
+          <div
+            key={index}
+            className="group relative flex flex-col space-y-4 rounded-lg border p-4"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+              </div>
+              <div className="text-right">
+                <Skeleton className="h-3 w-16 ml-auto" />
+                <Skeleton className="h-4 w-24 ml-auto mt-1" />
               </div>
             </div>
-            <div className="text-right">
-              <Skeleton className="h-3 w-16 ml-auto" />
-              <Skeleton className="h-4 w-24 ml-auto mt-1" />
+
+            <div className="space-y-3">
+              <Skeleton className="h-5 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+
+              <div className="space-y-2">
+                <Skeleton className="h-10 w-full rounded-md" />
+                <Skeleton className="h-10 w-full rounded-md" />
+                <Skeleton className="h-10 w-full rounded-md" />
+              </div>
             </div>
           </div>
-          
-          <div className="space-y-3">
-            <Skeleton className="h-5 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-            
-            <div className="space-y-2">
-              <Skeleton className="h-10 w-full rounded-md" />
-              <Skeleton className="h-10 w-full rounded-md" />
-              <Skeleton className="h-10 w-full rounded-md" />
-            </div>
-          </div>
-        </div>
-      ))}
+        )
+      )}
     </div>
   );
 
@@ -719,7 +827,8 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
                         </div>
                         <div>
                           <h3 className="font-medium text-foreground">
-                            {isAvailableCake ? "Bánh có sẵn" : "Bánh tùy chỉnh"} #{index + 1}
+                            {isAvailableCake ? "Bánh có sẵn" : "Bánh tùy chỉnh"}{" "}
+                            #{index + 1}
                           </h3>
                           <p className="text-sm text-muted-foreground">
                             Mã sản phẩm: {detail.id.slice(0, 8)}...
@@ -727,7 +836,9 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm text-muted-foreground">Thành tiền</p>
+                        <p className="text-sm text-muted-foreground">
+                          Thành tiền
+                        </p>
                         <p className="font-semibold text-green-600 dark:text-green-500">
                           {formatCurrency(detail.sub_total_price)}
                         </p>
@@ -741,12 +852,18 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
                           // Hiển thị thông tin bánh có sẵn
                           <>
                             <div className="space-y-1">
-                              <h4 className="font-medium text-foreground">{cakeDetails.name}</h4>
-                              <p className="text-sm text-muted-foreground">{cakeDetails.description}</p>
+                              <h4 className="font-medium text-foreground">
+                                {cakeDetails.name}
+                              </h4>
+                              <p className="text-sm text-muted-foreground">
+                                {cakeDetails.description}
+                              </p>
                             </div>
                             {cakeDetails.category && (
                               <div className="flex items-center gap-2">
-                                <span className="text-sm text-muted-foreground">Loại:</span>
+                                <span className="text-sm text-muted-foreground">
+                                  Loại:
+                                </span>
                                 <Badge variant="outline" className="text-xs">
                                   {cakeDetails.category.name}
                                 </Badge>
@@ -757,197 +874,334 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
                           // Hiển thị thông tin bánh tùy chỉnh
                           <div className="space-y-3">
                             <div className="space-y-1.5">
-                              <h4 className="font-medium text-foreground">{cakeDetails.custom_cake_name}</h4>
+                              <h4 className="font-medium text-foreground">
+                                {cakeDetails.custom_cake_name}
+                              </h4>
                               {cakeDetails.custom_cake_description && (
                                 <p className="text-sm text-muted-foreground">
                                   {cakeDetails.custom_cake_description}
                                 </p>
                               )}
                             </div>
-                            
-                            <Accordion type="single" collapsible className="w-full border rounded-md">
+
+                            <Accordion
+                              type="single"
+                              collapsible
+                              className="w-full border rounded-md"
+                            >
                               {/* Thành phần cơ bản */}
-                              {cakeDetails.part_selections && cakeDetails.part_selections.length > 0 && (
-                                <AccordionItem value="part-selections" className="border-b">
-                                  <AccordionTrigger className="py-3 px-4 hover:bg-muted/50 transition-colors">
-                                    <div className="flex items-center gap-2">
-                                      <div className="p-1 rounded-full bg-amber-100 dark:bg-amber-900/30">
-                                        <CakeSlice className="h-3.5 w-3.5 text-amber-500" />
-                                      </div>
-                                      <span className="text-sm font-medium">Thành phần cơ bản ({cakeDetails.part_selections.length})</span>
-                                    </div>
-                                  </AccordionTrigger>
-                                  <AccordionContent className="pt-0 pb-3 px-4">
-                                    <div className="grid grid-cols-1 gap-2">
-                                      {(Object.entries(
-                                        cakeDetails.part_selections.reduce((acc, part) => {
-                                          if (!acc[part.part_type]) {
-                                            acc[part.part_type] = [];
-                                          }
-                                          acc[part.part_type].push(part);
-                                          return acc;
-                                        }, {} as Record<string, any[]>)
-                                      ) as [string, any[]][]).map(([type, parts]) => (
-                                        <div key={type} className="py-1">
-                                          <div className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500"></div>
-                                            <span className="text-xs font-medium">{type}</span>
-                                            <span className="text-xs text-muted-foreground">({parts.length})</span>
-                                          </div>
-                                          <div className="mt-1 flex flex-wrap gap-1 ml-3">
-                                            {parts.map((part: any) => {
-                                              const partDetail = cakeDetails.partOptionDetails?.[part.part_option_id];
-                                              return (
-                                                <div
-                                                  key={part.id}
-                                                  className="text-xs px-2 py-1 rounded-md bg-muted hover:bg-muted/80 transition-colors flex items-center gap-1.5"
-                                                >
-                                                  {partDetail ? (
-                                                    <>
-                                                      <div 
-                                                        className="w-2 h-2 rounded-full" 
-                                                        style={{ backgroundColor: partDetail.color || '#ccc' }}
-                                                      ></div>
-                                                      <span>{partDetail.name}</span>
-                                                      {partDetail.price > 0 && (
-                                                        <span className="text-green-600">+{formatCurrency(partDetail.price)}</span>
-                                                      )}
-                                                    </>
-                                                  ) : (
-                                                    <span>{part.part_option_id.slice(0, 6)}</span>
-                                                  )}
-                                                </div>
-                                              );
-                                            })}
-                                          </div>
+                              {cakeDetails.part_selections &&
+                                cakeDetails.part_selections.length > 0 && (
+                                  <AccordionItem
+                                    value="part-selections"
+                                    className="border-b"
+                                  >
+                                    <AccordionTrigger className="py-3 px-4 hover:bg-muted/50 transition-colors">
+                                      <div className="flex items-center gap-2">
+                                        <div className="p-1 rounded-full bg-amber-100 dark:bg-amber-900/30">
+                                          <CakeSlice className="h-3.5 w-3.5 text-amber-500" />
                                         </div>
-                                      ))}
-                                    </div>
-                                  </AccordionContent>
-                                </AccordionItem>
-                              )}
-                              
+                                        <span className="text-sm font-medium">
+                                          Thành phần cơ bản (
+                                          {cakeDetails.part_selections.length})
+                                        </span>
+                                      </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="pt-0 pb-3 px-4">
+                                      <div className="grid grid-cols-1 gap-2">
+                                        {(
+                                          Object.entries(
+                                            cakeDetails.part_selections.reduce(
+                                              (acc, part) => {
+                                                if (!acc[part.part_type]) {
+                                                  acc[part.part_type] = [];
+                                                }
+                                                acc[part.part_type].push(part);
+                                                return acc;
+                                              },
+                                              {} as Record<string, any[]>
+                                            )
+                                          ) as [string, any[]][]
+                                        ).map(([type, parts]) => (
+                                          <div key={type} className="py-1">
+                                            <div className="flex items-center gap-2">
+                                              <div className="w-1.5 h-1.5 rounded-full bg-amber-500"></div>
+                                              <span className="text-xs font-medium">
+                                                {type}
+                                              </span>
+                                              <span className="text-xs text-muted-foreground">
+                                                ({parts.length})
+                                              </span>
+                                            </div>
+                                            <div className="mt-1 flex flex-wrap gap-1 ml-3">
+                                              {parts.map((part: any) => {
+                                                const partDetail =
+                                                  cakeDetails
+                                                    .partOptionDetails?.[
+                                                    part.part_option_id
+                                                  ];
+                                                return (
+                                                  <div
+                                                    key={part.id}
+                                                    className="text-xs px-2 py-1 rounded-md bg-muted hover:bg-muted/80 transition-colors flex items-center gap-1.5"
+                                                  >
+                                                    {partDetail ? (
+                                                      <>
+                                                        <div
+                                                          className="w-2 h-2 rounded-full"
+                                                          style={{
+                                                            backgroundColor:
+                                                              partDetail.color ||
+                                                              "#ccc",
+                                                          }}
+                                                        ></div>
+                                                        <span>
+                                                          {partDetail.name}
+                                                        </span>
+                                                        {partDetail.price >
+                                                          0 && (
+                                                          <span className="text-green-600">
+                                                            +
+                                                            {formatCurrency(
+                                                              partDetail.price
+                                                            )}
+                                                          </span>
+                                                        )}
+                                                      </>
+                                                    ) : (
+                                                      <span>
+                                                        {part.part_option_id.slice(
+                                                          0,
+                                                          6
+                                                        )}
+                                                      </span>
+                                                    )}
+                                                  </div>
+                                                );
+                                              })}
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </AccordionContent>
+                                  </AccordionItem>
+                                )}
+
                               {/* Phần thêm */}
-                              {cakeDetails.extra_selections && cakeDetails.extra_selections.length > 0 && (
-                                <AccordionItem value="extra-selections" className="border-b">
-                                  <AccordionTrigger className="py-3 px-4 hover:bg-muted/50 transition-colors">
-                                    <div className="flex items-center gap-2">
-                                      <div className="p-1 rounded-full bg-pink-100 dark:bg-pink-900/30">
-                                        <Gift className="h-3.5 w-3.5 text-pink-500" />
-                                      </div>
-                                      <span className="text-sm font-medium">Phần thêm ({cakeDetails.extra_selections.length})</span>
-                                    </div>
-                                  </AccordionTrigger>
-                                  <AccordionContent className="pt-0 pb-3 px-4">
-                                    <div className="grid grid-cols-1 gap-2">
-                                      {(Object.entries(
-                                        cakeDetails.extra_selections.reduce((acc, extra) => {
-                                          if (!acc[extra.extra_type]) {
-                                            acc[extra.extra_type] = [];
-                                          }
-                                          acc[extra.extra_type].push(extra);
-                                          return acc;
-                                        }, {} as Record<string, any[]>)
-                                      ) as [string, any[]][]).map(([type, extras]) => (
-                                        <div key={type} className="py-1">
-                                          <div className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-pink-500"></div>
-                                            <span className="text-xs font-medium">{type}</span>
-                                            <span className="text-xs text-muted-foreground">({extras.length})</span>
-                                          </div>
-                                          <div className="mt-1 flex flex-wrap gap-1 ml-3">
-                                            {extras.map((extra: any) => {
-                                              const extraDetail = cakeDetails.extraOptionDetails?.[extra.extra_option_id];
-                                              return (
-                                                <div
-                                                  key={extra.id}
-                                                  className="text-xs px-2 py-1 rounded-md bg-muted hover:bg-muted/80 transition-colors flex items-center gap-1.5"
-                                                >
-                                                  {extraDetail ? (
-                                                    <>
-                                                      <div 
-                                                        className="w-2 h-2 rounded-full" 
-                                                        style={{ backgroundColor: extraDetail.color || '#ccc' }}
-                                                      ></div>
-                                                      <span>{extraDetail.name}</span>
-                                                      {extraDetail.price > 0 && (
-                                                        <span className="text-green-600">+{formatCurrency(extraDetail.price)}</span>
-                                                      )}
-                                                    </>
-                                                  ) : (
-                                                    <span>{extra.extra_option_id.slice(0, 6)}</span>
-                                                  )}
-                                                </div>
-                                              );
-                                            })}
-                                          </div>
+                              {cakeDetails.extra_selections &&
+                                cakeDetails.extra_selections.length > 0 && (
+                                  <AccordionItem
+                                    value="extra-selections"
+                                    className="border-b"
+                                  >
+                                    <AccordionTrigger className="py-3 px-4 hover:bg-muted/50 transition-colors">
+                                      <div className="flex items-center gap-2">
+                                        <div className="p-1 rounded-full bg-pink-100 dark:bg-pink-900/30">
+                                          <Gift className="h-3.5 w-3.5 text-pink-500" />
                                         </div>
-                                      ))}
-                                    </div>
-                                  </AccordionContent>
-                                </AccordionItem>
-                              )}
-                              
+                                        <span className="text-sm font-medium">
+                                          Phần thêm (
+                                          {cakeDetails.extra_selections.length})
+                                        </span>
+                                      </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="pt-0 pb-3 px-4">
+                                      <div className="grid grid-cols-1 gap-2">
+                                        {(
+                                          Object.entries(
+                                            cakeDetails.extra_selections.reduce(
+                                              (acc, extra) => {
+                                                if (!acc[extra.extra_type]) {
+                                                  acc[extra.extra_type] = [];
+                                                }
+                                                acc[extra.extra_type].push(
+                                                  extra
+                                                );
+                                                return acc;
+                                              },
+                                              {} as Record<string, any[]>
+                                            )
+                                          ) as [string, any[]][]
+                                        ).map(([type, extras]) => (
+                                          <div key={type} className="py-1">
+                                            <div className="flex items-center gap-2">
+                                              <div className="w-1.5 h-1.5 rounded-full bg-pink-500"></div>
+                                              <span className="text-xs font-medium">
+                                                {type}
+                                              </span>
+                                              <span className="text-xs text-muted-foreground">
+                                                ({extras.length})
+                                              </span>
+                                            </div>
+                                            <div className="mt-1 flex flex-wrap gap-1 ml-3">
+                                              {extras.map((extra: any) => {
+                                                const extraDetail =
+                                                  cakeDetails
+                                                    .extraOptionDetails?.[
+                                                    extra.extra_option_id
+                                                  ];
+                                                return (
+                                                  <div
+                                                    key={extra.id}
+                                                    className="text-xs px-2 py-1 rounded-md bg-muted hover:bg-muted/80 transition-colors flex items-center gap-1.5"
+                                                  >
+                                                    {extraDetail ? (
+                                                      <>
+                                                        <div
+                                                          className="w-2 h-2 rounded-full"
+                                                          style={{
+                                                            backgroundColor:
+                                                              extraDetail.color ||
+                                                              "#ccc",
+                                                          }}
+                                                        ></div>
+                                                        <span>
+                                                          {extraDetail.name}
+                                                        </span>
+                                                        {extraDetail.price >
+                                                          0 && (
+                                                          <span className="text-green-600">
+                                                            +
+                                                            {formatCurrency(
+                                                              extraDetail.price
+                                                            )}
+                                                          </span>
+                                                        )}
+                                                      </>
+                                                    ) : (
+                                                      <span>
+                                                        {extra.extra_option_id.slice(
+                                                          0,
+                                                          6
+                                                        )}
+                                                      </span>
+                                                    )}
+                                                  </div>
+                                                );
+                                              })}
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </AccordionContent>
+                                  </AccordionItem>
+                                )}
+
                               {/* Trang trí */}
-                              {cakeDetails.decoration_selections && cakeDetails.decoration_selections.length > 0 && (
-                                <AccordionItem value="decoration-selections" className="border-b">
-                                  <AccordionTrigger className="py-3 px-4 hover:bg-muted/50 transition-colors">
-                                    <div className="flex items-center gap-2">
-                                      <div className="p-1 rounded-full bg-purple-100 dark:bg-purple-900/30">
-                                        <BringToFront className="h-3.5 w-3.5 text-purple-500" />
-                                      </div>
-                                      <span className="text-sm font-medium">Trang trí ({cakeDetails.decoration_selections.length})</span>
-                                    </div>
-                                  </AccordionTrigger>
-                                  <AccordionContent className="pt-0 pb-3 px-4">
-                                    <div className="grid grid-cols-1 gap-2">
-                                      {(Object.entries(
-                                        cakeDetails.decoration_selections.reduce((acc, decoration) => {
-                                          if (!acc[decoration.decoration_type]) {
-                                            acc[decoration.decoration_type] = [];
-                                          }
-                                          acc[decoration.decoration_type].push(decoration);
-                                          return acc;
-                                        }, {} as Record<string, any[]>)
-                                      ) as [string, any[]][]).map(([type, decorations]) => (
-                                        <div key={type} className="py-1">
-                                          <div className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-purple-500"></div>
-                                            <span className="text-xs font-medium">{type}</span>
-                                            <span className="text-xs text-muted-foreground">({decorations.length})</span>
-                                          </div>
-                                          <div className="mt-1 flex flex-wrap gap-1 ml-3">
-                                            {decorations.map((decoration: any) => {
-                                              const decorationDetail = cakeDetails.decorationOptionDetails?.[decoration.decoration_option_id];
-                                              return (
-                                                <div
-                                                  key={decoration.id}
-                                                  className="text-xs px-2 py-1 rounded-md bg-muted hover:bg-muted/80 transition-colors flex items-center gap-1.5"
-                                                >
-                                                  {decorationDetail ? (
-                                                    <>
-                                                      <div 
-                                                        className="w-2 h-2 rounded-full" 
-                                                        style={{ backgroundColor: decorationDetail.color || '#ccc' }}
-                                                      ></div>
-                                                      <span>{decorationDetail.name}</span>
-                                                      {decorationDetail.price > 0 && (
-                                                        <span className="text-green-600">+{formatCurrency(decorationDetail.price)}</span>
-                                                      )}
-                                                    </>
-                                                  ) : (
-                                                    <span>{decoration.decoration_option_id.slice(0, 6)}</span>
-                                                  )}
-                                                </div>
-                                              );
-                                            })}
-                                          </div>
+                              {cakeDetails.decoration_selections &&
+                                cakeDetails.decoration_selections.length >
+                                  0 && (
+                                  <AccordionItem
+                                    value="decoration-selections"
+                                    className="border-b"
+                                  >
+                                    <AccordionTrigger className="py-3 px-4 hover:bg-muted/50 transition-colors">
+                                      <div className="flex items-center gap-2">
+                                        <div className="p-1 rounded-full bg-purple-100 dark:bg-purple-900/30">
+                                          <BringToFront className="h-3.5 w-3.5 text-purple-500" />
                                         </div>
-                                      ))}
-                                    </div>
-                                  </AccordionContent>
-                                </AccordionItem>
-                              )}
+                                        <span className="text-sm font-medium">
+                                          Trang trí (
+                                          {
+                                            cakeDetails.decoration_selections
+                                              .length
+                                          }
+                                          )
+                                        </span>
+                                      </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="pt-0 pb-3 px-4">
+                                      <div className="grid grid-cols-1 gap-2">
+                                        {(
+                                          Object.entries(
+                                            cakeDetails.decoration_selections.reduce(
+                                              (acc, decoration) => {
+                                                if (
+                                                  !acc[
+                                                    decoration.decoration_type
+                                                  ]
+                                                ) {
+                                                  acc[
+                                                    decoration.decoration_type
+                                                  ] = [];
+                                                }
+                                                acc[
+                                                  decoration.decoration_type
+                                                ].push(decoration);
+                                                return acc;
+                                              },
+                                              {} as Record<string, any[]>
+                                            )
+                                          ) as [string, any[]][]
+                                        ).map(([type, decorations]) => (
+                                          <div key={type} className="py-1">
+                                            <div className="flex items-center gap-2">
+                                              <div className="w-1.5 h-1.5 rounded-full bg-purple-500"></div>
+                                              <span className="text-xs font-medium">
+                                                {type}
+                                              </span>
+                                              <span className="text-xs text-muted-foreground">
+                                                ({decorations.length})
+                                              </span>
+                                            </div>
+                                            <div className="mt-1 flex flex-wrap gap-1 ml-3">
+                                              {decorations.map(
+                                                (decoration: any) => {
+                                                  const decorationDetail =
+                                                    cakeDetails
+                                                      .decorationOptionDetails?.[
+                                                      decoration
+                                                        .decoration_option_id
+                                                    ];
+                                                  return (
+                                                    <div
+                                                      key={decoration.id}
+                                                      className="text-xs px-2 py-1 rounded-md bg-muted hover:bg-muted/80 transition-colors flex items-center gap-1.5"
+                                                    >
+                                                      {decorationDetail ? (
+                                                        <>
+                                                          <div
+                                                            className="w-2 h-2 rounded-full"
+                                                            style={{
+                                                              backgroundColor:
+                                                                decorationDetail.color ||
+                                                                "#ccc",
+                                                            }}
+                                                          ></div>
+                                                          <span>
+                                                            {
+                                                              decorationDetail.name
+                                                            }
+                                                          </span>
+                                                          {decorationDetail.price >
+                                                            0 && (
+                                                            <span className="text-green-600">
+                                                              +
+                                                              {formatCurrency(
+                                                                decorationDetail.price
+                                                              )}
+                                                            </span>
+                                                          )}
+                                                        </>
+                                                      ) : (
+                                                        <span>
+                                                          {decoration.decoration_option_id.slice(
+                                                            0,
+                                                            6
+                                                          )}
+                                                        </span>
+                                                      )}
+                                                    </div>
+                                                  );
+                                                }
+                                              )}
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </AccordionContent>
+                                  </AccordionItem>
+                                )}
 
                               {/* Message nếu có */}
                               {cakeDetails.message_selection && (
@@ -957,14 +1211,19 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
                                       <div className="p-1 rounded-full bg-blue-100 dark:bg-blue-900/30">
                                         <FileText className="h-3.5 w-3.5 text-blue-500" />
                                       </div>
-                                      <span className="text-sm font-medium">Lời nhắn</span>
+                                      <span className="text-sm font-medium">
+                                        Lời nhắn
+                                      </span>
                                     </div>
                                   </AccordionTrigger>
                                   <AccordionContent className="pt-0 pb-3 px-4">
                                     <div className="rounded-md bg-muted/50 p-2 text-sm text-muted-foreground">
-                                      {cakeDetails.message_selection.message || 'Không có lời nhắn'}
+                                      {cakeDetails.message_selection.message ||
+                                        "Không có lời nhắn"}
                                       {cakeDetails.message_selection.text && (
-                                        <p className="mt-1 font-medium">{cakeDetails.message_selection.text}</p>
+                                        <p className="mt-1 font-medium">
+                                          {cakeDetails.message_selection.text}
+                                        </p>
                                       )}
                                     </div>
                                   </AccordionContent>
@@ -979,7 +1238,9 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
                                   <div className="p-1 rounded-full bg-green-100 dark:bg-green-900/30">
                                     <FileText className="h-3.5 w-3.5 text-green-500" />
                                   </div>
-                                  <h5 className="text-sm font-medium">Công thức</h5>
+                                  <h5 className="text-sm font-medium">
+                                    Công thức
+                                  </h5>
                                 </div>
                                 <p className="text-sm text-muted-foreground bg-muted/50 p-2 rounded-md">
                                   {cakeDetails.recipe}
@@ -995,7 +1256,8 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
                     {detail.cake_note && (
                       <div className="rounded-lg border border-dashed border-yellow-200 bg-yellow-50/50 p-3 dark:border-yellow-900/30 dark:bg-yellow-900/10">
                         <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                          <span className="font-medium">Ghi chú:</span> {detail.cake_note}
+                          <span className="font-medium">Ghi chú:</span>{" "}
+                          {detail.cake_note}
                         </p>
                       </div>
                     )}
@@ -1017,11 +1279,16 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>Tổng số sản phẩm:</span>
               <span className="font-medium text-foreground">
-                {order.order_details.reduce((acc, curr) => acc + curr.quantity, 0)}
+                {order.order_details.reduce(
+                  (acc, curr) => acc + curr.quantity,
+                  0
+                )}
               </span>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground">Tổng tiền sản phẩm:</span>
+              <span className="text-sm text-muted-foreground">
+                Tổng tiền sản phẩm:
+              </span>
               <span className="text-xl font-semibold text-green-600 dark:text-green-500">
                 {formatCurrency(order.total_product_price)}
               </span>
@@ -1313,7 +1580,8 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
                           htmlFor="cake-image"
                           className="text-md font-medium"
                         >
-                          Hình ảnh bánh hoàn thiện {actionConfig.fileOptional && "(không bắt buộc)"}
+                          Hình ảnh bánh hoàn thiện{" "}
+                          {actionConfig.fileOptional && "(không bắt buộc)"}
                         </Label>
 
                         <div className="flex items-center gap-2">
@@ -1408,4 +1676,3 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
 };
 
 export default OrderDetailComponent;
-

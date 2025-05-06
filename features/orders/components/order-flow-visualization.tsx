@@ -10,6 +10,7 @@ const OrderStatus = {
   SHIPPING: 3,
   SHIPPING_COMPLETED: 4,
   COMPLETED: 5,
+  PICKUP: 3,
   REPORT_PENDING: -2,
   FAULTY: -3,
   CANCELED: -1,
@@ -29,22 +30,31 @@ export default function OrderFlowVisualization({
     mappedStatus = "PROCESSING";
   }
 
+  // Special case for pickup orders
+  const isPickupOrder = order.shipping_type?.toUpperCase() === "PICKUP";
+
+  // If shipping type is pickup and status is SHIPPING, map to PICKUP
+  if (isPickupOrder && mappedStatus === "SHIPPING") {
+    mappedStatus = "PICKUP";
+  }
+
+  // For pickup orders, treat SHIPPING_COMPLETED as COMPLETED
+  if (isPickupOrder && mappedStatus === "SHIPPING_COMPLETED") {
+    mappedStatus = "COMPLETED";
+  }
+
   const currentStep =
     OrderStatus[mappedStatus as keyof typeof OrderStatus] || 0;
 
   // Check if order is in report flow
-  const isReportFlow = 
-    currentStatus === "REPORT_PENDING" || 
-    currentStatus === "FAULTY";
+  const isReportFlow =
+    currentStatus === "REPORT_PENDING" || currentStatus === "FAULTY";
 
   // Determine step labels based on shipping_type
   const getStepLabel = (stepId: string) => {
-    if (stepId === "SHIPPING") {
+    if (stepId === "SHIPPING" || stepId === "PICKUP") {
       // Check shipping type to differentiate between pickup and delivery
-      if (
-        order.shipping_type &&
-        order.shipping_type.toLowerCase().includes("pickup")
-      ) {
+      if (isPickupOrder) {
         return "Lấy tại chỗ";
       } else {
         return "Giao hàng";
@@ -54,6 +64,9 @@ export default function OrderFlowVisualization({
     } else if (stepId === "PROCESSING") {
       return "Đang xử lý";
     } else if (stepId === "SHIPPING_COMPLETED") {
+      if (isPickupOrder) {
+        return "Hoàn thành";
+      }
       return "Giao hàng hoàn tất";
     } else if (stepId === "COMPLETED") {
       return "Hoàn thành";
@@ -65,17 +78,27 @@ export default function OrderFlowVisualization({
     return stepId;
   };
 
-  // Define normal flow steps
-  const normalSteps = [
-    {
-      id: "WAITING_BAKERY_CONFIRM",
-      label: getStepLabel("WAITING_BAKERY_CONFIRM"),
-    },
-    { id: "PROCESSING", label: getStepLabel("PROCESSING") },
-    { id: "SHIPPING", label: getStepLabel("SHIPPING") },
-    { id: "SHIPPING_COMPLETED", label: getStepLabel("SHIPPING_COMPLETED") },
-    { id: "COMPLETED", label: getStepLabel("COMPLETED") },
-  ];
+  // Define normal flow steps based on shipping type
+  const normalSteps = isPickupOrder
+    ? [
+        {
+          id: "WAITING_BAKERY_CONFIRM",
+          label: getStepLabel("WAITING_BAKERY_CONFIRM"),
+        },
+        { id: "PROCESSING", label: getStepLabel("PROCESSING") },
+        { id: "PICKUP", label: getStepLabel("PICKUP") },
+        { id: "COMPLETED", label: getStepLabel("COMPLETED") },
+      ]
+    : [
+        {
+          id: "WAITING_BAKERY_CONFIRM",
+          label: getStepLabel("WAITING_BAKERY_CONFIRM"),
+        },
+        { id: "PROCESSING", label: getStepLabel("PROCESSING") },
+        { id: "SHIPPING", label: getStepLabel("SHIPPING") },
+        { id: "SHIPPING_COMPLETED", label: getStepLabel("SHIPPING_COMPLETED") },
+        { id: "COMPLETED", label: getStepLabel("COMPLETED") },
+      ];
 
   // Define report flow steps
   const reportSteps = [
@@ -112,7 +135,7 @@ export default function OrderFlowVisualization({
       </div>
     );
   }
-  
+
   if (isReportFlow) {
     return (
       <div className="w-full">
@@ -123,19 +146,19 @@ export default function OrderFlowVisualization({
             </div>
             <div>
               <h4 className="font-medium text-yellow-800 dark:text-yellow-300">
-                {currentStatus === "REPORT_PENDING" 
-                  ? "Khiếu nại đang xử lý" 
+                {currentStatus === "REPORT_PENDING"
+                  ? "Khiếu nại đang xử lý"
                   : "Đơn hàng bị lỗi"}
               </h4>
               <p className="text-sm text-yellow-700 dark:text-yellow-400">
-                {currentStatus === "REPORT_PENDING" 
-                  ? "Đơn hàng đang trong quá trình xử lý khiếu nại từ khách hàng" 
+                {currentStatus === "REPORT_PENDING"
+                  ? "Đơn hàng đang trong quá trình xử lý khiếu nại từ khách hàng"
                   : "Đơn hàng đã được xác nhận lỗi sau khi xử lý khiếu nại"}
               </p>
             </div>
           </div>
         </div>
-        
+
         <div className="w-full py-8 px-4 bg-zinc-50 dark:bg-slate-900/60 rounded-lg border border-gray-200 dark:border-slate-800/60 shadow-sm dark:shadow-md dark:shadow-black/5">
           <div className="w-full relative flex items-center justify-between px-2 sm:px-8 max-w-4xl mx-auto">
             {/* Background connecting line (gray) */}
@@ -145,48 +168,75 @@ export default function OrderFlowVisualization({
             <div
               className={cn(
                 "absolute top-6 left-0 h-[4px] rounded-full transition-all duration-500",
-                currentStatus === "REPORT_PENDING" 
-                  ? "bg-yellow-500 dark:bg-yellow-500/70" 
+                currentStatus === "REPORT_PENDING"
+                  ? "bg-yellow-500 dark:bg-yellow-500/70"
                   : "bg-red-500 dark:bg-red-500/70"
               )}
               style={{
                 width: `calc(${Math.max(
                   0,
-                  Math.min(100, ((steps.indexOf(steps.find(s => s.id === mappedStatus) || steps[0])) / (steps.length - 1)) * 100)
-                )}% + ${steps.indexOf(steps.find(s => s.id === mappedStatus) || steps[0]) > 0 ? "10px" : "0px"})`,
-                zIndex: 1
+                  Math.min(
+                    100,
+                    (steps.indexOf(
+                      steps.find((s) => s.id === mappedStatus) || steps[0]
+                    ) /
+                      (steps.length - 1)) *
+                      100
+                  )
+                )}% + ${
+                  steps.indexOf(
+                    steps.find((s) => s.id === mappedStatus) || steps[0]
+                  ) > 0
+                    ? "10px"
+                    : "0px"
+                })`,
+                zIndex: 1,
               }}
             ></div>
 
             {steps.map((step, index) => {
-              const isCompleted = index < steps.indexOf(steps.find(s => s.id === mappedStatus) || steps[0]);
+              const isCompleted =
+                index <
+                steps.indexOf(
+                  steps.find((s) => s.id === mappedStatus) || steps[0]
+                );
               const isActive = step.id === mappedStatus;
-              const isPending = index > steps.indexOf(steps.find(s => s.id === mappedStatus) || steps[0]);
-              
+              const isPending =
+                index >
+                steps.indexOf(
+                  steps.find((s) => s.id === mappedStatus) || steps[0]
+                );
+
               // Special styling for report flow
-              const isReportStep = step.id === "REPORT_PENDING" || step.id === "FAULTY";
-              
+              const isReportStep =
+                step.id === "REPORT_PENDING" || step.id === "FAULTY";
+
               // Determine circle colors
               let circleClasses = "";
               let iconColor = "";
-              
+
               if (isActive && isReportStep && step.id === "REPORT_PENDING") {
-                circleClasses = "bg-yellow-500 border-yellow-200 text-white dark:bg-yellow-600 dark:border-yellow-400";
+                circleClasses =
+                  "bg-yellow-500 border-yellow-200 text-white dark:bg-yellow-600 dark:border-yellow-400";
                 iconColor = "text-white";
               } else if (isActive && isReportStep && step.id === "FAULTY") {
-                circleClasses = "bg-red-500 border-red-200 text-white dark:bg-red-600 dark:border-red-400";
+                circleClasses =
+                  "bg-red-500 border-red-200 text-white dark:bg-red-600 dark:border-red-400";
                 iconColor = "text-white";
               } else if (isActive) {
-                circleClasses = "bg-primary border-primary text-white dark:bg-primary dark:border-primary";
+                circleClasses =
+                  "bg-primary border-primary text-white dark:bg-primary dark:border-primary";
                 iconColor = "text-white";
               } else if (isCompleted) {
-                circleClasses = "bg-primary border-primary text-white dark:bg-primary dark:border-primary";
+                circleClasses =
+                  "bg-primary border-primary text-white dark:bg-primary dark:border-primary";
                 iconColor = "text-white";
               } else {
-                circleClasses = "bg-white border-gray-300 text-gray-400 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-400";
+                circleClasses =
+                  "bg-white border-gray-300 text-gray-400 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-400";
                 iconColor = "text-gray-400 dark:text-slate-400";
               }
-              
+
               return (
                 <div
                   key={step.id}
@@ -245,7 +295,7 @@ export default function OrderFlowVisualization({
               0,
               Math.min(100, ((currentStep - 1) / (steps.length - 1)) * 100)
             )}% + ${currentStep > 1 ? "10px" : "0px"})`,
-            zIndex: 1
+            zIndex: 1,
           }}
         ></div>
 
