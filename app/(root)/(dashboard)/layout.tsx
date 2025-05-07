@@ -9,8 +9,6 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
-import { breadcrumbTranslations } from "@/constants/bread-crumb-tranlate";
-import Breadcrumb from "@/components/shared/dashboard/bread-crumb";
 import { FeatureFlagsProvider } from "@/hooks/use-feature-flag";
 import TopRightHeaderButtons from "@/components/shared/dashboard/TopRightHeaderButtons";
 

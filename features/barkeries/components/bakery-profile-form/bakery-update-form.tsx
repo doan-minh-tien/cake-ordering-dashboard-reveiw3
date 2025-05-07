@@ -64,8 +64,20 @@ const bakeryFormSchema = z.object({
   back_card_file_id: z.string().optional(),
   food_safety_certificate_file_id: z.string().optional(),
   business_license_file_id: z.string().optional(),
-  open_time: z.string().min(1, "Giờ mở cửa là bắt buộc"),
-  close_time: z.string().min(1, "Giờ đóng cửa là bắt buộc"),
+  open_time: z
+    .string()
+    .min(1, "Giờ mở cửa là bắt buộc")
+    .refine((val) => {
+      // Validate time format (HH:MM or HH:MM:SS)
+      return /^\d{2}:\d{2}(:\d{2})?$/.test(val);
+    }, "Định dạng giờ không hợp lệ (HH:MM hoặc HH:MM:SS)"),
+  close_time: z
+    .string()
+    .min(1, "Giờ đóng cửa là bắt buộc")
+    .refine((val) => {
+      // Validate time format (HH:MM or HH:MM:SS)
+      return /^\d{2}:\d{2}(:\d{2})?$/.test(val);
+    }, "Định dạng giờ không hợp lệ (HH:MM hoặc HH:MM:SS)"),
   // File upload fields - not part of API but used for handling uploads
   avatar_file: z.any().optional(),
   front_card_file: z.any().optional(),
@@ -139,6 +151,7 @@ export function BakeryUpdateForm({ bakery }: BakeryUpdateFormProps) {
   const formatTimeForApi = (timeString: string): string => {
     if (!timeString) return "";
 
+    // Handle common time formats
     // If the time is already in HH:MM:SS format, return it
     if (/^\d{2}:\d{2}:\d{2}$/.test(timeString)) {
       return timeString;
@@ -147,6 +160,18 @@ export function BakeryUpdateForm({ bakery }: BakeryUpdateFormProps) {
     // If the time is in HH:MM format, append :00 for seconds
     if (/^\d{2}:\d{2}$/.test(timeString)) {
       return `${timeString}:00`;
+    }
+
+    // If it's just a number, try to format it as a time
+    if (/^\d+$/.test(timeString)) {
+      const hours = timeString.padStart(2, "0").substring(0, 2);
+      return `${hours}:00:00`;
+    }
+
+    // Default fallback - just ensure it has seconds
+    const parts = timeString.split(":");
+    if (parts.length === 2) {
+      return `${parts[0]}:${parts[1]}:00`;
     }
 
     return timeString;
@@ -503,6 +528,9 @@ export function BakeryUpdateForm({ bakery }: BakeryUpdateFormProps) {
                           }}
                         />
                       </FormControl>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Định dạng giờ: HH:MM (Ví dụ: 08:30)
+                      </p>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -526,6 +554,9 @@ export function BakeryUpdateForm({ bakery }: BakeryUpdateFormProps) {
                           }}
                         />
                       </FormControl>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Định dạng giờ: HH:MM (Ví dụ: 22:00)
+                      </p>
                       <FormMessage />
                     </FormItem>
                   )}

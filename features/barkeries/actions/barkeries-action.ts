@@ -124,7 +124,24 @@ export async function updateBakeryProfile(
     }
   }
 
-  // Create a new payload object with the exact structure the API expects
+  // Ensure the time formats are correct
+  const formatTime = (time: string): string => {
+    if (!time) return "";
+
+    // If already in HH:MM:SS format, return as is
+    if (/^\d{2}:\d{2}:\d{2}$/.test(time)) {
+      return time;
+    }
+
+    // If in HH:MM format, add seconds
+    if (/^\d{2}:\d{2}$/.test(time)) {
+      return `${time}:00`;
+    }
+
+    return time;
+  };
+
+  // Create a complete payload with all required fields
   const apiPayload = {
     bakery_name: updateData.bakery_name,
     bakery_description: updateData.bakery_description,
@@ -142,10 +159,11 @@ export async function updateBakeryProfile(
     avatar_file_id: updateData.avatar_file_id,
     front_card_file_id: updateData.front_card_file_id,
     back_card_file_id: updateData.back_card_file_id,
-    food_safety_certificate_file_id: updateData.food_safety_certificate_file_id,
-    business_license_file_id: updateData.business_license_file_id,
-    open_time: updateData.open_time,
-    close_time: updateData.close_time,
+    food_safety_certificate_file_id:
+      updateData.food_safety_certificate_file_id || "",
+    business_license_file_id: updateData.business_license_file_id || "",
+    open_time: formatTime(updateData.open_time),
+    close_time: formatTime(updateData.close_time),
     bank_account: updateData.bank_account || undefined,
   };
 

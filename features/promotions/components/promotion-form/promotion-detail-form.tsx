@@ -46,8 +46,10 @@ import {
   ShoppingBag,
   FileText,
   Info,
+  ArrowLeft,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 interface PromotionDetailFormProps {
   initialData: IPromotion | null;
@@ -60,13 +62,18 @@ const promotionSchema = z.object({
   expiration_date: z.string(),
   quantity: z.coerce.number().min(0),
   usage_count: z.coerce.number().min(0),
-  description: z.string().min(1, "Promotion description is required"),
-  voucher_type: z.string().min(1, "Voucher type is required"),
+  description: z.string().min(1, "Mô tả khuyến mãi không được để trống"),
+  voucher_type: z.string().min(1, "Loại voucher không được để trống"),
 });
 
 type promotionFormValue = z.infer<typeof promotionSchema>;
 
 const voucherType = ["PRIVATE", "GLOBAL", "SYSTEM"];
+const voucherTypeLabels = {
+  PRIVATE: "Riêng tư",
+  GLOBAL: "Toàn cục",
+  SYSTEM: "Hệ thống",
+};
 
 const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
   const [isPending, startTransition] = useTransition();
@@ -74,14 +81,16 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
   const { data: session } = useSession();
   const isAdmin = session?.user?.role === "ADMIN";
 
-  const title = initialData ? "Edit Promotion Details" : "Add New Promotion";
+  const title = initialData
+    ? "Chỉnh sửa thông tin khuyến mãi"
+    : "Thêm khuyến mãi mới";
   const description = initialData
-    ? "Edit the details of the promotion."
-    : "Add a new promotion.";
-  const action = initialData ? "Lưu thay đổi" : "Tạo";
+    ? "Chỉnh sửa chi tiết thông tin khuyến mãi."
+    : "Thêm một khuyến mãi mới.";
+  const action = initialData ? "Lưu thay đổi" : "Tạo mới";
   const toastMessage = initialData
-    ? "cập nhật thành công."
-    : "tạo thành công .";
+    ? "Cập nhật thành công."
+    : "Tạo mới thành công.";
 
   // Set default values, with initial usage_count of 0
   const defaultValues = initialData
@@ -134,6 +143,14 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
   return (
     <div className="w-full">
       <div className="mb-6">
+        <div className="flex items-center gap-4 mb-4">
+          <Link href="/dashboard/promotions">
+            <Button variant="outline" className="flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Quay lại
+            </Button>
+          </Link>
+        </div>
         <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
           {title}
         </h1>
@@ -148,7 +165,7 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
               <CardHeader className=" dark:bg-slate-800 border-b dark:border-slate-700">
                 <CardTitle className="text-lg font-medium flex items-center gap-2  dark:text-slate-100">
                   <Percent className="h-5 w-5 text-primary" />
-                  Discount Information
+                  Thông tin giảm giá
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-6 space-y-4">
@@ -158,12 +175,12 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-slate-700 dark:text-slate-300">
-                        Discount Percentage (%)
+                        Phần trăm giảm giá (%)
                       </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          placeholder="Enter discount percentage"
+                          placeholder="Nhập phần trăm giảm giá"
                           {...field}
                           className="focus:ring-2 focus:ring-primary dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
                         />
@@ -179,12 +196,12 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-slate-700 dark:text-slate-300">
-                        Min Order Amount
+                        Giá trị đơn hàng tối thiểu
                       </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          placeholder="Enter min order amount"
+                          placeholder="Nhập giá trị đơn hàng tối thiểu"
                           {...field}
                           className="focus:ring-2 focus:ring-primary dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
                         />
@@ -200,12 +217,12 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-slate-700 dark:text-slate-300">
-                        Max Discount Amount
+                        Giảm giá tối đa
                       </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          placeholder="Enter max discount amount"
+                          placeholder="Nhập giá trị giảm tối đa"
                           {...field}
                           className="focus:ring-2 focus:ring-primary dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
                         />
@@ -222,7 +239,7 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
               <CardHeader className=" dark:bg-slate-800 border-b dark:border-slate-700">
                 <CardTitle className="text-lg font-medium flex items-center gap-2 dark:text-slate-100">
                   <Clock className="h-5 w-5 text-primary" />
-                  Usage Details
+                  Chi tiết sử dụng
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-6 space-y-4">
@@ -232,7 +249,7 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-slate-700 dark:text-slate-300">
-                        Expiration Date
+                        Ngày hết hạn
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -252,12 +269,12 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-slate-700 dark:text-slate-300">
-                        Quantity
+                        Số lượng
                       </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          placeholder="Enter quantity"
+                          placeholder="Nhập số lượng"
                           {...field}
                           className="focus:ring-2 focus:ring-primary dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
                         />
@@ -275,12 +292,12 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-slate-700 dark:text-slate-300">
-                          Usage Count
+                          Số lần đã sử dụng
                         </FormLabel>
                         <FormControl>
                           <Input
                             type="number"
-                            placeholder="Enter usage count"
+                            placeholder="Nhập số lần sử dụng"
                             {...field}
                             className="focus:ring-2 focus:ring-primary dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
                           />
@@ -299,7 +316,7 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
             <CardHeader className=" dark:bg-slate-800 border-b dark:border-slate-700">
               <CardTitle className="text-lg font-medium flex items-center gap-2  dark:text-slate-100">
                 <Tag className="h-5 w-5 text-primary" />
-                Voucher Details
+                Chi tiết voucher
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6 space-y-4">
@@ -310,7 +327,7 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-slate-700 dark:text-slate-300">
-                        Voucher Type
+                        Loại voucher
                       </FormLabel>
                       <FormControl>
                         <Select
@@ -319,7 +336,7 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
                           disabled={isAdmin} // Disable for all admin cases
                         >
                           <SelectTrigger className="focus:ring-2 focus:ring-primary dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100">
-                            <SelectValue placeholder="Select voucher type" />
+                            <SelectValue placeholder="Chọn loại voucher" />
                           </SelectTrigger>
                           <SelectContent className="dark:bg-slate-800 dark:border-slate-700">
                             {availableVoucherTypes.map((type) => (
@@ -328,7 +345,9 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
                                 value={type}
                                 className="dark:text-slate-100 dark:hover:bg-slate-700"
                               >
-                                {type}
+                                {voucherTypeLabels[
+                                  type as keyof typeof voucherTypeLabels
+                                ] || type}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -346,11 +365,11 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-slate-700 dark:text-slate-300">
-                      Description
+                      Mô tả
                     </FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Enter description"
+                        placeholder="Nhập mô tả khuyến mãi"
                         {...field}
                         className="min-h-28 focus:ring-2 focus:ring-primary dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
                       />
@@ -369,8 +388,8 @@ const PromotionDetailForm = ({ initialData }: PromotionDetailFormProps) => {
                 <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1">
                   <Info className="h-4 w-4" />
                   {initialData
-                    ? "Update promotion details"
-                    : "Create a new promotion"}
+                    ? "Cập nhật thông tin khuyến mãi"
+                    : "Tạo một khuyến mãi mới"}
                 </p>
               </div>
               <Button

@@ -38,7 +38,9 @@ export default async function EditBakeryPage() {
             Cập nhật thông tin cửa hàng
           </h1>
           <p className="text-muted-foreground mt-2">
-            Chỉnh sửa và cập nhật thông tin cửa hàng bánh của bạn
+            Chỉnh sửa và cập nhật thông tin cửa hàng bánh của bạn. Nhấn nút
+            &quot;Quay lại trang chi tiết&quot; để trở về trang thông tin cửa
+            hàng.
           </p>
         </div>
 
