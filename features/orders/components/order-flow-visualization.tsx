@@ -11,6 +11,7 @@ const OrderStatus = {
   SHIPPING_COMPLETED: 4,
   COMPLETED: 5,
   PICKUP: 3,
+  READY_FOR_PICKUP: 3,
   REPORT_PENDING: -2,
   FAULTY: -3,
   CANCELED: -1,
@@ -24,23 +25,23 @@ export default function OrderFlowVisualization({
   order,
 }: OrderFlowVisualizationProps) {
   const currentStatus = order.order_status;
-  // Handle the case where the order status is READY_FOR_PICKUP
-  let mappedStatus = currentStatus;
-  if (currentStatus === "READY_FOR_PICKUP") {
-    mappedStatus = "PROCESSING";
-  }
-
-  // Special case for pickup orders
   const isPickupOrder = order.shipping_type?.toUpperCase() === "PICKUP";
 
-  // If shipping type is pickup and status is SHIPPING, map to PICKUP
-  if (isPickupOrder && mappedStatus === "SHIPPING") {
-    mappedStatus = "PICKUP";
-  }
+  // Map various statuses to our simplified flow
+  let mappedStatus = currentStatus;
 
-  // For pickup orders, treat SHIPPING_COMPLETED as COMPLETED
-  if (isPickupOrder && mappedStatus === "SHIPPING_COMPLETED") {
-    mappedStatus = "COMPLETED";
+  // For pickup orders, map READY_FOR_PICKUP, SHIPPING, SHIPPING_COMPLETED to PICKUP
+  if (isPickupOrder) {
+    if (currentStatus === "READY_FOR_PICKUP" || currentStatus === "SHIPPING") {
+      mappedStatus = "PICKUP";
+    } else if (currentStatus === "SHIPPING_COMPLETED") {
+      mappedStatus = "COMPLETED";
+    }
+  } else {
+    // For regular orders, keep original mapping
+    if (currentStatus === "READY_FOR_PICKUP") {
+      mappedStatus = "PROCESSING";
+    }
   }
 
   const currentStep =
@@ -52,7 +53,11 @@ export default function OrderFlowVisualization({
 
   // Determine step labels based on shipping_type
   const getStepLabel = (stepId: string) => {
-    if (stepId === "SHIPPING" || stepId === "PICKUP") {
+    if (
+      stepId === "SHIPPING" ||
+      stepId === "PICKUP" ||
+      stepId === "READY_FOR_PICKUP"
+    ) {
       // Check shipping type to differentiate between pickup and delivery
       if (isPickupOrder) {
         return "Lấy tại chỗ";

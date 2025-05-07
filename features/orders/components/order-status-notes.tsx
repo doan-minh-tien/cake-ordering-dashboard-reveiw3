@@ -9,8 +9,28 @@ interface OrderStatusNotesProps {
 
 export default function OrderStatusNotes({ order }: OrderStatusNotesProps) {
   const status = order.order_status;
+  const shippingType = order.shipping_type;
 
   const getStatusNote = () => {
+    // Check if this is a pickup order
+    const isPickupOrder = shippingType?.toUpperCase() === "PICKUP";
+
+    // Special handling for PICKUP orders with READY_FOR_PICKUP status
+    if (
+      isPickupOrder &&
+      (status === "READY_FOR_PICKUP" || status === "SHIPPING")
+    ) {
+      return {
+        title: "Lấy tại chỗ",
+        note: "Bánh đã làm xong, chờ khách đến lấy tại cửa hàng.",
+        bgColor: "bg-indigo-50 dark:bg-indigo-950/20",
+        borderColor: "border-indigo-200 dark:border-indigo-800/40",
+        titleColor: "text-indigo-900 dark:text-indigo-300",
+        noteColor: "text-indigo-700 dark:text-indigo-400",
+        accentColor: "text-indigo-600 dark:text-indigo-300",
+      };
+    }
+
     switch (status) {
       case "PENDING":
         return {
@@ -24,23 +44,23 @@ export default function OrderStatusNotes({ order }: OrderStatusNotesProps) {
         };
       case "WAITING_BAKERY_CONFIRM":
         return {
-          title: "Chờ xác nhận từ bakery",
-          note: "Khách đã đặt và thanh toán. Đợi bakery xác nhận có thể làm bánh.",
-          bgColor: "bg-violet-50 dark:bg-violet-950/20",
-          borderColor: "border-violet-200 dark:border-violet-800/40",
-          titleColor: "text-violet-900 dark:text-violet-300",
-          noteColor: "text-violet-700 dark:text-violet-400",
-          accentColor: "text-violet-600 dark:text-violet-300",
+          title: "Chờ xác nhận",
+          note: "Đơn hàng đang chờ bạn xác nhận trước khi bắt đầu chế biến.",
+          bgColor: "bg-amber-50 dark:bg-amber-950/20",
+          borderColor: "border-amber-200 dark:border-amber-800/40",
+          titleColor: "text-amber-900 dark:text-amber-300",
+          noteColor: "text-amber-700 dark:text-amber-400",
+          accentColor: "text-amber-600 dark:text-amber-300",
         };
       case "PROCESSING":
         return {
           title: "Đang xử lý",
-          note: "Bakery đang xử lý đơn hàng. Khách hàng đã được thông báo.",
-          bgColor: "bg-indigo-50 dark:bg-indigo-950/20",
-          borderColor: "border-indigo-200 dark:border-indigo-800/40",
-          titleColor: "text-indigo-900 dark:text-indigo-300",
-          noteColor: "text-indigo-700 dark:text-indigo-400",
-          accentColor: "text-indigo-600 dark:text-indigo-300",
+          note: "Đơn hàng đã được xác nhận và đang được chế biến.",
+          bgColor: "bg-blue-50 dark:bg-blue-950/20",
+          borderColor: "border-blue-200 dark:border-blue-800/40",
+          titleColor: "text-blue-900 dark:text-blue-300",
+          noteColor: "text-blue-700 dark:text-blue-400",
+          accentColor: "text-blue-600 dark:text-blue-300",
         };
       case "READY_FOR_PICKUP":
         return {
@@ -128,6 +148,9 @@ export default function OrderStatusNotes({ order }: OrderStatusNotesProps) {
   };
 
   const additionalInfo = () => {
+    // Check if this is a pickup order
+    const isPickupOrder = shippingType?.toUpperCase() === "PICKUP";
+
     // Add any status-specific information
     switch (status) {
       case "PENDING":
@@ -135,10 +158,19 @@ export default function OrderStatusNotes({ order }: OrderStatusNotesProps) {
       case "WAITING_BAKERY_CONFIRM":
         return "Bakery nên xác nhận đơn hàng càng sớm càng tốt để giữ trải nghiệm khách hàng tốt nhất.";
       case "PROCESSING":
+        if (isPickupOrder) {
+          return "Nhớ cập nhật khi đã làm xong bánh để chuyển sang trạng thái lấy tại chỗ.";
+        }
         return "Nhớ cập nhật khi đã làm xong bánh để chuyển sang trạng thái sẵn sàng giao.";
       case "READY_FOR_PICKUP":
+        if (isPickupOrder) {
+          return "Đảm bảo bánh được đóng gói cẩn thận và an toàn cho khách lấy tại cửa hàng.";
+        }
         return "Đảm bảo bánh được đóng gói cẩn thận và an toàn cho việc vận chuyển.";
       case "SHIPPING":
+        if (isPickupOrder) {
+          return "Bánh đã sẵn sàng, khách sẽ đến lấy bánh tại cửa hàng.";
+        }
         return "Theo dõi quá trình giao hàng và liên hệ khách nếu gặp vấn đề.";
       case "SHIPPING_COMPLETED":
         return "Sau khi giao hàng, hệ thống sẽ tự động chuyển trạng thái sau 1 giờ nếu không có vấn đề.";

@@ -56,6 +56,8 @@ import { useRouter } from "next/navigation";
 import {
   beingToNext,
   beingToNextWithFileBase64,
+  moveToPickup,
+  getCakeImageByAvailableCakeId,
 } from "../../actions/order-action";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -115,6 +117,7 @@ type CakeDetail = {
   id: string;
   name?: string;
   description?: string;
+  image_url?: string;
   category?: {
     id: string;
     name: string;
@@ -150,6 +153,7 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
     {}
   );
   const [isLoadingDetails, setIsLoadingDetails] = useState(true);
+  const [cakeImages, setCakeImages] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
@@ -166,11 +170,33 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
               id: result.data.id,
               name: result.data.available_cake_name,
               description: result.data.available_cake_description,
+              image_url:
+                result.data.available_cake_main_image ||
+                "/images/cake-placeholder.png",
               category: {
                 id: result.data.available_cake_type,
                 name: result.data.available_cake_type,
               },
             };
+
+            // Fetch cake image using available_cake_id
+            if (detail.available_cake_id) {
+              try {
+                const imageResult = await getCakeImageByAvailableCakeId(
+                  detail.available_cake_id
+                );
+                if (imageResult.success && imageResult.data) {
+                  // Add to cakeImages state
+                  setCakeImages((prev) => ({
+                    ...prev,
+                    [detail.id]: imageResult.data.file_url,
+                  }));
+                }
+              } catch (err) {
+                console.error("Error fetching cake image:", err);
+              }
+            }
+
             return { [detail.id]: cakeDetail };
           }
         } else if (detail.custom_cake_id) {
@@ -250,6 +276,7 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
               id: result.data.id,
               custom_cake_name: result.data.custom_cake_name,
               custom_cake_description: result.data.custom_cake_description,
+              image_url: "/images/custom-cake-placeholder.png",
               total_price: result.data.total_price,
               recipe: result.data.recipe,
               part_selections: result.data.part_selections || [],
@@ -594,8 +621,85 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
       setIsLoading(true);
 
       let result;
-      // If processing status and files are required, use beingToNextWithFileBase64
-      if (order.order_status === "PROCESSING") {
+      const isPickupOrder = order.shipping_type?.toUpperCase() === "PICKUP";
+
+      // Special handling for PICKUP orders going from PROCESSING to PICKUP status
+      if (isPickupOrder && order.order_status === "PROCESSING") {
+        // Check if a file has been uploaded
+        if (uploadedFiles.length > 0) {
+          // Validate file before sending to server
+          const file = uploadedFiles[0];
+          if (!file || file.size === 0) {
+            toast.error("Tệp không hợp lệ hoặc rỗng");
+            setIsLoading(false);
+            return;
+          }
+
+          // Check file size (10MB limit is common)
+          const maxSize = 10 * 1024 * 1024; // 10MB
+          if (file.size > maxSize) {
+            toast.error(
+              `Tệp quá lớn. Kích thước tối đa là ${maxSize / (1024 * 1024)}MB`
+            );
+            setIsLoading(false);
+            return;
+          }
+
+          // Console log file properties
+          console.log("File properties:", {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            lastModified: file.lastModified,
+          });
+
+          try {
+            toast.info("Đang tải lên hình ảnh...");
+
+            // Convert file to base64
+            const fileBase64 = await convertFileToBase64(file);
+
+            // Use the new moveToPickup function with base64 data
+            result = await moveToPickup(
+              order.id,
+              fileBase64,
+              file.name,
+              file.type
+            );
+
+            console.log("Result from pickup transition:", result);
+
+            if (!result.success) {
+              console.error("Server action failed:", result.error);
+              toast.error(
+                "Lỗi chuyển trạng thái: " + (result.error || "Không xác định")
+              );
+              setIsLoading(false);
+              return;
+            }
+          } catch (uploadError: any) {
+            console.error("Error in file upload:", uploadError);
+            toast.error(
+              "Lỗi tải lên: " + (uploadError?.message || "Không xác định")
+            );
+            setIsLoading(false);
+            return;
+          }
+        } else {
+          // No file uploaded, use the moveToPickup function without file
+          result = await moveToPickup(order.id);
+
+          if (!result.success) {
+            console.error("Server action failed:", result.error);
+            toast.error(
+              "Lỗi chuyển trạng thái: " + (result.error || "Không xác định")
+            );
+            setIsLoading(false);
+            return;
+          }
+        }
+      } else if (order.order_status === "PROCESSING") {
+        // Regular non-pickup orders with processing status
         // Check if a file has been uploaded
         if (uploadedFiles.length > 0) {
           // Validate file before sending to server
@@ -816,7 +920,7 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
                     className="group relative flex flex-col space-y-4 rounded-lg border p-4 transition-all hover:shadow-md dark:border-gray-800"
                   >
                     {/* Header Section */}
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
                           {isAvailableCake ? (
@@ -835,14 +939,6 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
                           </p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm text-muted-foreground">
-                          Thành tiền
-                        </p>
-                        <p className="font-semibold text-green-600 dark:text-green-500">
-                          {formatCurrency(detail.sub_total_price)}
-                        </p>
-                      </div>
                     </div>
 
                     {/* Cake Details Section */}
@@ -851,13 +947,37 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
                         {isAvailableCake ? (
                           // Hiển thị thông tin bánh có sẵn
                           <>
-                            <div className="space-y-1">
-                              <h4 className="font-medium text-foreground">
-                                {cakeDetails.name}
-                              </h4>
-                              <p className="text-sm text-muted-foreground">
-                                {cakeDetails.description}
-                              </p>
+                            <div className="flex justify-between items-start gap-4">
+                              <div className="flex gap-4">
+                                <div className="relative h-16 w-16 overflow-hidden rounded-md border bg-muted/30">
+                                  <Image
+                                    src={
+                                      cakeImages[detail.id] ||
+                                      cakeDetails.image_url ||
+                                      "/images/cake-placeholder.png"
+                                    }
+                                    alt={cakeDetails.name || "Bánh"}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <h4 className="font-medium text-foreground">
+                                    {cakeDetails.name}
+                                  </h4>
+                                  <p className="text-sm text-muted-foreground">
+                                    {cakeDetails.description}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm text-muted-foreground">
+                                  Thành tiền
+                                </p>
+                                <p className="font-semibold text-green-600 dark:text-green-500">
+                                  {formatCurrency(detail.sub_total_price)}
+                                </p>
+                              </div>
                             </div>
                             {cakeDetails.category && (
                               <div className="flex items-center gap-2">
@@ -873,15 +993,41 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
                         ) : (
                           // Hiển thị thông tin bánh tùy chỉnh
                           <div className="space-y-3">
-                            <div className="space-y-1.5">
-                              <h4 className="font-medium text-foreground">
-                                {cakeDetails.custom_cake_name}
-                              </h4>
-                              {cakeDetails.custom_cake_description && (
+                            <div className="flex justify-between items-start gap-4">
+                              <div className="flex gap-4">
+                                <div className="relative h-16 w-16 overflow-hidden rounded-md border bg-muted/30">
+                                  <Image
+                                    src={
+                                      cakeDetails.image_url ||
+                                      "/images/custom-cake-placeholder.png"
+                                    }
+                                    alt={
+                                      cakeDetails.custom_cake_name ||
+                                      "Bánh tùy chỉnh"
+                                    }
+                                    fill
+                                    className="object-cover"
+                                  />
+                                </div>
+                                <div className="space-y-1.5">
+                                  <h4 className="font-medium text-foreground">
+                                    {cakeDetails.custom_cake_name}
+                                  </h4>
+                                  {cakeDetails.custom_cake_description && (
+                                    <p className="text-sm text-muted-foreground">
+                                      {cakeDetails.custom_cake_description}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="text-right">
                                 <p className="text-sm text-muted-foreground">
-                                  {cakeDetails.custom_cake_description}
+                                  Thành tiền
                                 </p>
-                              )}
+                                <p className="font-semibold text-green-600 dark:text-green-500">
+                                  {formatCurrency(detail.sub_total_price)}
+                                </p>
+                              </div>
                             </div>
 
                             <Accordion
@@ -1452,36 +1598,6 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
           </CardContent>
         </Card>
       </div>
-
-      {/* Order Details */}
-      <Card className="border dark:border-gray-800 shadow-sm relative overflow-hidden">
-        <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-cyan-400 to-blue-500"></div>
-        <CardHeader className="pb-2 pt-6">
-          <CardTitle className="text-lg font-semibold flex items-center gap-2">
-            <Tag size={18} className="text-primary" /> Chi tiết sản phẩm
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {order.order_details?.map((item, index) => (
-              <div
-                key={index}
-                className="flex flex-col sm:flex-row justify-between gap-3 py-4 border-b dark:border-gray-800 border-dashed last:border-b-0"
-              >
-                <div>
-                  <p className="font-medium">{item.cake_note || "Bánh"}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Số lượng: {item.quantity}
-                  </p>
-                </div>
-                <div className="font-semibold text-primary">
-                  {formatCurrency(item.sub_total_price)}
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Order Summary */}
       <Card className="border dark:border-gray-800 shadow-sm relative overflow-hidden">

@@ -215,6 +215,24 @@ const ActionMenu = ({ row }: ActionMenuProps) => {
 
   // Function to get action button text based on status
   const getActionButtonText = (status: string) => {
+    const isPickupOrder =
+      row.original.shipping_type?.toUpperCase() === "PICKUP";
+
+    if (isPickupOrder) {
+      switch (status) {
+        case "WAITING_BAKERY_CONFIRM":
+          return "Xác nhận đơn hàng";
+        case "PROCESSING":
+          return "Chuyển sang lấy tại chỗ";
+        case "READY_FOR_PICKUP":
+        case "SHIPPING":
+          return "Hoàn thành đơn hàng";
+        default:
+          return "Chuyển trạng thái tiếp theo";
+      }
+    }
+
+    // Default text for non-pickup orders
     switch (status) {
       case "WAITING_BAKERY_CONFIRM":
         return "Xác nhận đơn hàng";
@@ -269,7 +287,9 @@ const ActionMenu = ({ row }: ActionMenuProps) => {
             <DialogHeader>
               <DialogTitle>Xác nhận thao tác</DialogTitle>
               <DialogDescription>
-                Chuyển đơn hàng sang trạng thái sẵn sàng giao? Bạn có thể tải lên hình ảnh bánh hoàn thiện (không bắt buộc).
+                {row.original.shipping_type?.toUpperCase() === "PICKUP"
+                  ? "Chuyển đơn hàng sang trạng thái lấy tại chỗ? Bạn có thể tải lên hình ảnh bánh hoàn thiện (không bắt buộc)."
+                  : "Chuyển đơn hàng sang trạng thái sẵn sàng giao? Bạn có thể tải lên hình ảnh bánh hoàn thiện (không bắt buộc)."}
               </DialogDescription>
             </DialogHeader>
 

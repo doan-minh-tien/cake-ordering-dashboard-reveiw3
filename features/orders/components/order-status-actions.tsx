@@ -75,6 +75,34 @@ export default function OrderStatusActions({ order }: OrderStatusActionsProps) {
 
   // Function to get action button text and color based on status
   const getActionButtonConfig = (status: string) => {
+    const isPickupOrder = order.shipping_type?.toUpperCase() === "PICKUP";
+
+    if (isPickupOrder) {
+      switch (status) {
+        case "WAITING_BAKERY_CONFIRM":
+          return {
+            text: "Xác nhận đơn hàng",
+            color: "bg-blue-600 hover:bg-blue-700",
+          };
+        case "PROCESSING":
+          return {
+            text: "Chuyển sang lấy tại chỗ",
+            color: "bg-indigo-600 hover:bg-indigo-700",
+          };
+        case "READY_FOR_PICKUP":
+        case "SHIPPING":
+          return {
+            text: "Hoàn thành đơn hàng",
+            color: "bg-green-600 hover:bg-green-700",
+          };
+        default:
+          return {
+            text: "Chuyển trạng thái tiếp theo",
+            color: "bg-green-600 hover:bg-green-700",
+          };
+      }
+    }
+
     switch (status) {
       case "WAITING_BAKERY_CONFIRM":
         return {
