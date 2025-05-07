@@ -37,6 +37,12 @@ export type IBarkery = {
   confirmed_at: string | null;
   banned_at: string | null;
   shop_image_files: IBakeryFile[];
+  food_safety_certificate_file_id: string;
+  food_safety_certificate_file: IFoodSafetyCertificateFile;
+  business_license_file_id: string;
+  business_license_file: IBusinessLicenseFile;
+  open_time: string;
+  close_time: string;
 
   metric: IBakeryMetric;
   reviews: any | null;
@@ -77,6 +83,28 @@ export type IBakeryMetric = {
 };
 
 export type IFile = {
+  id: string;
+  file_name: string;
+  file_url: string;
+  created_at: string;
+  created_by: string;
+  updated_at: string;
+  updated_by: string;
+  is_deleted: boolean;
+};
+
+export type IBusinessLicenseFile = {
+  id: string;
+  file_name: string;
+  file_url: string;
+  created_at: string;
+  created_by: string;
+  updated_at: string;
+  updated_by: string;
+  is_deleted: boolean;
+};
+
+export type IFoodSafetyCertificateFile = {
   id: string;
   file_name: string;
   file_url: string;

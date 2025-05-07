@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { GalleryVerticalEnd } from "lucide-react";
+import { Cake } from "lucide-react";
 
 import {
   SidebarMenu,
@@ -14,9 +14,12 @@ export function TeamSwitcher() {
     <SidebarMenu>
       <SidebarMenuItem>
         <SidebarMenuButton size="lg" className="pointer-events-none">
-          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-            <GalleryVerticalEnd className="size-4" />
+          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-blue-600 text-white">
+            <Cake className="size-4" />
           </div>
+          <span className="font-semibold text-base text-foreground">
+            BreadTalk
+          </span>
         </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>

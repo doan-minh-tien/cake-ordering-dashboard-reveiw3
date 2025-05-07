@@ -3,7 +3,6 @@
 import * as React from "react";
 
 import { NavMain } from "@/components/shared/dashboard/sidebar/nav-main";
-import { NavProjects } from "@/components/shared/dashboard/sidebar/nav-projects";
 import { NavUser } from "@/components/shared/dashboard/sidebar/nav-user";
 import { TeamSwitcher } from "@/components/shared/dashboard/sidebar/team-switcher";
 import {
@@ -22,7 +21,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain />
-        <NavProjects />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

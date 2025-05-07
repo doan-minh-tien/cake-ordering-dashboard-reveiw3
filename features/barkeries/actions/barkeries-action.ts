@@ -47,7 +47,7 @@ export async function approveBakery(params: string): Promise<Result<void>> {
   console.log(params);
   const result = await apiRequest(() =>
     axiosAuth.put(`/bakeries/${params}/approve`, {
-      is_approve: true
+      is_approve: true,
     })
   );
   if (!result.success) {
@@ -80,6 +80,9 @@ export async function updateBakeryProfile(
   bakeryId: string,
   updateData: {
     bakery_name: string;
+    bakery_description?: string | null;
+    cake_description?: string | null;
+    price_description?: string | null;
     password?: string;
     phone: string;
     address: string;
@@ -92,6 +95,10 @@ export async function updateBakeryProfile(
     avatar_file_id: string;
     front_card_file_id: string;
     back_card_file_id: string;
+    food_safety_certificate_file_id: string;
+    business_license_file_id: string;
+    open_time: string;
+    close_time: string;
     bank_account?: string;
   }
 ): Promise<Result<IBarkery>> {
@@ -120,6 +127,9 @@ export async function updateBakeryProfile(
   // Create a new payload object with the exact structure the API expects
   const apiPayload = {
     bakery_name: updateData.bakery_name,
+    bakery_description: updateData.bakery_description,
+    cake_description: updateData.cake_description,
+    price_description: updateData.price_description,
     password: updateData.password || "password_placeholder", // Default password if not provided
     phone: updateData.phone,
     address: updateData.address,
@@ -132,6 +142,10 @@ export async function updateBakeryProfile(
     avatar_file_id: updateData.avatar_file_id,
     front_card_file_id: updateData.front_card_file_id,
     back_card_file_id: updateData.back_card_file_id,
+    food_safety_certificate_file_id: updateData.food_safety_certificate_file_id,
+    business_license_file_id: updateData.business_license_file_id,
+    open_time: updateData.open_time,
+    close_time: updateData.close_time,
     bank_account: updateData.bank_account || undefined,
   };
 

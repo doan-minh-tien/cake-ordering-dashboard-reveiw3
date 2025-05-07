@@ -78,6 +78,25 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
     });
   };
 
+  const formatTime = (timeString: string) => {
+    // Handle empty/null case
+    if (!timeString) return "00:00";
+
+    // If the time already has the right format (00:00), return it
+    if (/^\d{2}:\d{2}$/.test(timeString)) return timeString;
+
+    try {
+      // Handle other formats or add leading zeros if needed
+      const [hours, minutes] = timeString.split(":").map((part) => part.trim());
+      const formattedHours = hours.padStart(2, "0");
+      const formattedMinutes = minutes ? minutes.padStart(2, "0") : "00";
+      return `${formattedHours}:${formattedMinutes}`;
+    } catch (error) {
+      // Return default if parsing fails
+      return "00:00";
+    }
+  };
+
   const getVerificationStatus = () => {
     if (bakery.status === "CONFIRMED") {
       return {
@@ -130,7 +149,11 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
               }`}
             >
               {verificationStatus.icon}
-              {verificationStatus.status === "CONFIRMED" ? "Đã xác minh" : verificationStatus.status === "PENDING" ? "Đang xem xét" : "Chưa xác minh"}
+              {verificationStatus.status === "CONFIRMED"
+                ? "Đã xác minh"
+                : verificationStatus.status === "PENDING"
+                ? "Đang xem xét"
+                : "Chưa xác minh"}
             </Badge>
             {/* Bakery Type Badge */}
             <Badge
@@ -144,33 +167,33 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
 
         {/* Profile Image, Name, Location & Edit Button */}
         <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 -mt-16 sm:-mt-20 px-4 sm:px-8">
-           {/* Profile Image */}
-           <div className="flex-shrink-0">
-             <div className="relative h-28 w-28 sm:h-32 sm:w-32 rounded-full overflow-hidden border-4 border-background dark:border-gray-800 shadow-lg">
-               <Image
-                 src={bakery.avatar_file.file_url || "/api/placeholder/128/128"}
-                 alt={`${bakery.bakery_name} logo`}
-                 fill
-                 className="object-cover"
-               />
-             </div>
-           </div>
+          {/* Profile Image */}
+          <div className="flex-shrink-0">
+            <div className="relative h-28 w-28 sm:h-32 sm:w-32 rounded-full overflow-hidden border-4 border-background dark:border-gray-800 shadow-lg">
+              <Image
+                src={bakery.avatar_file.file_url || "/api/placeholder/128/128"}
+                alt={`${bakery.bakery_name} logo`}
+                fill
+                className="object-cover"
+              />
+            </div>
+          </div>
 
-           {/* Name, Location */}
-           <div className="flex-1 min-w-0 mt-3 sm:mt-0 sm:pb-2">
-             <h1 className="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80 mb-1 truncate">
-               {bakery.bakery_name}
-             </h1>
-             <div className="flex items-center gap-2 text-muted-foreground text-sm sm:text-base">
-               <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
-               <p className="truncate">{bakery.address}</p>
-             </div>
-           </div>
+          {/* Name, Location */}
+          <div className="flex-1 min-w-0 mt-3 sm:mt-0 sm:pb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1 truncate">
+              {bakery.bakery_name}
+            </h1>
+            <div className="flex items-center gap-2 text-muted-foreground text-sm sm:text-base">
+              <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
+              <p className="truncate">{bakery.address}</p>
+            </div>
+          </div>
 
-           {/* Edit Button */}
-           <div className="mt-2 sm:mt-0 sm:pb-2">
-             <EditButton bakeryId={bakery.id} />
-           </div>
+          {/* Edit Button */}
+          <div className="mt-2 sm:mt-0 sm:pb-2">
+            <EditButton bakeryId={bakery.id} />
+          </div>
         </div>
       </div>
 
@@ -180,15 +203,15 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
           icon={<Store className="h-6 w-6" />}
           title="Thông tin cơ bản"
           value={bakery.confirmed_at ? "Đã xác nhận" : "Chưa xác nhận"}
-          description={`Ngày tạo: ${formatDate(
-            bakery.avatar_file.created_at
-          )}`}
+          description={`Ngày tạo: ${formatDate(bakery.avatar_file.created_at)}`}
         />
         <StatCard
-          icon={<Cake className="h-6 w-6" />}
-          title="Sản phẩm"
-          value="0 Sản phẩm"
-          description="Chưa có sản phẩm nào"
+          icon={<Clock className="h-6 w-6" />}
+          title="Thời gian mở cửa"
+          value={`${formatTime(bakery.open_time)} - ${formatTime(
+            bakery.close_time
+          )}`}
+          description="Giờ hoạt động hàng ngày"
         />
         <StatCard
           icon={<DollarSign className="h-6 w-6" />}
@@ -200,7 +223,6 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-
         {/* Left Column - Main Content (Tabs) */}
         <div className="md:col-span-8">
           {/* Tab Navigation */}
@@ -257,21 +279,27 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
                       </h3>
                       <ul className="space-y-3 pl-1">
                         <InfoItem
-                          icon={<Store className="h-5 w-5 text-muted-foreground" />}
+                          icon={
+                            <Store className="h-5 w-5 text-muted-foreground" />
+                          }
                           label="Tên cửa hàng"
                           value={bakery.bakery_name}
                           copyable={false}
                           onCopy={() => copyToClipboard(bakery.bakery_name)}
                         />
                         <InfoItem
-                          icon={<MapPin className="h-5 w-5 text-muted-foreground" />}
+                          icon={
+                            <MapPin className="h-5 w-5 text-muted-foreground" />
+                          }
                           label="Địa chỉ"
                           value={bakery.address}
                           copyable={false}
                           onCopy={() => copyToClipboard(bakery.address)}
                         />
                         <InfoItem
-                          icon={<FileText className="h-5 w-5 text-muted-foreground" />}
+                          icon={
+                            <FileText className="h-5 w-5 text-muted-foreground" />
+                          }
                           label="Mã số thuế"
                           value={bakery.tax_code}
                           copyable={false}
@@ -288,14 +316,18 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
                       </h3>
                       <ul className="space-y-3 pl-1">
                         <InfoItem
-                          icon={<Phone className="h-5 w-5 text-muted-foreground" />}
+                          icon={
+                            <Phone className="h-5 w-5 text-muted-foreground" />
+                          }
                           label="Điện thoại"
                           value={bakery.phone}
                           copyable
                           onCopy={() => copyToClipboard(bakery.phone)}
                         />
                         <InfoItem
-                          icon={<Mail className="h-5 w-5 text-muted-foreground" />}
+                          icon={
+                            <Mail className="h-5 w-5 text-muted-foreground" />
+                          }
                           label="Email"
                           value={bakery.email}
                           copyable
@@ -342,7 +374,7 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
                       <Separator className="my-4 dark:bg-gray-600/50" />
 
                       {/* Cake Description */}
-                       <div>
+                      <div>
                         <h4 className="font-semibold mb-2 flex items-center gap-2 text-sm text-muted-foreground">
                           <Cake className="h-4 w-4 text-primary/80" />
                           Mô tả sản phẩm
@@ -356,12 +388,12 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
                       <Separator className="my-4 dark:bg-gray-600/50" />
 
                       {/* Price Description */}
-                       <div>
+                      <div>
                         <h4 className="font-semibold mb-2 flex items-center gap-2 text-sm text-muted-foreground">
                           <DollarSign className="h-4 w-4 text-primary/80" />
                           Mô tả giá cả
                         </h4>
-                         <p className="text-foreground/90 dark:text-foreground/80 leading-relaxed text-sm pl-6">
+                        <p className="text-foreground/90 dark:text-foreground/80 leading-relaxed text-sm pl-6">
                           {bakery.price_description ||
                             "Chưa có mô tả về giá cả"}
                         </p>
@@ -383,63 +415,57 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
                           <MetricDisplay
                             icon={<Package className="h-5 w-5" />}
                             title="Tổng đơn hàng"
-                            value={bakery.metric.orders_count?.toString() || "0"}
+                            value={
+                              bakery.metric.orders_count?.toString() || "0"
+                            }
                           />
                           <MetricDisplay
                             icon={<Users className="h-5 w-5" />}
                             title="Khách hàng"
-                            value={bakery.metric.customers_count?.toString() || "0"}
+                            value={
+                              bakery.metric.customers_count?.toString() || "0"
+                            }
                           />
                           <MetricDisplay
                             icon={<Receipt className="h-5 w-5" />}
                             title="Giá trị đơn TB"
-                            value={bakery.metric?.average_order_value
-                              ? formatCurrency(bakery.metric.average_order_value)
-                              : "N/A"}
+                            value={
+                              bakery.metric?.average_order_value
+                                ? formatCurrency(
+                                    bakery.metric.average_order_value
+                                  )
+                                : "N/A"
+                            }
                           />
                           <MetricDisplay
                             icon={<DollarSign className="h-5 w-5" />}
                             title="Doanh thu (Shop)"
-                            value={formatCurrency(bakery.metric?.total_revenue ?? 0)}
+                            value={formatCurrency(
+                              bakery.metric?.total_revenue ?? 0
+                            )}
                           />
                           <MetricDisplay
                             icon={<DollarSign className="h-5 w-5" />}
                             title="Doanh thu (Hệ thống)"
-                            value={formatCurrency(bakery.metric?.app_revenue ?? 0)}
+                            value={formatCurrency(
+                              bakery.metric?.app_revenue ?? 0
+                            )}
                           />
                           <MetricDisplay
                             icon={<Star className="h-5 w-5" />}
                             title="Đánh giá TB"
-                            value={(bakery.metric?.rating_average ?? 0) > 0
-                              ? (bakery.metric?.rating_average ?? 0).toFixed(1)
-                              : "N/A"}
+                            value={
+                              (bakery.metric?.rating_average ?? 0) > 0
+                                ? (bakery.metric?.rating_average ?? 0).toFixed(
+                                    1
+                                  )
+                                : "N/A"
+                            }
                           />
                         </div>
                       </div>
-                      <Separator className="mt-8" />
                     </>
                   )}
-
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                      <Clock className="h-5 w-5 text-primary" />
-                      Thời gian hoạt động
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="bg-muted/50 dark:bg-muted/60 rounded-lg p-4 border dark:border-gray-700/50">
-                        <p className="text-sm text-muted-foreground mb-1">
-                          Thứ 2 - Thứ 6
-                        </p>
-                        <p className="text-lg font-medium">07:00 - 21:00</p>
-                      </div>
-                      <div className="bg-muted/50 dark:bg-muted/60 rounded-lg p-4 border dark:border-gray-700/50">
-                        <p className="text-sm text-muted-foreground mb-1">
-                          Thứ 7 - Chủ nhật
-                        </p>
-                        <p className="text-lg font-medium">08:00 - 22:00</p>
-                      </div>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
             )}
@@ -470,8 +496,9 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
 
                     {/* Thumbnail grid */}
                     <div className="grid grid-cols-4 sm:grid-cols-6 gap-4">
-                      {[bakery.avatar_file, ...bakery.shop_image_files].slice(0, 0).map(
-                        (image, index) => (
+                      {[bakery.avatar_file, ...bakery.shop_image_files]
+                        .slice(0, 0)
+                        .map((image, index) => (
                           <div
                             key={image.id}
                             className={`relative aspect-square overflow-hidden rounded-lg cursor-pointer transition-all hover:opacity-90
@@ -490,8 +517,7 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
                               className="object-cover"
                             />
                           </div>
-                        )
-                      )}
+                        ))}
                     </div>
                   </div>
                 </CardContent>
@@ -560,7 +586,7 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
         </div>
 
         {/* Right Column - Sidebar */}
-         <div className="md:col-span-4">
+        <div className="md:col-span-4">
           <Card className="sticky top-6 shadow-sm border dark:border-gray-700">
             <CardHeader className="bg-muted/30 dark:bg-muted/50 py-5 border-b dark:border-gray-700">
               <CardTitle className="text-xl flex items-center gap-2.5">
@@ -578,33 +604,44 @@ const BakeryDetail = ({ bakery }: BakeryDetailProps) => {
                     : "bg-red-50 border-red-200 dark:bg-red-900/30 dark:border-red-700/50"
                 }`}
               >
-                <div className={`h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  verificationStatus.status === "CONFIRMED"
-                    ? "bg-green-100 text-green-600 dark:bg-green-800/50 dark:text-green-400"
-                    : verificationStatus.status === "PENDING"
-                    ? "bg-yellow-100 text-yellow-600 dark:bg-yellow-800/50 dark:text-yellow-400"
-                    : "bg-red-100 text-red-600 dark:bg-red-800/50 dark:text-red-400"
-                }`}>
-                  {React.cloneElement(verificationStatus.icon, { className: "h-5 w-5" })}
+                <div
+                  className={`h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                    verificationStatus.status === "CONFIRMED"
+                      ? "bg-green-100 text-green-600 dark:bg-green-800/50 dark:text-green-400"
+                      : verificationStatus.status === "PENDING"
+                      ? "bg-yellow-100 text-yellow-600 dark:bg-yellow-800/50 dark:text-yellow-400"
+                      : "bg-red-100 text-red-600 dark:bg-red-800/50 dark:text-red-400"
+                  }`}
+                >
+                  {React.cloneElement(verificationStatus.icon, {
+                    className: "h-5 w-5",
+                  })}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className={`font-semibold ${
-                    verificationStatus.status === "CONFIRMED"
-                      ? "text-green-800 dark:text-green-300"
+                  <p
+                    className={`font-semibold ${
+                      verificationStatus.status === "CONFIRMED"
+                        ? "text-green-800 dark:text-green-300"
+                        : verificationStatus.status === "PENDING"
+                        ? "text-yellow-800 dark:text-yellow-300"
+                        : "text-red-800 dark:text-red-300"
+                    }`}
+                  >
+                    {verificationStatus.status === "CONFIRMED"
+                      ? "Đã xác minh"
                       : verificationStatus.status === "PENDING"
-                      ? "text-yellow-800 dark:text-yellow-300"
-                      : "text-red-800 dark:text-red-300"
-                  }`}>
-                    {verificationStatus.status === "CONFIRMED" ? "Đã xác minh" : verificationStatus.status === "PENDING" ? "Đang xem xét" : "Chưa xác minh"}
+                      ? "Đang xem xét"
+                      : "Chưa xác minh"}
                   </p>
-             
                 </div>
               </div>
 
               <Separator className="my-6 dark:bg-gray-700" />
 
               <div className="space-y-3">
-                <h3 className="text-base font-medium mb-2">Yêu cầu xác minh:</h3>
+                <h3 className="text-base font-medium mb-2">
+                  Yêu cầu xác minh:
+                </h3>
                 <VerificationItem
                   title="Thông tin cơ bản"
                   description={`Tên: ${bakery.owner_name}`}
@@ -672,11 +709,15 @@ const StatCard = ({
     <CardContent className="p-5 text-center">
       <div className="mb-3 inline-flex items-center justify-center p-3 rounded-full bg-primary/10 dark:bg-primary/20">
         <div className="text-primary h-6 w-6">
-          {React.cloneElement(icon as React.ReactElement, { className: "h-full w-full" })}
+          {React.cloneElement(icon as React.ReactElement, {
+            className: "h-full w-full",
+          })}
         </div>
       </div>
       <div>
-        <p className="text-sm font-medium text-muted-foreground mb-1">{title}</p>
+        <p className="text-sm font-medium text-muted-foreground mb-1">
+          {title}
+        </p>
         <p className="text-2xl font-semibold mb-1.5">{value}</p>
         <p className="text-xs text-muted-foreground truncate">{description}</p>
       </div>
@@ -722,7 +763,9 @@ const InfoItem = ({
   <li className="flex items-start gap-4 text-sm group p-3 rounded-md hover:bg-muted/30 dark:hover:bg-muted/50 transition-colors">
     <div className="h-5 w-5 mt-1 text-primary/80 flex-shrink-0">{icon}</div>
     <div className="flex-1 min-w-0">
-      <span className="text-muted-foreground block text-xs mb-0.5">{label}</span>
+      <span className="text-muted-foreground block text-xs mb-0.5">
+        {label}
+      </span>
       <div className="flex items-center gap-1.5 mt-0">
         <span className="font-medium break-words">{value}</span>
         {copyable && (
@@ -892,7 +935,7 @@ const EditButton = ({ bakeryId }: { bakeryId: string }) => {
       <Link href="/dashboard/bakeries/edit">
         <Button variant="outline" className="flex items-center gap-2">
           <Pencil className="h-4 w-4" />
-          Edit Profile
+          Chỉnh sửa thông tin
         </Button>
       </Link>
     );

@@ -35,10 +35,10 @@ export default async function EditBakeryPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            Update Bakery Profile
+            Cập nhật thông tin cửa hàng
           </h1>
           <p className="text-muted-foreground mt-2">
-            Update your bakery information and details
+            Chỉnh sửa và cập nhật thông tin cửa hàng bánh của bạn
           </p>
         </div>
 
