@@ -361,7 +361,7 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
         };
       case "PICKUP":
       case "READY_FOR_PICKUP":
-      case isPickupOrder && "SHIPPING" ? "SHIPPING" : "":
+      case "SHIPPING": // Also handle SHIPPING status for pickup orders
         return {
           label: "Lấy tại chỗ",
           bgColor: "bg-indigo-100 dark:bg-indigo-900/30",
@@ -471,7 +471,7 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
         case "SHIPPING": // Also handle SHIPPING status for pickup orders
           return {
             text: "Hoàn thành đơn hàng",
-            color: "bg-green-600 hover:bg-green-700",
+            color: "bg-teal-600 hover:bg-teal-700",
             description:
               "Xác nhận khách hàng đã nhận bánh và hoàn thành đơn hàng?",
             confirmText: "Xác nhận hoàn thành",
@@ -528,7 +528,7 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
       case "SHIPPING":
         return {
           text: "Xác nhận giao hàng thành công",
-          color: "bg-emerald-600 hover:bg-emerald-700",
+          color: "bg-teal-600 hover:bg-teal-700",
           description:
             "Xác nhận đơn hàng đã được giao thành công? Sau khi xác nhận, đơn hàng sẽ vào thời gian chờ 1 giờ trước khi hoàn tất.",
           confirmText: "Xác nhận giao hàng",
@@ -790,10 +790,6 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
     order.order_status !== "PENDING" &&
     order.order_status !== "COMPLETED" &&
     order.order_status !== "CANCELED" &&
-    !(
-      order.shipping_type?.toUpperCase() !== "PICKUP" &&
-      order.order_status === "SHIPPING"
-    ) &&
     // New statuses that don't need action buttons from bakery side
     order.order_status !== "REPORT_PENDING" &&
     order.order_status !== "FAULTY";
@@ -1587,7 +1583,7 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
                 </div>
                 <div>
                   <p className="font-medium text-foreground">
-                    {order.shipping_time} phút
+                    {Math.round(Number(order.shipping_time))} phút
                   </p>
                   <p className="text-sm text-muted-foreground">
                     Thời gian giao hàng dự kiến
@@ -1674,7 +1670,7 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
               >
                 <DialogTrigger asChild>
                   <Button
-                    className={`flex items-center ${actionConfig.color} transition-all hover:shadow-md`}
+                    className={`flex items-center ${actionConfig.color} text-white transition-all hover:shadow-md`}
                     disabled={isLoading || actionConfig.disableAction}
                   >
                     <ArrowRight className="mr-2 h-4 w-4" />
@@ -1769,7 +1765,7 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
                           !actionConfig.fileOptional &&
                           uploadedFiles.length === 0)
                       }
-                      className={`${actionConfig.color} transition-all hover:opacity-90`}
+                      className={`${actionConfig.color} text-white transition-all hover:opacity-90`}
                     >
                       {isLoading ? (
                         <div className="flex items-center gap-1.5">
