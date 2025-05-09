@@ -1,5 +1,6 @@
 "use server";
 
+import { IBakery } from "@/features/cakes/types/cake";
 import {
   ApiSingleResponse,
   fetchSingleData,
@@ -24,6 +25,21 @@ export async function getUserInfo(
   const result = await fetchSingleData<UserInfo>(`/customers/${userId}`);
   if (!result.success) {
     console.error("Failed to fetch user info:", result.error);
+    return {
+      data: null,
+    };
+  }
+  return result.data;
+}
+
+
+export async function getBakeryInfo(
+  bakeryId: string
+): Promise<ApiSingleResponse<IBakery>> {
+  noStore();
+  const result = await fetchSingleData<IBakery>(`/bakeries/${bakeryId}`);
+  if (!result.success) {
+    console.error("Failed to fetch bakery info:", result.error);
     return {
       data: null,
     };
