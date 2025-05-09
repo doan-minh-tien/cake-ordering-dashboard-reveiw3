@@ -18,7 +18,7 @@ export function TeamSwitcher() {
             <Cake className="size-4" />
           </div>
           <span className="font-semibold text-base text-foreground">
-            BreadTalk
+            CusCake
           </span>
         </SidebarMenuButton>
       </SidebarMenuItem>

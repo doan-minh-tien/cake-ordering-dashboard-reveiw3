@@ -23,6 +23,7 @@ import {
   ITotalCustomers,
   ITotalBakeries,
   DateRangeParams,
+  AdminSalesOverviewResponse,
 } from "@/features/reports/types/admin-report-type";
 import { differenceInDays, parseISO, isValid } from "date-fns";
 
@@ -107,19 +108,26 @@ export async function getAdminDashboardOverview(): Promise<AdminDashboardOvervie
 /**
  * Lấy tổng doanh thu từ API `/admins/sales-overview`
  */
-export async function getAdminTotalRevenue(params: DateRangeParams = {}): Promise<IAdminTotalRevenue> {
+export async function getAdminTotalRevenue(
+  params: DateRangeParams = {}
+): Promise<IAdminTotalRevenue> {
   noStore();
   const { dateFrom, dateTo } = params;
 
   let url = `/admins/total-revenue`;
   if (dateFrom && dateTo) {
-    url += `?dateFrom=${encodeURIComponent(dateFrom)}&dateTo=${encodeURIComponent(dateTo)}`;
+    url += `?dateFrom=${encodeURIComponent(
+      dateFrom
+    )}&dateTo=${encodeURIComponent(dateTo)}`;
   }
 
   const result = await fetchSingleData<IAdminTotalRevenue>(url);
 
   if (!result.success || !result.data?.data) {
-    console.error("Failed to fetch admin total revenue:", result.success ? "Data not found" : "API error");
+    console.error(
+      "Failed to fetch admin total revenue:",
+      result.success ? "Data not found" : "API error"
+    );
     return {
       amount: 0,
       change: 0,
@@ -217,41 +225,28 @@ export async function getAdminDashboardMetrics() {
 }
 
 /**
- * Lấy số lượng bakery đang chờ duyệt từ API `/bakeries`
- */
-export async function getPendingBakeries(): Promise<IPendingBakeries> {
-  noStore();
-
-  const result = await fetchSingleData<IPendingBakeries>(`/admins/pending-bakeries`);
-
-  if (!result.success || !result.data?.data) {
-    console.error("Failed to fetch pending bakeries:", result.success ? "Data not found" : "API error");
-    return {
-      amount: 0,
-      change: 0,
-      comparisonPeriod: "tháng trước",
-    };
-  }
-
-  return result.data.data;
-}
-
-/**
  * Lấy tổng số khách hàng từ API `/admins/sales-overview`
  */
-export async function getTotalCustomers(params: DateRangeParams = {}): Promise<ITotalCustomers> {
+export async function getTotalCustomers(
+  params: DateRangeParams = {}
+): Promise<ITotalCustomers> {
   noStore();
   const { dateFrom, dateTo } = params;
 
-  let url = `/admins/total-customers`;
+  let url = `/admins/sales-overview`;
   if (dateFrom && dateTo) {
-    url += `?dateFrom=${encodeURIComponent(dateFrom)}&dateTo=${encodeURIComponent(dateTo)}`;
+    url += `?dateFrom=${encodeURIComponent(
+      dateFrom
+    )}&dateTo=${encodeURIComponent(dateTo)}`;
   }
 
-  const result = await fetchSingleData<ITotalCustomers>(url);
+  const result = await fetchSingleData<OverviewType>(url);
 
   if (!result.success || !result.data?.data) {
-    console.error("Failed to fetch total customers:", result.success ? "Data not found" : "API error");
+    console.error(
+      "Failed to fetch total customers:",
+      result.success ? "Data not found" : "API error"
+    );
     return {
       amount: 0,
       change: 0,
@@ -259,7 +254,11 @@ export async function getTotalCustomers(params: DateRangeParams = {}): Promise<I
     };
   }
 
-  return result.data.data;
+  return {
+    amount: result.data.data.totalCustomers || 0,
+    change: 0,
+    comparisonPeriod: "tháng trước",
+  };
 }
 
 /**
@@ -268,10 +267,15 @@ export async function getTotalCustomers(params: DateRangeParams = {}): Promise<I
 export async function getTotalBakeries(): Promise<ITotalBakeries> {
   noStore();
 
-  const result = await fetchSingleData<ITotalBakeries>(`/admins/total-bakeries`);
+  const result = await fetchSingleData<ITotalBakeries>(
+    `/admins/total-bakeries`
+  );
 
   if (!result.success || !result.data?.data) {
-    console.error("Failed to fetch total bakeries:", result.success ? "Data not found" : "API error");
+    console.error(
+      "Failed to fetch total bakeries:",
+      result.success ? "Data not found" : "API error"
+    );
     return {
       amount: 0,
       change: 0,
@@ -311,15 +315,15 @@ export async function getSaleOverview(params: {
   // Determine if we should use daily or monthly format based on date range
   let useMonthlyFormat = false;
   let formatParam = "daily";
-  
+
   if (dateFrom && dateTo) {
     try {
       const fromDate = parseISO(dateFrom);
       const toDate = parseISO(dateTo);
-      
+
       if (isValid(fromDate) && isValid(toDate)) {
         const daysDiff = differenceInDays(toDate, fromDate);
-        
+
         // If date range is more than 31 days, use monthly format
         if (daysDiff > 31) {
           useMonthlyFormat = true;
@@ -334,7 +338,9 @@ export async function getSaleOverview(params: {
   // Use admin-specific endpoint   // REVENUE, BAKERIES, CUSTOMERS
   let url = `/admins/chart?type=${type}&format=${formatParam}`;
   if (dateFrom && dateTo) {
-    url += `&dateFrom=${encodeURIComponent(dateFrom)}&dateTo=${encodeURIComponent(dateTo)}`;
+    url += `&dateFrom=${encodeURIComponent(
+      dateFrom
+    )}&dateTo=${encodeURIComponent(dateTo)}`;
   }
 
   const result = await fetchListData<any>(url);
@@ -346,49 +352,50 @@ export async function getSaleOverview(params: {
 
   // Process the API response
   let formattedData: TimeSeriesDataItem[] = [];
-  
+
   // Check the format of the API response
   if (Array.isArray(result.data.data)) {
     if (result.data.data.length > 0) {
       // Determine the data format from the first item
       const firstItem = result.data.data[0];
-      
-      if (typeof firstItem === 'object') {
-        if ('date' in firstItem) {
+
+      if (typeof firstItem === "object") {
+        if ("date" in firstItem) {
           // Data is already in daily format
           formattedData = result.data.data as DailyDataItem[];
-        } else if ('month' in firstItem) {
+        } else if ("month" in firstItem) {
           // Data is already in monthly format
           formattedData = result.data.data as MonthlyDataItem[];
         } else {
           // Unknown object format, use empty array
           formattedData = [];
         }
-      } else if (typeof firstItem === 'number') {
+      } else if (typeof firstItem === "number") {
         // Legacy format (array of numbers)
         const currentYear = new Date().getFullYear();
         formattedData = result.data.data.map((value: number, index: number) => {
           // Create a date for the first day of each month
-          const month = (index + 1).toString().padStart(2, '0');
+          const month = (index + 1).toString().padStart(2, "0");
           return {
             month: `${currentYear}-${month}`,
-            value: value
+            value: value,
           } as MonthlyDataItem;
         });
       }
     }
   }
 
-  console.log("Admin formatted data (first item):", formattedData.length > 0 ? formattedData[0] : "No data");
+  console.log(
+    "Admin formatted data (first item):",
+    formattedData.length > 0 ? formattedData[0] : "No data"
+  );
 
-  return { 
-    data: formattedData, 
+  return {
+    data: formattedData,
     pageCount: result.data.pageCount || 0,
-    error: result.data.error 
+    error: result.data.error,
   };
 }
-
-
 
 export type OverviewType = {
   totalRevenues: number;
@@ -398,15 +405,19 @@ export type OverviewType = {
   totalProducts: number;
 };
 
-export async function getOverview(params: DateRangeParams = {}): Promise<ApiSingleResponse<OverviewType>> {
+export async function getOverview(
+  params: DateRangeParams = {}
+): Promise<ApiSingleResponse<OverviewType>> {
   noStore();
 
   const session = await auth();
   const { dateFrom, dateTo } = params;
-  
+
   let url = `/admins/sales-overview`;
   if (dateFrom && dateTo) {
-    url += `?dateFrom=${encodeURIComponent(dateFrom)}&dateTo=${encodeURIComponent(dateTo)}`;
+    url += `?dateFrom=${encodeURIComponent(
+      dateFrom
+    )}&dateTo=${encodeURIComponent(dateTo)}`;
   }
 
   const result = await fetchSingleData<OverviewType>(url);

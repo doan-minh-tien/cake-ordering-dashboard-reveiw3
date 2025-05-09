@@ -16,6 +16,14 @@ export interface ITotalCustomers {
   comparisonPeriod: string;
 }
 
+export interface AdminSalesOverviewResponse {
+  totalRevenues: number;
+  totalBakeries: number;
+  totalReports: number;
+  totalCustomers: number;
+  totalProducts: number;
+}
+
 export interface ITotalBakeries {
   amount: number;
   change: number;
@@ -25,4 +33,4 @@ export interface ITotalBakeries {
 export interface DateRangeParams {
   dateFrom?: string;
   dateTo?: string;
-} 
+}

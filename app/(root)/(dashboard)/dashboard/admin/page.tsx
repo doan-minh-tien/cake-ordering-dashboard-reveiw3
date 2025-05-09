@@ -4,7 +4,6 @@ import {
 } from "@/features/reports/actions/report-action";
 import {
   getAdminTotalRevenue,
-  getPendingBakeries,
   getTotalCustomers,
   getTotalBakeries,
   getSaleOverview,
@@ -20,6 +19,7 @@ import {
   PercentIcon,
   ShieldIcon,
   ActivityIcon,
+  FileTextIcon,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth";
@@ -40,6 +40,10 @@ import {
 } from "@/components/ui/card";
 import { getTopBakery } from "@/features/reports/actions/admin-dashoboard-action";
 import { ITopBakeriesType } from "@/features/reports/types/admid-dashboard-type";
+import ClientCardCustomerCount from "../components/client-card-customer-count";
+import ClientCardReportsCount from "../components/client-card-reports-count";
+import ClientCardBakeriesCount from "../components/client-card-bakeries-count";
+import ClientCardRevenue from "../components/client-card-revenue";
 
 // Animated shimmer effect for loading states
 const Shimmer = ({ className }: { className: string }) => (
@@ -80,40 +84,36 @@ const AdminActionCard = ({
 );
 
 // Top bakeries chart for admin
-const TopBakeriesChart = ({
-  data,
-}: {
-  data: ITopBakeriesType[];
-}) => {
+const TopBakeriesChart = ({ data }: { data: ITopBakeriesType[] }) => {
   console.log("data", data);
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-base font-normal">
-        Top Cửa Hàng Hiệu Quả
-      </CardTitle>
-      <StoreIcon className="h-4 w-4 text-muted-foreground" />
-    </CardHeader>
-    <CardContent>
-      <div className="space-y-4">
-        {data.map((bakery, index) => (
-          <div key={index} className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground text-sm w-5">
-                {index + 1}.
-              </span>
-              <span className="font-medium truncate max-w-[180px]">
-                {bakery.bakery.bakery_name}
-              </span>
+          Top Cửa Hàng Hiệu Quả
+        </CardTitle>
+        <StoreIcon className="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {data.map((bakery, index) => (
+            <div key={index} className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground text-sm w-5">
+                  {index + 1}.
+                </span>
+                <span className="font-medium truncate max-w-[180px]">
+                  {bakery.bakery.bakery_name}
+                </span>
+              </div>
+              <div className="text-right">
+                <span className="font-semibold">
+                  {formatCurrency(bakery.total_revenue)}
+                </span>
+              </div>
             </div>
-            <div className="text-right">
-              <span className="font-semibold">
-                {formatCurrency(bakery.total_revenue)}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
@@ -137,22 +137,21 @@ const AdminDashboard = async ({ searchParams }: AdminDashboardProps) => {
   const today = new Date();
   let dateFrom = searchParams?.dateFrom;
   let dateTo = searchParams?.dateTo;
-  
+
   // Set default date range to current month if not provided
   if (!dateFrom) {
-    dateFrom = format(startOfMonth(today), 'yyyy-MM-dd');
+    dateFrom = format(startOfMonth(today), "yyyy-MM-dd");
   }
-  
+
   if (!dateTo) {
-    dateTo = format(today, 'yyyy-MM-dd');
+    dateTo = format(today, "yyyy-MM-dd");
   }
-  
+
   console.log("Admin Dashboard Date range:", { dateFrom, dateTo });
 
   // Fetch data from API with the new admin report actions
   const [
     overviewData,
-    pendingBakeries,
     categoryDistribution,
     productPerformance,
     saleOverviewRevenue,
@@ -161,7 +160,6 @@ const AdminDashboard = async ({ searchParams }: AdminDashboardProps) => {
     topBakeries,
   ] = await Promise.all([
     getOverview({ dateFrom, dateTo }),
-    getPendingBakeries(),
     getCategoryDistribution({ dateFrom, dateTo }),
     getProductPerformance({ dateFrom, dateTo }),
     getSaleOverview({ type: "REVENUE", dateFrom, dateTo }),
@@ -170,10 +168,12 @@ const AdminDashboard = async ({ searchParams }: AdminDashboardProps) => {
     getTopBakery(),
   ]);
 
+  // Fetch the total customer count
+  const customerCount = await getTotalCustomers({ dateFrom, dateTo });
+
   // Debug: Log các giá trị nhận được
   console.log("Debug Admin Dashboard Data:");
   console.log("overviewData:", overviewData);
-  console.log("pendingBakeries:", pendingBakeries);
   console.log("Sales data format:", saleOverviewRevenue?.data?.[0]);
 
   // Prepare sales data for chart
@@ -191,6 +191,7 @@ const AdminDashboard = async ({ searchParams }: AdminDashboardProps) => {
     pending: "text-orange-500 dark:text-orange-400",
     commission: "text-purple-500 dark:text-purple-400",
     health: "text-teal-500 dark:text-teal-400",
+    reports: "text-blue-500 dark:text-blue-400",
   };
 
   return (
@@ -205,47 +206,33 @@ const AdminDashboard = async ({ searchParams }: AdminDashboardProps) => {
         >
           {/* Tổng Doanh Thu */}
           <Suspense fallback={<Shimmer className="h-32" />}>
-            <StatCard
-              title="Tổng Doanh Thu"
-              value={formatCurrency(overviewData?.data?.totalRevenues || 0)}
-              change={0}
-              period="tháng trước"
-              icon={
-                <DollarSignIcon className={`h-5 w-5 ${iconColors.revenue}`} />
-              }
-            />
-          </Suspense>
-
-          {/* Chờ Duyệt */}
-          <Suspense fallback={<Shimmer className="h-32" />}>
-            <StatCard
-              title="Chờ Duyệt"
-              value={(pendingBakeries?.amount || 0).toString()}
-              change={0}
-              period="tháng trước"
-              icon={<ClockIcon className={`h-5 w-5 ${iconColors.pending}`} />}
+            <ClientCardRevenue
+              amount={overviewData?.data?.totalRevenues || 0}
+              iconColor={iconColors.revenue}
             />
           </Suspense>
 
           {/* Khách Hàng */}
           <Suspense fallback={<Shimmer className="h-32" />}>
-            <StatCard
-              title="Khách Hàng"
-              value={(overviewData?.data?.totalCustomers || 0).toString()}
-              change={0}
-              period="tháng trước"
-              icon={<UsersIcon className={`h-5 w-5 ${iconColors.customers}`} />}
+            <ClientCardCustomerCount
+              data={customerCount}
+              iconColor={iconColors.customers}
             />
           </Suspense>
 
           {/* Cửa Hàng */}
           <Suspense fallback={<Shimmer className="h-32" />}>
-            <StatCard
-              title="Cửa Hàng"
-              value={(overviewData?.data?.totalBakeries || 0).toString()}
-              change={0}
-              period="tháng trước"
-              icon={<StoreIcon className={`h-5 w-5 ${iconColors.store}`} />}
+            <ClientCardBakeriesCount
+              count={overviewData?.data?.totalBakeries || 0}
+              iconColor={iconColors.store}
+            />
+          </Suspense>
+
+          {/* Báo Cáo */}
+          <Suspense fallback={<Shimmer className="h-32" />}>
+            <ClientCardReportsCount
+              count={overviewData?.data?.totalReports || 0}
+              iconColor={iconColors.reports}
             />
           </Suspense>
         </section>
@@ -288,7 +275,7 @@ const AdminDashboard = async ({ searchParams }: AdminDashboardProps) => {
         {/* Sales Overview Chart */}
         <section className="mt-8" aria-label="Sales overview chart">
           <Suspense fallback={<Shimmer className="h-[450px]" />}>
-            <SalesOverviewChart 
+            <SalesOverviewChart
               data={salesData}
               dateRange={{ dateFrom, dateTo }}
             />
