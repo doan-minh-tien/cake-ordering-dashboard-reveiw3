@@ -1696,22 +1696,32 @@ const OrderDetailComponent = ({ order }: OrderDetailComponentProps) => {
                           {actionConfig.fileOptional && "(không bắt buộc)"}
                         </Label>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-col gap-2">
                           <Button
                             type="button"
                             variant="outline"
                             size="sm"
                             onClick={() => fileInputRef.current?.click()}
-                            className="flex items-center gap-1 hover:border-primary/70 transition-colors"
+                            className="w-fit flex items-center gap-1 hover:border-primary/70 transition-colors"
                           >
                             <Upload className="h-4 w-4" />
                             Tải ảnh lên
                           </Button>
-                          <span className="text-sm text-muted-foreground">
-                            {uploadedFiles.length > 0
-                              ? uploadedFiles[0].name
-                              : "Chưa chọn tệp nào"}
-                          </span>
+
+                          {uploadedFiles.length > 0 && (
+                            <div className="flex items-center px-3 py-2 bg-muted/30 rounded-md">
+                              <ImageIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+                              <span className="text-sm text-muted-foreground break-all">
+                                {uploadedFiles[0].name}
+                              </span>
+                            </div>
+                          )}
+
+                          {uploadedFiles.length === 0 && (
+                            <span className="text-sm text-muted-foreground">
+                              Chưa chọn tệp nào
+                            </span>
+                          )}
                         </div>
 
                         <Input

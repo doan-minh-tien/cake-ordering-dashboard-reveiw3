@@ -349,17 +349,17 @@ export function CakeExtraOptionTable({ data }: CakeExtraOptionTableProps) {
                     Hãy thêm danh mục đầu tiên cho loại tùy chọn thêm này
                   </p>
                   <Button
-                    variant="default"
+                    variant="outline"
                     size="sm"
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                    className="rounded-full px-3 bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700 hover:text-amber-800 transition-all flex items-center gap-1"
                     onClick={() =>
                       onOpen("collectionCakeExtraOptionModal", {
                         ingredientType: type,
                       })
                     }
                   >
-                    <PlusCircle className="h-4 w-4 mr-1" />
-                    Thêm danh mục
+                    <PlusCircle className="h-4 w-4" />
+                    <span>Thêm danh mục</span>
                   </Button>
                 </div>
               )}
@@ -386,13 +386,13 @@ export function CakeExtraOptionTable({ data }: CakeExtraOptionTableProps) {
               Quản lý tùy chọn thêm
             </h2>
             <Button
-              variant="default"
+              variant="outline"
               size="sm"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white"
+              className="rounded-full px-3 bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700 hover:text-amber-800 transition-all flex items-center gap-1"
               onClick={() => onOpen("createExtraTypeModal", { existingTypes })}
             >
-              <PlusCircle className="h-4 w-4 mr-1" />
-              Thêm loại tùy chọn thêm mới
+              <PlusCircle className="h-4 w-4" />
+              <span>Tạo loại tùy chọn thêm</span>
             </Button>
           </div>
           <CardContent>
@@ -403,18 +403,19 @@ export function CakeExtraOptionTable({ data }: CakeExtraOptionTableProps) {
                   Chưa có loại tùy chọn thêm nào
                 </h3>
                 <p className="text-indigo-600 mb-4">
-                  Bạn cần tạo loại tùy chọn thêm trước khi thêm các tùy chọn riêng lẻ
+                  Bạn cần tạo loại tùy chọn thêm trước khi thêm các tùy chọn
+                  riêng lẻ
                 </p>
                 <Button
-                  variant="default"
+                  variant="outline"
                   size="sm"
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
+                  className="rounded-full px-3 bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700 hover:text-amber-800 transition-all flex items-center gap-1"
                   onClick={() =>
                     onOpen("createExtraTypeModal", { existingTypes })
                   }
                 >
-                  <PlusCircle className="h-4 w-4 mr-1" />
-                  Tạo loại tùy chọn thêm
+                  <PlusCircle className="h-4 w-4" />
+                  <span>Tạo loại tùy chọn thêm</span>
                 </Button>
               </div>
             ) : (

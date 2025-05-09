@@ -24,10 +24,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import {
-  Form,
-  FormLabel,
-} from "@/components/ui/form";
+import { Form, FormLabel } from "@/components/ui/form";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -62,12 +59,12 @@ import {
 enum CakeMessageTypeEnum {
   NONE = "NONE",
   TEXT = "TEXT",
-  IMAGE = "IMAGE"
+  IMAGE = "IMAGE",
 }
 
 enum CakeMessageOptionTypeEnum {
   PIPING_COLOUR = "PIPING_COLOUR",
-  PLAQUE_COLOUR = "PLAQUE_COLOUR"
+  PLAQUE_COLOUR = "PLAQUE_COLOUR",
 }
 
 // Tên hiển thị tiếng Việt cho các loại tin nhắn
@@ -77,7 +74,7 @@ const getTypeDisplayName = (type: string): string => {
     PIPING_COLOUR: "Màu Viền",
     TEXT: "Nội Dung",
     NONE: "Không",
-    IMAGE: "Hình Ảnh"
+    IMAGE: "Hình Ảnh",
   };
 
   return typeNameMap[type] || type;
@@ -115,7 +112,9 @@ const CollectionCakeMessageModal = () => {
   const [currentStep, setCurrentStep] = useState("form"); // "form", "summary"
   const [currentItemIndex, setCurrentItemIndex] = useState(0);
   const [currentItemValidated, setCurrentItemValidated] = useState(false);
-  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
+  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>(
+    {}
+  );
   const [allItemsValid, setAllItemsValid] = useState(false);
 
   const form = useForm<z.infer<typeof collectionSchema>>({
@@ -163,7 +162,7 @@ const CollectionCakeMessageModal = () => {
       nameValid,
       colorValid,
       typeValid,
-      allValid: nameValid && colorValid && typeValid
+      allValid: nameValid && colorValid && typeValid,
     };
 
     setCurrentItemValidated(!!validationResults.allValid);
@@ -177,11 +176,11 @@ const CollectionCakeMessageModal = () => {
       return false;
     }
 
-    const allValid = messageItems.every(item => {
+    const allValid = messageItems.every((item) => {
       const nameValid = !!item.name;
       const colorValid = !!item.color && !!item.color.name;
       const typeValid = !!item.type;
-      
+
       return nameValid && colorValid && typeValid;
     });
 
@@ -208,9 +207,7 @@ const CollectionCakeMessageModal = () => {
   const removeCurrentItem = () => {
     if (messageItems.length <= 1) return;
 
-    const updatedItems = messageItems.filter(
-      (_, i) => i !== currentItemIndex
-    );
+    const updatedItems = messageItems.filter((_, i) => i !== currentItemIndex);
     setMessageItems(updatedItems);
     form.setValue("messages", updatedItems);
 
@@ -228,11 +225,11 @@ const CollectionCakeMessageModal = () => {
       };
       setMessageItems(updatedItems);
       form.setValue("messages", updatedItems);
-      
+
       // Mark field as touched
-      setTouchedFields(prev => ({
+      setTouchedFields((prev) => ({
         ...prev,
-        [field]: true
+        [field]: true,
       }));
     }
   };
@@ -325,10 +322,10 @@ const CollectionCakeMessageModal = () => {
             type="button"
             onClick={addNewItem}
             variant="outline"
-            className="gap-2 rounded-md"
+            className="rounded-full px-3 bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700 hover:text-amber-800 transition-all flex items-center gap-1 flex-1"
           >
             <Plus className="w-4 h-4" />
-            Thêm tin nhắn mới
+            <span>Thêm tin nhắn mới</span>
           </Button>
         </div>
       );
@@ -338,7 +335,7 @@ const CollectionCakeMessageModal = () => {
     const validation = {
       nameValid: !!currentItem.name,
       colorValid: !!currentItem.color && !!currentItem.color.name,
-      typeValid: !!currentItem.type
+      typeValid: !!currentItem.type,
     };
 
     return (
@@ -390,15 +387,23 @@ const CollectionCakeMessageModal = () => {
               <MessageSquare className="w-4 h-4 text-primary" />
               Tên tin nhắn <span className="text-red-500">*</span>
             </FormLabel>
-            <Select 
+            <Select
               value={currentItem.name}
-              onValueChange={(value) => updateCurrentItem("name", value as CakeMessageOptionTypeEnum)}
-              onOpenChange={() => setTouchedFields(prev => ({ ...prev, name: true }))}
+              onValueChange={(value) =>
+                updateCurrentItem("name", value as CakeMessageOptionTypeEnum)
+              }
+              onOpenChange={() =>
+                setTouchedFields((prev) => ({ ...prev, name: true }))
+              }
             >
-              <SelectTrigger className={cn(
-                "rounded-md h-9", 
-                isFieldTouched("name") && !validation.nameValid && "border-red-500"
-              )}>
+              <SelectTrigger
+                className={cn(
+                  "rounded-md h-9",
+                  isFieldTouched("name") &&
+                    !validation.nameValid &&
+                    "border-red-500"
+                )}
+              >
                 <SelectValue placeholder="Chọn tên tin nhắn" />
               </SelectTrigger>
               <SelectContent>
@@ -420,15 +425,23 @@ const CollectionCakeMessageModal = () => {
               <MessageSquare className="w-4 h-4 text-primary" />
               Loại tin nhắn <span className="text-red-500">*</span>
             </FormLabel>
-            <Select 
+            <Select
               value={currentItem.type}
-              onValueChange={(value) => updateCurrentItem("type", value as CakeMessageTypeEnum)}
-              onOpenChange={() => setTouchedFields(prev => ({ ...prev, type: true }))}
+              onValueChange={(value) =>
+                updateCurrentItem("type", value as CakeMessageTypeEnum)
+              }
+              onOpenChange={() =>
+                setTouchedFields((prev) => ({ ...prev, type: true }))
+              }
             >
-              <SelectTrigger className={cn(
-                "rounded-md h-9", 
-                isFieldTouched("type") && !validation.typeValid && "border-red-500"
-              )}>
+              <SelectTrigger
+                className={cn(
+                  "rounded-md h-9",
+                  isFieldTouched("type") &&
+                    !validation.typeValid &&
+                    "border-red-500"
+                )}
+              >
                 <SelectValue placeholder="Chọn loại tin nhắn" />
               </SelectTrigger>
               <SelectContent>
@@ -440,7 +453,9 @@ const CollectionCakeMessageModal = () => {
               </SelectContent>
             </Select>
             {isFieldTouched("type") && !validation.typeValid && (
-              <p className="text-xs text-red-500">Vui lòng chọn loại tin nhắn</p>
+              <p className="text-xs text-red-500">
+                Vui lòng chọn loại tin nhắn
+              </p>
             )}
           </div>
 
@@ -455,7 +470,7 @@ const CollectionCakeMessageModal = () => {
               onOpenChange={(open) => {
                 setCurrentColorPopover(open);
                 if (!open) {
-                  setTouchedFields(prev => ({ ...prev, color: true }));
+                  setTouchedFields((prev) => ({ ...prev, color: true }));
                 }
               }}
             >
@@ -465,7 +480,9 @@ const CollectionCakeMessageModal = () => {
                   role="combobox"
                   className={cn(
                     "w-full justify-between rounded-xl h-10 hover:bg-transparent",
-                    isFieldTouched("color") && !validation.colorValid && "border-red-500"
+                    isFieldTouched("color") &&
+                      !validation.colorValid &&
+                      "border-red-500"
                   )}
                 >
                   <div className="flex items-center gap-2">
@@ -545,11 +562,8 @@ const CollectionCakeMessageModal = () => {
         <ScrollArea className="h-[300px] pr-4">
           <div className="space-y-2">
             {messageItems.map((item, index) => {
-              const isItemValid = 
-                !!item.name && 
-                !!item.color && 
-                !!item.color.name && 
-                !!item.type;
+              const isItemValid =
+                !!item.name && !!item.color && !!item.color.name && !!item.type;
 
               return (
                 <div
@@ -566,9 +580,12 @@ const CollectionCakeMessageModal = () => {
                       style={{ backgroundColor: item.color?.hex || "#000000" }}
                     />
                     <div>
-                      <div className="font-medium">{getTypeDisplayName(item.name)}</div>
+                      <div className="font-medium">
+                        {getTypeDisplayName(item.name)}
+                      </div>
                       <div className="text-xs text-gray-500">
-                        {getTypeDisplayName(item.type)} - {item.color?.name || "Black"}
+                        {getTypeDisplayName(item.type)} -{" "}
+                        {item.color?.name || "Black"}
                       </div>
                     </div>
                   </div>
@@ -611,19 +628,19 @@ const CollectionCakeMessageModal = () => {
                       type="button"
                       onClick={addNewItem}
                       variant="outline"
-                      className="gap-2 rounded-md flex-1"
+                      className="rounded-full px-3 bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700 hover:text-amber-800 transition-all flex items-center gap-1 flex-1"
                     >
                       <Plus className="w-4 h-4" />
-                      Thêm tin nhắn mới
+                      <span>Thêm tin nhắn mới</span>
                     </Button>
                     <Button
                       type="button"
                       onClick={goToSummary}
                       disabled={!currentItemValidated}
-                      className="gap-2 rounded-md flex-1"
+                      className="rounded-full px-3 bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700 hover:text-amber-800 transition-all flex items-center gap-1 flex-1"
                     >
                       <ListFilter className="w-4 h-4" />
-                      Xem danh sách ({messageItems.length})
+                      <span>Xem danh sách ({messageItems.length})</span>
                     </Button>
                   </div>
                 </>
@@ -632,8 +649,10 @@ const CollectionCakeMessageModal = () => {
               {currentStep === "summary" && (
                 <Button
                   type="submit"
-                  className="w-full rounded-md h-10"
-                  disabled={isPending || messageItems.length === 0 || !allItemsValid}
+                  className="rounded-full px-3 bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700 hover:text-amber-800 transition-all flex items-center gap-1 justify-center w-full"
+                  disabled={
+                    isPending || messageItems.length === 0 || !allItemsValid
+                  }
                 >
                   {isPending
                     ? "Đang xử lý..."
@@ -647,7 +666,7 @@ const CollectionCakeMessageModal = () => {
                 type="button"
                 variant="outline"
                 onClick={handleClose}
-                className="rounded-md h-9 w-full"
+                className="rounded-full px-3 border-gray-200 hover:bg-gray-50 text-gray-700 transition-all w-full"
               >
                 Hủy bỏ
               </Button>

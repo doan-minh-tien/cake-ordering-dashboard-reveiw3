@@ -5,15 +5,15 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { 
-  PlusCircle, 
-  Package, 
-  Check, 
-  Tags,  
+import {
+  PlusCircle,
+  Package,
+  Check,
+  Tags,
   Palette,
   ChevronsUpDown,
   Loader,
-  DollarSign
+  DollarSign,
 } from "lucide-react";
 
 import {
@@ -41,10 +41,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useColorSelection } from "@/hooks/use-color";
 import { cn } from "@/lib/utils";
 import { createCakeExtraOption } from "../../actions/cake-extra-option-action";
-import { 
+import {
   Popover,
   PopoverContent,
-  PopoverTrigger
+  PopoverTrigger,
 } from "@/components/ui/popover";
 import {
   Command,
@@ -189,16 +189,18 @@ const CreateExtraTypeModal = () => {
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Tags className="h-4 w-4 text-indigo-600" />
-                  <h3 className="text-sm font-medium">Chọn loại tùy chọn thêm</h3>
+                  <h3 className="text-sm font-medium">
+                    Chọn loại tùy chọn thêm
+                  </h3>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {missingPredefinedTypes.map((typeKey) => (
-                    <div 
+                    <div
                       key={typeKey}
                       className={cn(
                         "flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors border",
-                        selectedPredefinedType === typeKey 
-                          ? "bg-indigo-100 border-indigo-300" 
+                        selectedPredefinedType === typeKey
+                          ? "bg-indigo-100 border-indigo-300"
                           : "hover:bg-indigo-50 border-gray-200"
                       )}
                       onClick={() => handleSelectPredefinedType(typeKey)}
@@ -321,8 +323,7 @@ const CreateExtraTypeModal = () => {
                             <div
                               className="w-3 h-3 rounded-full flex-shrink-0"
                               style={{
-                                backgroundColor:
-                                  field.value?.hex || "#FFFFFF",
+                                backgroundColor: field.value?.hex || "#FFFFFF",
                               }}
                             />
                             <span className="truncate text-xs">
@@ -420,9 +421,7 @@ const CreateExtraTypeModal = () => {
                     />
                   </FormControl>
                   <div className="space-y-0.5 leading-none">
-                    <FormLabel className="text-xs">
-                      Đặt làm mặc định
-                    </FormLabel>
+                    <FormLabel className="text-xs">Đặt làm mặc định</FormLabel>
                   </div>
                 </FormItem>
               )}
@@ -431,7 +430,7 @@ const CreateExtraTypeModal = () => {
             <DialogFooter className="pt-2">
               <Button
                 type="submit"
-                className="w-full rounded-md bg-indigo-600 hover:bg-indigo-700 text-white"
+                className="rounded-full px-3 bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700 hover:text-amber-800 transition-all flex items-center gap-1 justify-center w-full"
                 disabled={isPending}
               >
                 {isPending ? "Đang xử lý..." : "Tạo loại tùy chọn thêm mới"}
@@ -444,4 +443,4 @@ const CreateExtraTypeModal = () => {
   );
 };
 
-export default CreateExtraTypeModal; 
+export default CreateExtraTypeModal;

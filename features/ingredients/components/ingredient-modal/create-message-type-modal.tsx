@@ -5,12 +5,12 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { 
-  MessageSquare, 
-  Check, 
+import {
+  MessageSquare,
+  Check,
   Palette,
   ChevronsUpDown,
-  Loader
+  Loader,
 } from "lucide-react";
 
 import {
@@ -37,10 +37,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useColorSelection } from "@/hooks/use-color";
 import { cn } from "@/lib/utils";
 import { createCakeMessage } from "../../actions/cake-message-option-action";
-import { 
+import {
   Popover,
   PopoverContent,
-  PopoverTrigger
+  PopoverTrigger,
 } from "@/components/ui/popover";
 import {
   Command,
@@ -55,12 +55,12 @@ import {
 enum CakeMessageTypeEnum {
   NONE = "NONE",
   TEXT = "TEXT",
-  IMAGE = "IMAGE"
+  IMAGE = "IMAGE",
 }
 
 enum CakeMessageOptionTypeEnum {
   PIPING_COLOUR = "PIPING_COLOUR",
-  PLAQUE_COLOUR = "PLAQUE_COLOUR"
+  PLAQUE_COLOUR = "PLAQUE_COLOUR",
 }
 
 // Tên hiển thị tiếng Việt cho các loại tin nhắn
@@ -70,7 +70,7 @@ const getTypeDisplayName = (type: string): string => {
     PIPING_COLOUR: "Màu Viền",
     TEXT: "Nội Dung",
     NONE: "Không",
-    IMAGE: "Hình Ảnh"
+    IMAGE: "Hình Ảnh",
   };
 
   return typeNameMap[type] || type;
@@ -96,7 +96,8 @@ const CreateMessageTypeModal = () => {
   const [isPending, startTransition] = useTransition();
   const existingTypes = data?.existingTypes || [];
   const { COLOR_OPTIONS, getColorValue } = useColorSelection();
-  const [currentColorPopover, setCurrentColorPopover] = useState<boolean>(false);
+  const [currentColorPopover, setCurrentColorPopover] =
+    useState<boolean>(false);
   const [typePopoverOpen, setTypePopoverOpen] = useState<boolean>(false);
   const [namePopoverOpen, setNamePopoverOpen] = useState<boolean>(false);
 
@@ -196,7 +197,9 @@ const CreateMessageTypeModal = () => {
                           className="w-full justify-between rounded-md h-9 text-sm"
                           aria-expanded={typePopoverOpen}
                         >
-                          <span className="truncate">{getTypeDisplayName(field.value)}</span>
+                          <span className="truncate">
+                            {getTypeDisplayName(field.value)}
+                          </span>
                           <ChevronsUpDown className="ml-1 h-4 w-4 flex-shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
@@ -204,26 +207,31 @@ const CreateMessageTypeModal = () => {
                         <Command>
                           <CommandList>
                             <CommandGroup>
-                              {Object.values(CakeMessageTypeEnum).map((messageType) => (
-                                <CommandItem
-                                  key={messageType}
-                                  value={messageType}
-                                  onSelect={() => {
-                                    form.setValue("type", messageType as CakeMessageTypeEnum);
-                                    setTypePopoverOpen(false);
-                                  }}
-                                >
-                                  {getTypeDisplayName(messageType)}
-                                  <Check
-                                    className={cn(
-                                      "ml-auto h-4 w-4",
-                                      field.value === messageType
-                                        ? "opacity-100"
-                                        : "opacity-0"
-                                    )}
-                                  />
-                                </CommandItem>
-                              ))}
+                              {Object.values(CakeMessageTypeEnum).map(
+                                (messageType) => (
+                                  <CommandItem
+                                    key={messageType}
+                                    value={messageType}
+                                    onSelect={() => {
+                                      form.setValue(
+                                        "type",
+                                        messageType as CakeMessageTypeEnum
+                                      );
+                                      setTypePopoverOpen(false);
+                                    }}
+                                  >
+                                    {getTypeDisplayName(messageType)}
+                                    <Check
+                                      className={cn(
+                                        "ml-auto h-4 w-4",
+                                        field.value === messageType
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    />
+                                  </CommandItem>
+                                )
+                              )}
                             </CommandGroup>
                           </CommandList>
                         </Command>
@@ -268,7 +276,9 @@ const CreateMessageTypeModal = () => {
                             className="w-full justify-between rounded-md h-8 text-xs"
                             aria-expanded={namePopoverOpen}
                           >
-                            <span className="truncate">{getTypeDisplayName(field.value)}</span>
+                            <span className="truncate">
+                              {getTypeDisplayName(field.value)}
+                            </span>
                             <ChevronsUpDown className="ml-1 h-3 w-3 flex-shrink-0 opacity-50" />
                           </Button>
                         </PopoverTrigger>
@@ -276,26 +286,31 @@ const CreateMessageTypeModal = () => {
                           <Command>
                             <CommandList>
                               <CommandGroup>
-                                {Object.values(CakeMessageOptionTypeEnum).map((optionType) => (
-                                  <CommandItem
-                                    key={optionType}
-                                    value={optionType}
-                                    onSelect={() => {
-                                      form.setValue("name", optionType as CakeMessageOptionTypeEnum);
-                                      setNamePopoverOpen(false);
-                                    }}
-                                  >
-                                    {getTypeDisplayName(optionType)}
-                                    <Check
-                                      className={cn(
-                                        "ml-auto h-4 w-4",
-                                        field.value === optionType
-                                          ? "opacity-100"
-                                          : "opacity-0"
-                                      )}
-                                    />
-                                  </CommandItem>
-                                ))}
+                                {Object.values(CakeMessageOptionTypeEnum).map(
+                                  (optionType) => (
+                                    <CommandItem
+                                      key={optionType}
+                                      value={optionType}
+                                      onSelect={() => {
+                                        form.setValue(
+                                          "name",
+                                          optionType as CakeMessageOptionTypeEnum
+                                        );
+                                        setNamePopoverOpen(false);
+                                      }}
+                                    >
+                                      {getTypeDisplayName(optionType)}
+                                      <Check
+                                        className={cn(
+                                          "ml-auto h-4 w-4",
+                                          field.value === optionType
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  )
+                                )}
                               </CommandGroup>
                             </CommandList>
                           </Command>
@@ -410,9 +425,7 @@ const CreateMessageTypeModal = () => {
                     />
                   </FormControl>
                   <div className="space-y-0.5 leading-none">
-                    <FormLabel className="text-xs">
-                      Đặt làm mặc định
-                    </FormLabel>
+                    <FormLabel className="text-xs">Đặt làm mặc định</FormLabel>
                   </div>
                 </FormItem>
               )}
@@ -421,7 +434,7 @@ const CreateMessageTypeModal = () => {
             <DialogFooter className="pt-2">
               <Button
                 type="submit"
-                className="w-full rounded-md bg-indigo-600 hover:bg-indigo-700 text-white"
+                className="rounded-full px-3 bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700 hover:text-amber-800 transition-all flex items-center gap-1 justify-center w-full"
                 disabled={isPending}
               >
                 {isPending ? "Đang xử lý..." : "Tạo loại tin nhắn mới"}
@@ -434,4 +447,4 @@ const CreateMessageTypeModal = () => {
   );
 };
 
-export default CreateMessageTypeModal; 
+export default CreateMessageTypeModal;

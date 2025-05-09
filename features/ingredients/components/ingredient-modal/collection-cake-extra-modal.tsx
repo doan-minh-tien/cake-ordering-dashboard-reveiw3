@@ -427,10 +427,10 @@ const CollectionCakeExtraModal = () => {
             type="button"
             onClick={addNewItem}
             variant="outline"
-            className="gap-2 rounded-md h-8 text-xs"
+            className="rounded-full px-3 bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700 hover:text-amber-800 transition-all flex items-center gap-1 flex-1 h-8 text-xs"
           >
             <Plus className="w-3.5 h-3.5" />
-            Thêm extra mới
+            <span>Thêm extra mới</span>
           </Button>
         </div>
       );
@@ -861,19 +861,19 @@ const CollectionCakeExtraModal = () => {
                       type="button"
                       onClick={addNewItem}
                       variant="outline"
-                      className="gap-2 rounded-md flex-1 h-8 text-xs"
+                      className="rounded-full px-3 bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700 hover:text-amber-800 transition-all flex items-center gap-1 flex-1 h-8 text-xs"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      Thêm extra mới
+                      <span>Thêm extra mới</span>
                     </Button>
                     <Button
                       type="button"
                       onClick={goToSummary}
                       disabled={!currentItemValidated}
-                      className="gap-2 rounded-md flex-1 h-8 text-xs"
+                      className="rounded-full px-3 bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700 hover:text-amber-800 transition-all flex items-center gap-1 flex-1 h-8 text-xs"
                     >
                       <ListFilter className="w-3.5 h-3.5" />
-                      Xem danh sách ({extraItems.length})
+                      <span>Xem danh sách ({extraItems.length})</span>
                     </Button>
                   </div>
                 </>
@@ -882,7 +882,7 @@ const CollectionCakeExtraModal = () => {
               {currentStep === "summary" && (
                 <Button
                   type="submit"
-                  className="w-full rounded-md h-8 text-xs"
+                  className="rounded-full px-3 bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700 hover:text-amber-800 transition-all flex items-center gap-1 justify-center w-full h-8 text-xs"
                   disabled={
                     isPending || extraItems.length === 0 || !allItemsValid
                   }
@@ -899,7 +899,7 @@ const CollectionCakeExtraModal = () => {
                 type="button"
                 variant="outline"
                 onClick={handleClose}
-                className="rounded-md h-8 text-xs w-full"
+                className="rounded-full px-3 border-gray-200 hover:bg-gray-50 text-gray-700 transition-all w-full h-8 text-xs"
               >
                 Hủy bỏ
               </Button>

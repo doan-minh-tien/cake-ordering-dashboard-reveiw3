@@ -46,12 +46,12 @@ import { toast } from "sonner";
 enum CakeMessageTypeEnum {
   NONE = "NONE",
   TEXT = "TEXT",
-  IMAGE = "IMAGE"
+  IMAGE = "IMAGE",
 }
 
 enum CakeMessageOptionTypeEnum {
   PIPING_COLOUR = "PIPING_COLOUR",
-  PLAQUE_COLOUR = "PLAQUE_COLOUR"
+  PLAQUE_COLOUR = "PLAQUE_COLOUR",
 }
 
 // Simplified icon mapping
@@ -73,7 +73,7 @@ const getTypeDisplayName = (type: string): string => {
     PIPING_COLOUR: "Màu Viền",
     TEXT: "Nội Dung",
     NONE: "Không",
-    IMAGE: "Hình Ảnh"
+    IMAGE: "Hình Ảnh",
   };
 
   return typeNameMap[type] || type;
@@ -344,7 +344,7 @@ export function CakeMessageOptionTable({ data }: CakeMessageOptionTableProps) {
                   <Button
                     variant="default"
                     size="sm"
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                    className="bg-amber-600 hover:bg-amber-700 text-black shadow-sm"
                     onClick={() =>
                       onOpen("collectionCakeMessageModal", {
                         ingredientType: type,
@@ -379,13 +379,15 @@ export function CakeMessageOptionTable({ data }: CakeMessageOptionTableProps) {
               Quản lý tin nhắn bánh
             </h2>
             <Button
-              variant="default"
+              variant="outline"
               size="sm"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white"
-              onClick={() => onOpen("createMessageTypeModal", { existingTypes })}
+              className="rounded-full px-3 bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700 hover:text-amber-800 transition-all flex items-center gap-1"
+              onClick={() =>
+                onOpen("createMessageTypeModal", { existingTypes })
+              }
             >
-              <PlusCircle className="h-4 w-4 mr-1" />
-              Thêm loại tin nhắn mới
+              <PlusCircle className="h-4 w-4" />
+              <span>Thêm loại tin nhắn mới</span>
             </Button>
           </div>
           <CardContent>
@@ -399,15 +401,15 @@ export function CakeMessageOptionTable({ data }: CakeMessageOptionTableProps) {
                   Bạn cần tạo loại tin nhắn trước khi thêm các tin nhắn riêng lẻ
                 </p>
                 <Button
-                  variant="default"
+                  variant="outline"
                   size="sm"
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
+                  className="rounded-full px-3 bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700 hover:text-amber-800 transition-all flex items-center gap-1"
                   onClick={() =>
                     onOpen("createMessageTypeModal", { existingTypes })
                   }
                 >
-                  <PlusCircle className="h-4 w-4 mr-1" />
-                  Tạo loại tin nhắn
+                  <PlusCircle className="h-4 w-4" />
+                  <span>Tạo loại tin nhắn</span>
                 </Button>
               </div>
             ) : (
